@@ -90,7 +90,6 @@ def setup_package():
                                  'Intended Audience :: Developers',
                                  'License :: OSI Approved',
                                  'Programming Language :: C',
-                                 'Programming Language :: OpenCL',
                                  'Programming Language :: Python',
                                  'Topic :: Software Development',
                                  'Topic :: Scientific/Engineering',
