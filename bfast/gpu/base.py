@@ -204,13 +204,14 @@ class BFASTGPU(BFAST):
         self._timers['kernel'] = 0
         self._timers['transfer_gpu_host'] = 0
         
-        
+        # fit single or fit several models, one per chunk
         if n_chunks is None:
             results = self._fit_single(data, dates, nan_value)
         else:
             results = self._fit_chunks(data, dates, n_chunks=n_chunks, nan_value=nan_value)
         
         if self.detailed_results:
+            
             self.y_pred = results['y_pred']
             self.mosum = results['mosum']
             self.bounds = results['bounds']
@@ -313,7 +314,8 @@ class BFASTGPU(BFAST):
         if self.trend:
             trend = 1
         else:
-            trend = 0        
+            trend = 0
+                    
         # MO_first, Ns, ns, sigmas, mosum, mosum_nn, bounds, breaks, means, y_error, y_pred = self.futobj.main(trend, self.k, self.n, self.freq, self.hfrac, self.lam, mapped_indices_cl, y_cl)
         if self.detailed_results:
             MO_first, Ns, ns, sigmas, mosum, mosum_nn, bounds, breaks, means, y_error, y_pred = self.futobj.main(trend, self.k, self.n, self.freq, self.hfrac, self.lam, mapped_indices_cl, y_cl)
