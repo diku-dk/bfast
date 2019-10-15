@@ -1,4 +1,8 @@
+'''
+Created on Oct 15, 2019
 
+@author: fgieseke
+'''
 class BFAST(object):
     
     def __init__(self,
