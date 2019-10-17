@@ -8,7 +8,7 @@ The bfast package provides a highly-efficient parallel implementation for the `B
 Documentation
 =============
 
-Will be released soon.
+See the `documentation <http://bfast.readthedocs.org>`_ for details and examples.
 
 ============
 Dependencies
