@@ -12,8 +12,11 @@
 #
 import os
 import sys
+sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
+autodoc_mock_imports = ['bfast']
 
+import 
 import sphinx_bootstrap_theme
 
 # -- Project information -----------------------------------------------------
@@ -23,7 +26,9 @@ copyright = '2019, Fabian Gieseke, Cosmin Oancea'
 author = 'Fabian Gieseke, Cosmin Oancea'
 
 # The full version, including alpha/beta/rc tags
-release = '0.3'
+import bfast
+version = bfast.__version__
+release = bfast.__version__
 
 
 # -- General configuration ---------------------------------------------------
