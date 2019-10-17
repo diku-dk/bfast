@@ -27,6 +27,70 @@ from .bfastdistribdetailed import bfastdistribdetailed
 
 class BFASTGPU(BFAST):
 
+    """ BFAST Monitor implementation optimized for GPUs. The
+    interface follows the one of the corresponding R package, 
+    see: https://cran.r-project.org/web/packages/bfast   
+
+    def __init__(self,
+                 start_monitor,
+                 freq=365,
+                 k=3,
+                 hfrac=0.25,
+                 trend=True,
+                 level=0.05,
+                 detailed_results=False,
+                 old_version=False,
+                 verbose=0,
+                 platform_id=0,
+                 device_id=0
+                 ):
+                         
+    Parameters
+    ----------
+    
+    start_monitor : datetime
+        A datetime object specifying the start of 
+        the monitoring phase.
+        
+    freq : int, default 365
+        The frequency for the seasonal model
+    k : int, default 3
+        The number of harmonic terms
+    hfrac : float, default 0.25
+        Float in the interval (0,1) specifying the 
+        bandwidth relative to the sample size in 
+        the MOSUM/ME monitoring processes.
+    trend : bool, default True
+        Whether a tend offset term shall be used or not
+    level : float, default 0.05
+        Significance level of the monitoring (and ROC, 
+        if selected) procedure, i.e., probability of 
+        type I error.
+    detailed_results : bool, default False
+        If detailed results should be returned or not
+    old_version : bool, default False
+        Specified if an older, non-optimized version
+        shall be used
+    verbose : int, optional (default=0)
+        The verbosity level (0=no output, 1=output)
+    platform_id : int, default 0
+        Specifies the OpenCL platform id
+    device_id int, default 0
+        Specified the OpenCL device id
+        
+    Examples
+    --------
+           
+      >>> from bfast import BFASTGPU
+      >>> from datetime import datetime
+      >>> start_monitor = datetime(2010, 1, 1)
+      >>> model = BFASTGPU(start_monitor)
+       
+    Notes
+    -----
+        
+    """
+    
     def __init__(self,
                  start_monitor,
                  freq=365,
@@ -179,7 +243,6 @@ class BFASTGPU(BFAST):
     def fit(self, data, dates, n_chunks=None, nan_value=0):
         """ Fits the BFAST model for the ndarray 'data'
         
-        ----------
         Parameters
         ----------
         data: ndarray of shape (N, W, H),
@@ -187,12 +250,20 @@ class BFASTGPU(BFAST):
             series points per pixel and W 
             and H the width and the height 
             of the image, respectively.
+        dates : list of datetime objects
+            Specifies the dates of the elements
+            in data indexed by the first axis
+            n_chunks : int or None, default None
+        nan_value : int, default 0
+            Specified the NaN value used in 
+            the array data
         
-        -------
         Returns
         -------
-        """        
-        
+        self : instance of BFASTGPU
+            The object itself
+        """
+                        
         # TODO: crop dates here, crop data here
         #dates = self.dates
         self._timers = {}
@@ -204,13 +275,14 @@ class BFASTGPU(BFAST):
         self._timers['kernel'] = 0
         self._timers['transfer_gpu_host'] = 0
         
-        
+        # fit single or fit several models, one per chunk
         if n_chunks is None:
             results = self._fit_single(data, dates, nan_value)
         else:
             results = self._fit_chunks(data, dates, n_chunks=n_chunks, nan_value=nan_value)
         
         if self.detailed_results:
+            
             self.y_pred = results['y_pred']
             self.mosum = results['mosum']
             self.bounds = results['bounds']
@@ -221,6 +293,14 @@ class BFASTGPU(BFAST):
         return self            
     
     def get_timers(self):
+        """ Returns runtime measurements for the 
+        different phases of the fitting process.
+
+        Returns
+        -------
+        dict : An array containing the runtimes 
+            for the different phases.
+        """        
         
         return self._timers
            
@@ -313,7 +393,8 @@ class BFASTGPU(BFAST):
         if self.trend:
             trend = 1
         else:
-            trend = 0        
+            trend = 0
+                    
         # MO_first, Ns, ns, sigmas, mosum, mosum_nn, bounds, breaks, means, y_error, y_pred = self.futobj.main(trend, self.k, self.n, self.freq, self.hfrac, self.lam, mapped_indices_cl, y_cl)
         if self.detailed_results:
             MO_first, Ns, ns, sigmas, mosum, mosum_nn, bounds, breaks, means, y_error, y_pred = self.futobj.main(trend, self.k, self.n, self.freq, self.hfrac, self.lam, mapped_indices_cl, y_cl)

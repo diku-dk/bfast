@@ -2,13 +2,13 @@
 bfast
 =====
 
-The bfast package provides a highly-efficient parallel implementation for the `Breaks For Additive Season and Trend (BFAST) <http://bfast.r-forge.r-project.org>`_ proposed by Verbesselt et al. The implementation is based on `OpenCL <https://www.khronos.org/opencl>`_. 
+The bfast package provides a highly-efficient parallel implementation for the `Breaks For Additive Season and Trend (BFASTmonitor) <http://bfast.r-forge.r-project.org>`_ proposed by Verbesselt et al. The implementation is based on `OpenCL <https://www.khronos.org/opencl>`_. 
 
 =============
 Documentation
 =============
 
-Will be released soon.
+See the `documentation <http://bfast.readthedocs.org>`_ for details and examples.
 
 ============
 Dependencies

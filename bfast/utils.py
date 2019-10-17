@@ -1,3 +1,8 @@
+'''
+Created on Oct 15, 2019
+
+@author: fgieseke
+'''
 import numpy as np
 
 __critvals = np.array([1.22762665817831, 1.68732328328598, 2.22408818231127,

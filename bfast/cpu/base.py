@@ -14,7 +14,62 @@ from ..base import BFAST
 from ..utils import check, get_critval
 
 class BFASTCPU(BFAST):
+
+    """ BFAST Monitor implementation using CPUs. The
+    interface follows the one of the corresponding R package, 
+    see: https://cran.r-project.org/web/packages/bfast   
+
+    def __init__(self,
+                 start_monitor,
+                 freq=365,
+                 k=3,
+                 hfrac=0.25,
+                 trend=True,
+                 level=0.05,
+                 detailed_results=False,
+                 old_version=False,
+                 verbose=0,
+                 platform_id=0,
+                 device_id=0
+                 ):
+                         
+    Parameters
+    ----------
     
+    start_monitor : datetime
+        A datetime object specifying the start of 
+        the monitoring phase.
+        
+    freq : int, default 365
+        The frequency for the seasonal model
+    k : int, default 3
+        The number of harmonic terms
+    hfrac : float, default 0.25
+        Float in the interval (0,1) specifying the 
+        bandwidth relative to the sample size in 
+        the MOSUM/ME monitoring processes.
+    trend : bool, default True
+        Whether a tend offset term shall be used or not
+    level : float, default 0.05
+        Significance level of the monitoring (and ROC, 
+        if selected) procedure, i.e., probability of 
+        type I error.
+    verbose : int, optional (default=0)
+        The verbosity level (0=no output, 1=output)
+        
+    Examples
+    --------
+           
+      >>> from bfast import BFASTCPU
+      >>> from datetime import datetime
+      >>> start_monitor = datetime(2010, 1, 1)
+      >>> model = BFASTCPU(start_monitor)
+       
+    Notes
+    -----
+        
+    """
+        
     def __init__(self,
                  start_monitor,
                  freq=365,
@@ -32,21 +87,24 @@ class BFASTCPU(BFAST):
                                        trend=trend,
                                        level=level,
                                        verbose=verbose)
-        
-    def store_indices(self, fname):
-        
-        f = open(fname,'w')
-        f.write("[")
-        
-        elt = [str(a) for a in self.mapped_indices.tolist()]
-        line = ",".join(elt)
-        f.write(line)
-        f.write("]")
-            
-        f.close()
-        
+                
     def fit(self, y, dates):
+        """ Fits the BFAST model for the 1D array y.
+        
+        Parameters
+        ----------
+        y : array
+            1d array of length N
+        dates : list of datetime objects
+            Specifies the dates of the elements
+            in data indexed by the first axis
 
+        Returns
+        -------
+        self : instance of BFASTCPU
+            The object itself
+        """
+        
         N = len(y)
         self.n = self._compute_end_history(dates)
         self.lam = self._compute_lam(len(y))
@@ -201,3 +259,15 @@ class BFASTCPU(BFAST):
         fv = numpy.vectorize(f, otypes=[numpy.float])
         
         return fv(a)    
+
+    def _store_indices(self, fname):
+        
+        f = open(fname,'w')
+        f.write("[")
+        
+        elt = [str(a) for a in self.mapped_indices.tolist()]
+        line = ",".join(elt)
+        f.write(line)
+        f.write("]")
+            
+        f.close()
