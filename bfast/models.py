@@ -1,12 +1,12 @@
-from bfast.cpu import BFASTMonitorCPU
-from bfast.gpu import BFASTMonitorGPU
+from bfast.monitor import BFASTMonitorPython
+from bfast.monitor import BFASTMonitorOpenCL
 
 class BFASTMonitor(object):
 
-    """ BFASTMonitor class implementing two different 
-    implementations: The first one is a simple, non-optimized
-    Python implementation for the BFASTMonitor approach. The
-    second one is an efficient massively-parallel implementation. 
+    """ BFASTMonitor implements the BFASTMonitor approach and
+    provides several backends/implementations. The first one 
+    is a simple, non-optimized Python implementation. The
+    second one is an efficient massively-parallel OpenCL implementation. 
     
     The interface follows the one of the corresponding R package, 
     see: https://cran.r-project.org/web/packages/bfast   
@@ -33,22 +33,22 @@ class BFASTMonitor(object):
         type I error.
     verbose : int, optional (default=0)
         The verbosity level (0=no output, 1=output)
-    backend : str, default 'gpu"
+    backend : str, default 'opencl"
         Specifies the implementation that shall be used:
-        backend='cpu' resorts to the non-optimized CPU
-        version; backend='gpu' resorts to the optimized
+        backend='python' resorts to the non-optimized Python
+        version; backend='opencl' resorts to the optimized
         massively-parallel OpenCL implementation
     platform_id : int, default 0
-        Only relevant if backend='gpu'.
+        Only relevant if backend='opencl'.
         Specifies the OpenCL platform id
     device_id int, default 0
-        Only relevant if backend='gpu'.
+        Only relevant if backend='opencl'.
         Specified the OpenCL device id        
     detailed_results : bool, default False
-        Only relevant if backend='gpu'.
+        Only relevant if backend='opencl'.
         If detailed results should be returned or not
     old_version : bool, default False
-        Only relevant if backend='gpu'.
+        Only relevant if backend='opencl'.
         Specified if an older, non-optimized version
         shall be used
 
@@ -74,7 +74,7 @@ class BFASTMonitor(object):
                  trend=True,
                  level=0.05,
                  verbose=0,
-                 backend="gpu",
+                 backend="opencl",
                  platform_id=0,
                  device_id=0,
                  detailed_results=False,
@@ -120,8 +120,8 @@ class BFASTMonitor(object):
         
         self._model = None
 
-        if self.backend == 'cpu':
-            self._model = BFASTMonitorCPU(
+        if self.backend == 'python':
+            self._model = BFASTMonitorPython(
                  start_monitor=self.start_monitor,
                  freq=self.freq,
                  k=self.k,
@@ -131,8 +131,8 @@ class BFASTMonitor(object):
                  verbose=self.verbose,
                 )
         
-        elif self.backend == 'gpu':
-            self._model = BFASTMonitorGPU(
+        elif self.backend == 'opencl':
+            self._model = BFASTMonitorOpenCL(
                  start_monitor=self.start_monitor,
                  freq=self.freq,
                  k=self.k,
@@ -145,6 +145,11 @@ class BFASTMonitor(object):
                  platform_id=self.platform_id,
                  device_id=self.device_id
                 )
+        
+        elif self.backend == "C":
+            
+            raise Exception("Multi-core C implementation will be added soon!")
+        
         else:
             
             raise Exception("Unknown backend '{}".format(self.backend))

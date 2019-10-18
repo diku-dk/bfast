@@ -13,12 +13,12 @@ dates for the satellite images (i.e., a datetime index for the first dimension o
     
 .. literalinclude:: ../../examples/howto.py
     :start-after: # define history and monitoring period and crop input data
-    :end-before: # apply BFASTMonitor using the gpu backend and the first GPU
+    :end-before: # apply BFASTMonitor using the OpenCL backend and the first device (e.g., GPU)
     
 Next, the start of the history period as well as the start and end of the monitoring period are defined. Given these
 datetimes, the data array and the dates are "cropped" .
 
 .. literalinclude:: ../../examples/howto.py
-    :start-after: # apply BFASTMonitor using the gpu backend and the first GPU 
+    :start-after: # apply BFASTMonitor using the OpenCL backend and the first device (e.g., GPU) 
     
 Finally, the BFASTMonitor model is defined and fitted using the 'gpu' backend. The data array is processed in 5 chunks.
