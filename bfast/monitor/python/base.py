@@ -11,12 +11,12 @@ import pandas
 import datetime
 from sklearn import linear_model
 
-from ..base import BFASTMonitorBase
-from ..utils import check, get_critval
+from bfast.utils import check, get_critval
+from bfast.base import BFASTMonitorBase
 
-class BFASTMonitorCPU(BFASTMonitorBase):
+class BFASTMonitorPython(BFASTMonitorBase):
 
-    """ BFAST Monitor implementation using CPUs. The
+    """ BFAST Monitor implementation based on Python. The
     interface follows the one of the corresponding R package, 
     see: https://cran.r-project.org/web/packages/bfast   
 
@@ -81,7 +81,7 @@ class BFASTMonitorCPU(BFASTMonitorBase):
                  verbose=0,
                  ):
         
-        super(BFASTMonitorCPU, self).__init__(start_monitor,
+        super(BFASTMonitorPython, self).__init__(start_monitor,
                                        freq,
                                        k=k,
                                        hfrac=hfrac,

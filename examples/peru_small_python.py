@@ -1,15 +1,16 @@
 import os
 import wget
-import time
-import copy
 import numpy
-numpy.warnings.filterwarnings('ignore')
-import matplotlib.pyplot as plt
-import matplotlib
 from datetime import datetime
 
 from bfast import BFASTMonitor
 from bfast.utils import crop_data_dates
+
+import copy
+
+import matplotlib.pyplot as plt
+import matplotlib
+
 
 # parameters
 k = 3
@@ -20,6 +21,7 @@ level = 0.05
 start_hist = datetime(2002, 1, 1)
 start_monitor = datetime(2010, 1, 1)
 end_monitor = datetime(2018, 1, 1)
+position = (100,100)
 
 # download and parse input data
 ifile_meta = "../data/peru_small/dates.txt"
@@ -42,7 +44,7 @@ print("First date: {}".format(dates[0]))
 print("Last date: {}".format(dates[-1]))
 print("Shape of data array: {}".format(data.shape))
 
-# fit BFASTMontiro model
+# fit BFAST using the CPU implementation (single pixel)
 model = BFASTMonitor(
             start_monitor,
             freq=freq,
@@ -50,22 +52,17 @@ model = BFASTMonitor(
             hfrac=hfrac,
             trend=trend,
             level=level,
-            backend='gpu',
-            detailed_results=True,  # needed to plot
-            verbose=1,
-            device_id=0,
-        )
+            backend='python',
+            verbose=1
+            )
 
-#data = data[:,:50,:50]
-start_time = time.time()
-model.fit(data, dates, n_chunks=5, nan_value=-32768)
-end_time = time.time()
-print("All computations have taken {} seconds.".format(end_time - start_time))
+# only apply on a small subset
+data = data[:,:50,:50]
+model.fit(data, dates, nan_value=-32768)
 
 # visualize results
 breaks = model.breaks
 means = model.means
-
 no_breaks_indices = (breaks == -1)
 means[no_breaks_indices] = 0
 means[means > 0] = 0
