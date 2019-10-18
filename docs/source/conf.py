@@ -20,8 +20,8 @@ import sphinx_bootstrap_theme
 # -- Project information -----------------------------------------------------
 
 project = 'BFAST'
-copyright = '2019, Fabian Gieseke, Cosmin Oancea'
-author = 'Fabian Gieseke, Cosmin Oancea'
+copyright = '2019, Fabian Gieseke, Cosmin Oancea, Sabina Rosca, Troels Henriksen, Jan Verbesselt'
+author = 'Fabian Gieseke, Cosmin Oancea, Sabina Rosca, Troels Henriksen, Jan Verbesselt'
 
 # The full version, including alpha/beta/rc tags
 import bfast

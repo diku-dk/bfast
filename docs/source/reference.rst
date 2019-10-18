@@ -5,20 +5,9 @@
 Reference
 =========
 
-BFASTCPU
---------
+.. autoclass:: bfast.BFASTMonitor
+    :members: fit, get_params, set_params, timers, breaks, means
 
-A simple **non-optimized** Python version of the BFASTMonitor approach:
-
-.. autoclass:: bfast.BFASTCPU
-    :members: fit
-
-BFASTGPU
---------
-
-The parallel implementation for the BFASTMonitor approach:
-
-.. autoclass:: bfast.BFASTGPU
-    :members: fit, get_timers
-
+.. automodule:: bfast.utils
+    :members: crop_data_dates
 

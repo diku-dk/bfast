@@ -1,17 +1,16 @@
-import time
-import copy
+import os
+import wget
 import numpy
-numpy.warnings.filterwarnings('ignore')
-import matplotlib.pyplot as plt
-import matplotlib
 from datetime import datetime
 
-from bfast import BFASTGPU
+from bfast import BFASTMonitor
 from bfast.utils import crop_data_dates
 
-# input data
-ifile_meta = "peru_ndmi_stack.grd"
-ifile_data = "peru.npy"
+import copy
+
+import matplotlib.pyplot as plt
+import matplotlib
+
 
 # parameters
 k = 3
@@ -22,48 +21,51 @@ level = 0.05
 start_hist = datetime(2002, 1, 1)
 start_monitor = datetime(2010, 1, 1)
 end_monitor = datetime(2018, 1, 1)
+position = (100,100)
 
-# load and crop data
+# download and parse input data
+ifile_meta = "../data/peru_small/dates.txt"
+ifile_data = "../data/peru_small/data.npy"
+
+if not os.path.exists(ifile_meta):
+    url = 'https://sid.erda.dk/share_redirect/fcwjD77gUY/dates.txt'
+    wget.download(url, '../data/peru_small/dates.txt')
+if not os.path.exists(ifile_data):
+    url = 'https://sid.erda.dk/share_redirect/fcwjD77gUY/data.npy'
+    wget.download(url, '../data/peru_small/data.npy')
+
 data_orig = numpy.load(ifile_data)
 with open(ifile_meta) as f:
-    dates = f.read().split('\n')[25].split("time:")[1]
-    dates = dates.split(":")
-    dates = [datetime.strptime(d, '%Y-%m-%d') for d in dates]
+    dates = f.read().split('\n')
+    dates = [datetime.strptime(d, '%Y-%m-%d') for d in dates if len(d) > 0]
 
-data_orig, dates = crop_data_dates(data_orig, dates, start_hist, end_monitor)
+data, dates = crop_data_dates(data_orig, dates, start_hist, end_monitor)
 print("First date: {}".format(dates[0]))
 print("Last date: {}".format(dates[-1]))
-print("Shape of data array: {}".format(data_orig.shape))
+print("Shape of data array: {}".format(data.shape))
 
-model_gpu = BFASTGPU(
+# fit BFAST using the CPU implementation (single pixel)
+model = BFASTMonitor(
             start_monitor,
             freq=freq,
             k=k,
             hfrac=hfrac,
             trend=trend,
             level=level,
-            detailed_results=True,  # needed to plot
-            verbose=1,
-            device_id=0,
+            backend='cpu',
+            verbose=1
             )
 
-start_time = time.time()
-model_gpu.fit(data_orig, dates, n_chunks=5, nan_value=-32768)
-end_time = time.time()
-print("All computations have taken {} seconds.".format(end_time - start_time))
+# only apply on a small subset
+data = data[:,:50,:50]
+model.fit(data, dates, nan_value=-32768)
 
-breaks = model_gpu.breaks
-means = model_gpu.means
-
-fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(10, 10))
+# visualize results
+breaks = model.breaks
+means = model.means
 no_breaks_indices = (breaks == -1)
 means[no_breaks_indices] = 0
 means[means > 0] = 0
-im = axes.imshow(means, cmap='viridis', vmin=means.min(), vmax=None)
-fig.subplots_adjust(right=0.8)
-cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-fig.colorbar(im, cax=cbar_ax)
-
 breaks_plot = breaks.astype(numpy.float)
 breaks_plot[breaks == -2] = numpy.nan
 breaks_plot[breaks == -1] = numpy.nan

@@ -6,14 +6,15 @@ Created on Apr 19, 2018
 
 import copy
 import numpy
+numpy.warnings.filterwarnings('ignore')
 import pandas
 import datetime
 from sklearn import linear_model
 
-from ..base import BFAST
+from ..base import BFASTMonitorBase
 from ..utils import check, get_critval
 
-class BFASTCPU(BFAST):
+class BFASTMonitorCPU(BFASTMonitorBase):
 
     """ BFAST Monitor implementation using CPUs. The
     interface follows the one of the corresponding R package, 
@@ -80,15 +81,71 @@ class BFASTCPU(BFAST):
                  verbose=0,
                  ):
         
-        super(BFASTCPU, self).__init__(start_monitor,
+        super(BFASTMonitorCPU, self).__init__(start_monitor,
                                        freq,
                                        k=k,
                                        hfrac=hfrac,
                                        trend=trend,
                                        level=level,
                                        verbose=verbose)
+        
+        self._timers = {}
+    
+    def fit(self, data, dates, n_chunks=None, nan_value=0):
+        """ Fits the models for the ndarray 'data'
+        
+        Parameters
+        ----------
+        data: ndarray of shape (N, W, H),
+            where N is the number of time 
+            series points per pixel and W 
+            and H the width and the height 
+            of the image, respectively.
+        dates : list of datetime objects
+            Specifies the dates of the elements
+            in data indexed by the first axis
+            n_chunks : int or None, default None
+        nan_value : int, default 0
+            Specified the NaN value used in 
+            the array data
+        
+        Returns
+        -------
+        self : instance of BFASTMonitor
+            The object itself
+        """
+
+        data = data.astype(numpy.float32)
+        
+        means_global = numpy.zeros(
+            (data.shape[1], data.shape[2]), 
+            dtype=numpy.float32
+        )
+        breaks_global = numpy.zeros(
+            (data.shape[1], data.shape[2]), dtype=numpy.int32
+        )        
+        
+        # set NaN values
+        data[data==nan_value] = numpy.nan
+        
+        for i in range(data.shape[1]):
+
+            if self.verbose > 0:
+                print("Processing row {}".format(i))
                 
-    def fit(self, y, dates):
+            for j in range(data.shape[2]):
+                
+                y = data[:,i,j]
+                self.fit_single(y, dates)
+                breaks_global[i,j] = self.first_break
+                means_global[i,j] = self.mean
+                
+        self.breaks = breaks_global
+        self.means = means_global
+         
+        return self
+                    
+    def fit_single(self, y, dates):
         """ Fits the BFAST model for the 1D array y.
         
         Parameters
@@ -128,16 +185,20 @@ class BFASTCPU(BFAST):
         h = numpy.int(float(ns) * self.hfrac)
         Ns = N - num_nans[N - 1]
         
-        if self.verbose > 0:
-            print("y={}".format(y))
-            print("N={}".format(N))
-            print("n={}".format(self.n))
-            print("lam={}".format(self.lam))
-            print("ns={}".format(ns))
-            print("NS={}".format(Ns))
+        #if self.verbose > 1:
+        #    print("y={}".format(y))
+        #    print("N={}".format(N))
+        #    print("n={}".format(self.n))
+        #    print("lam={}".format(self.lam))
+        #    print("ns={}".format(ns))
+        #    print("NS={}".format(Ns))
         
-        if ns <= 8 or Ns-ns <= 8:
-            raise Exception("Not enough observations: ns={ns}, Ns={Ns}".format(ns=ns, Ns=Ns))
+        if ns <= 5 or Ns-ns <= 5:
+            self.breaks = -2 * numpy.ones(N - self.n, dtype=numpy.int32)               
+            self.mean = 0.0
+            if self.verbose > 1: 
+                print("WARNING: Not enough observations: ns={ns}, Ns={Ns}".format(ns=ns, Ns=Ns))
+            return self
 
         val_inds = val_inds[ns:]
         val_inds -= self.n
@@ -182,11 +243,16 @@ class BFASTCPU(BFAST):
             idx = val_inds[j]
             self.mosum[idx] = mosum_nn[j]
         
+        self.mean = mosum_nn.mean()
+        
         # boundary and breaks
         self.bounds = self.lam * numpy.sqrt(self._log_plus(self.mapped_indices[self.n:] / numpy.float(self.mapped_indices[-1])))
+        
         self.breaks = numpy.abs(self.mosum) > self.bounds
         
+        
         self.first_break = numpy.where(self.breaks==True)[0]
+        
 
         if len(self.first_break) > 0:
             self.first_break = self.first_break[0]
@@ -196,6 +262,18 @@ class BFASTCPU(BFAST):
         self.y_error = y_error
         
         return self
+    
+    def get_timers(self):
+        """ Returns runtime measurements for the 
+        different phases of the fitting process.
+
+        Returns
+        -------
+        dict : An array containing the runtimes 
+            for the different phases.
+        """        
+        
+        return self._timers
     
     def _compute_lam(self, N):
         

@@ -2,8 +2,9 @@
 Created on Oct 15, 2019
 
 @author: fgieseke
-'''
-class BFAST(object):
+'''   
+    
+class BFASTMonitorBase(object):
     
     def __init__(self,
                  start_monitor,
@@ -25,5 +26,5 @@ class BFAST(object):
         
     def fit(self, y):
             
-        raise Exception("Function 'fit' not implemented!")
+        raise Exception("Function 'fit' not implemented!")    
     

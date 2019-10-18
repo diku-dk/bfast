@@ -1,8 +1,3 @@
-'''
-Created on Oct 15, 2019
-
-@author: fgieseke
-'''
 import numpy as np
 
 __critvals = np.array([1.22762665817831, 1.68732328328598, 2.22408818231127,
@@ -419,7 +414,7 @@ def get_critval(h, period, level, mr):
     # For historical reasons, the critvals are scaled by sqrt(2)
     return __critvals[tuple(index)] * np.sqrt(2)
 
-def find_index_date(dates, t):
+def _find_index_date(dates, t):
 
     for i in range(len(dates)):
         if t < dates[i]:
@@ -428,9 +423,38 @@ def find_index_date(dates, t):
     return len(dates)
                 
 def crop_data_dates(data, dates, start, end):
+    """ Crops the input data and the associated
+    dates w.r.t. the provided start and end 
+    datetime object.
     
-    start_idx = find_index_date(dates, start)
-    end_idx = find_index_date(dates, end)
+    Parameters
+    ----------
+    data: ndarray of shape (N, W, H)
+        Here, N is the number of time 
+        series points per pixel and W 
+        and H are the width and the height 
+        of the image, respectively.
+    dates : list of datetime objects
+        Specifies the dates of the elements
+        in data indexed by the first axis
+        n_chunks : int or None, default None
+    start : datetime
+        The start datetime object
+    end : datetime
+        The end datetime object
+            
+    Returns
+    -------
+    Returns: data, dates
+        The cropped data array and the 
+        cropped list. Only those images 
+        and dates that are with the start/end
+        period are contained in the returned
+        objects.
+    """
+    
+    start_idx = _find_index_date(dates, start)
+    end_idx = _find_index_date(dates, end)
 
     data_cropped = data[start_idx:end_idx, :, :]
     dates_cropped = list(np.array(dates)[start_idx:end_idx])
