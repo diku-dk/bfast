@@ -30,7 +30,7 @@ print("First date: {}".format(dates[0]))
 print("Last date: {}".format(dates[-1]))
 print("Shape of data array: {}".format(data.shape))
 
-# apply BFASTMonitor using the gpu backend and the first GPU
+# apply BFASTMonitor using the OpenCL backend and the first device (e.g., GPU)
 from bfast import BFASTMonitor
 
 model = BFASTMonitor(
@@ -40,7 +40,7 @@ model = BFASTMonitor(
             hfrac=0.25,
             trend=False,
             level=0.05,
-            backend='gpu',
+            backend='opencl',
             device_id=0,
         )
 model.fit(data, dates, n_chunks=5, nan_value=-32768)
