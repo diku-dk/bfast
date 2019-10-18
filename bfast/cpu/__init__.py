@@ -1,1 +1,1 @@
-from .base import BFASTCPU
+from .base import BFASTMonitorCPU

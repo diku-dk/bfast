@@ -1,1 +1,1 @@
-from .base import BFASTGPU
+from .base import BFASTMonitorGPU

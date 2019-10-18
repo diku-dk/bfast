@@ -1,4 +1,3 @@
-from bfast.cpu import BFASTCPU
-from bfast.gpu import BFASTGPU
+from .models import BFASTMonitor
 
 __version__ = '0.3'

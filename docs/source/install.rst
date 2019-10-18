@@ -7,12 +7,21 @@ Installation
 
     The authors are not responsible for any implications that stem from the use of this software!
 
+We recommend to use `virtualenv <https://pypi.python.org/pypi/virtualenv>`_ to install the package and all dependencies (see below).
+
+Create a new virtual environment and activate it::
+
+  $ virtualenv -p python3 myenv
+  $ source myenv/bin/activate
+
+The package is available on `PyPI <https://pypi.python.org/pypi>`_, but can also be installed directly from the source code.
+
 Installation via PyPI
 ---------------------
+  
+To install the package via `PyPI <https://pypi.python.org/pypi>`_, type::
 
-The package is available on `PyPI <https://pypi.python.org/pypi>`_, but can also be installed directly from the source code. We recommend to use `virtualenv <https://pypi.python.org/pypi/virtualenv>`_ to install the package and all dependencies (see below). To install the package via `PyPI <https://pypi.python.org/pypi>`_, type::
-
-  $ sudo pip install bfast
+  $ pip install bfast
 
 Installation From Sources
 -------------------------
@@ -28,8 +37,11 @@ Subsequently, install the package locally via::
 
 or, globally for all users, via::
 
-  $ sudo python setup.py build
   $ sudo python setup.py install
+  
+In case you would like to extend the package, type::
+
+  $ python setup.py develop
 
 Dependencies
 ------------
@@ -51,4 +63,6 @@ The bfast package depends on the following Python packages:
 - scipy==1.2.1
 - matplotlib==2.2.2
 - wget==3.2
+- Sphinx==2.2.0
+- sphinx-bootstrap-theme==0.7.1
 

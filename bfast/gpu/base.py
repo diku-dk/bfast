@@ -13,7 +13,7 @@ import pyopencl
 import pyopencl.array as pycl_array
 
 from ..utils import check, get_critval
-from ..base import BFAST
+from ..base import BFASTMonitorBase
 
 from .bfastfinal import bfastfinal
 from .bfastfinaldetailed import bfastfinaldetailed
@@ -25,7 +25,7 @@ from .bfastdistribdetailed import bfastdistribdetailed
 # ## $ gpu-pyopencl --library bfastfuth.fut
 #################################################
 
-class BFASTGPU(BFAST):
+class BFASTMonitorGPU(BFASTMonitorBase):
 
     """ BFAST Monitor implementation optimized for GPUs. The
     interface follows the one of the corresponding R package, 
@@ -80,12 +80,7 @@ class BFASTGPU(BFAST):
         
     Examples
     --------
-           
-      >>> from bfast import BFASTGPU
-      >>> from datetime import datetime
-      >>> start_monitor = datetime(2010, 1, 1)
-      >>> model = BFASTGPU(start_monitor)
-       
+                  
     Notes
     -----
         
@@ -108,7 +103,7 @@ class BFASTGPU(BFAST):
         if k not in [3,4,5,6,7,8,9,10]:
             raise Exception("Current implementation can only handle the following values for k: {}".format(",".join(str(e) for e in [3,4,5,6,7,8,9,10])))
         
-        super(BFASTGPU, self).__init__(start_monitor,
+        super(BFASTMonitorGPU, self).__init__(start_monitor,
                                        freq,
                                        k=k,
                                        hfrac=hfrac,
