@@ -23,6 +23,8 @@ The bfast package has been tested under Python 3.*. The required Python dependen
 - scipy==1.2.1
 - matplotlib==2.2.2
 - wget==3.2
+- Sphinx==2.2.0
+- sphinx-bootstrap-theme==0.7.1
 
 Further, `OpenCL <https://www.khronos.org/opencl>`_ needs to be available.
 
@@ -41,11 +43,6 @@ To install the package from the sources, first get the current stable release vi
 Afterwards, on Linux systems, you can install the package locally for the current user via::
 
   python setup.py install --user
-
-On Debian/Ubuntu systems, the package can be installed globally for all users via::
-
-  python setup.py build
-  sudo python setup.py install
 
 ==========
 Disclaimer
