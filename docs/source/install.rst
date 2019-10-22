@@ -43,6 +43,15 @@ In case you would like to extend the package, type::
 
   $ python setup.py develop
 
+Google Colab Installation 
+-------------------------
+
+A simple way to run the massively-parallel implementation using powerful GPUs is to resort to `Google Colab <https://colab.research.google.com>`_. To install and run the code, you can proceed as follows: Start a new notebook and change the runtime to GPU (Runtime->Change runtime type). Afterwards, type in::
+
+  $ !pip install bfast
+
+Execute the cell (hit Shift+Return). You might have to restart the runtime by clicking on the button that appeared at the bottom for the cell (Restart Runtime). Afterwards, you can follow the instructions provided in :ref:`Getting Started`.
+
 Dependencies
 ------------
 

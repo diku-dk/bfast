@@ -5,16 +5,19 @@ import numpy
 from datetime import datetime
 
 # download and parse input data
-ifile_meta = "../data/peru_small/dates.txt"
-ifile_data = "../data/peru_small/data.npy"
+ifile_meta = "data/peru_small/dates.txt"
+ifile_data = "data/peru_small/data.npy"
+
+if not os.path.isdir("data/peru_small"):
+    os.makedirs("data/peru_small")
 
 if not os.path.exists(ifile_meta):
     url = 'https://sid.erda.dk/share_redirect/fcwjD77gUY/dates.txt'
-    wget.download(url, '../data/peru_small/dates.txt')
+    wget.download(url, ifile_meta)
 if not os.path.exists(ifile_data):
     url = 'https://sid.erda.dk/share_redirect/fcwjD77gUY/data.npy'
-    wget.download(url, '../data/peru_small/data.npy')
-    
+    wget.download(url, ifile_data)
+
 data_orig = numpy.load(ifile_data)
 with open(ifile_meta) as f:
     dates = f.read().split('\n')
