@@ -114,8 +114,7 @@ class BFASTMonitor(object):
         
         Returns
         -------
-        Returns : BFASTMonitor
-            The object itself
+        self : The BFASTMonitor object.
         """
         
         self._model = None
@@ -162,14 +161,13 @@ class BFASTMonitor(object):
         self._model_fitted = True
                         
         return self
-    
+        
     def get_params(self):
         """ Returns the parameters for this model.
         
         Returns
         -------
-        Returns : dict
-            Mapping of string to any
+        dict: Mapping of string to any
             parameter names mapped to their values.
         """
         
@@ -210,8 +208,7 @@ class BFASTMonitor(object):
 
         Returns
         -------
-        dict : dict
-            An array containing the runtimes 
+        dict : An dictionary containing the runtimes 
             for the different phases.
         """        
     
@@ -226,9 +223,12 @@ class BFASTMonitor(object):
 
         Returns
         -------
-        Returns: array-like
-            An array containing the breaks
-            computed for the input data
+        array-like: An array containing the (first) breaks
+            detected by BFASTMonitor. A '-2' corresponds
+            to pixels (time series) not containing sufficient data
+            and a '-1' to pixels without any breaks. All other non-negative
+            entries correspond to the first break that was 
+            detected in the monitor period (i.e., its index).
         """        
     
         if self._is_fitted():
@@ -242,9 +242,10 @@ class BFASTMonitor(object):
 
         Returns
         -------
-        Returns : array-like
-            An array containing the means
-            computed for the input data
+        array-like : An array containing the mean values
+            of the individual MOSUM processes (e.g., a positive
+            mean for a pixel corresponds to an increase of the
+            vegetation in case indices such as NDMI are considered)
         """        
     
         if self._is_fitted():

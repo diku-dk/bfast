@@ -112,7 +112,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         Returns
         -------
         self : instance of BFASTMonitor
-            The object itself
+            The object itself.
         """
 
         data = data.astype(numpy.float32)
@@ -185,14 +185,6 @@ class BFASTMonitorPython(BFASTMonitorBase):
         h = numpy.int(float(ns) * self.hfrac)
         Ns = N - num_nans[N - 1]
         
-        #if self.verbose > 1:
-        #    print("y={}".format(y))
-        #    print("N={}".format(N))
-        #    print("n={}".format(self.n))
-        #    print("lam={}".format(self.lam))
-        #    print("ns={}".format(ns))
-        #    print("NS={}".format(Ns))
-        
         if ns <= 5 or Ns-ns <= 5:
             self.breaks = -2 * numpy.ones(N - self.n, dtype=numpy.int32)               
             self.mean = 0.0
@@ -249,11 +241,9 @@ class BFASTMonitorPython(BFASTMonitorBase):
         self.bounds = self.lam * numpy.sqrt(self._log_plus(self.mapped_indices[self.n:] / numpy.float(self.mapped_indices[-1])))
         
         self.breaks = numpy.abs(self.mosum) > self.bounds
-        
-        
+                
         self.first_break = numpy.where(self.breaks==True)[0]
         
-
         if len(self.first_break) > 0:
             self.first_break = self.first_break[0]
         else:
@@ -262,6 +252,34 @@ class BFASTMonitorPython(BFASTMonitorBase):
         self.y_error = y_error
         
         return self
+    
+    def get_breaks(self):
+        """ Returns the breaks array.
+        
+        Returns
+        -------
+        Numpy array : An array containing the (first) breaks
+            detected by BFASTMonitor. A -2 corresponds
+            to pixels (time series) not containing sufficient data
+            and a -1 to pixels without any breaks. All other non-negative
+            entries correspond to the first break that was 
+            detected in the monitor period (i.e., its index).
+        """
+        
+        return self.breaks
+
+    def get_means(self):
+        """ Returns the means array (of the MOSUM process).
+        
+        Returns
+        -------
+        Numpy array : An array containing the mean values
+            of the individual MOSUM processes (e.g., a positive
+            mean for a pixel corresponds to an increase of the
+            vegetation in case indices such as NDMI are considered)
+        """
+        
+        return self.means    
     
     def get_timers(self):
         """ Returns runtime measurements for the 

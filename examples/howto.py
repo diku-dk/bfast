@@ -49,4 +49,7 @@ model = BFASTMonitor(
 model.fit(data, dates, n_chunks=5, nan_value=-32768)
 
 print("Detected breaks")
+# -2 corresponds to not enough data for a pixel
+# -1 corresponds to "no breaks detected"
+# idx with isx>=0 corresponds to the position of the first break
 print(model.breaks)
