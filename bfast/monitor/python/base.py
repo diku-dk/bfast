@@ -251,35 +251,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
                 
         self.y_error = y_error
         
-        return self
-    
-    def get_breaks(self):
-        """ Returns the breaks array.
-        
-        Returns
-        -------
-        Numpy array : An array containing the (first) breaks
-            detected by BFASTMonitor. A -2 corresponds
-            to pixels (time series) not containing sufficient data
-            and a -1 to pixels without any breaks. All other non-negative
-            entries correspond to the first break that was 
-            detected in the monitor period (i.e., its index).
-        """
-        
-        return self.breaks
-
-    def get_means(self):
-        """ Returns the means array (of the MOSUM process).
-        
-        Returns
-        -------
-        Numpy array : An array containing the mean values
-            of the individual MOSUM processes (e.g., a positive
-            mean for a pixel corresponds to an increase of the
-            vegetation in case indices such as NDMI are considered)
-        """
-        
-        return self.means    
+        return self   
     
     def get_timers(self):
         """ Returns runtime measurements for the 
