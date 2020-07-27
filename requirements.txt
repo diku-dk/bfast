@@ -7,4 +7,4 @@ matplotlib==2.2.2
 wget==3.2
 Sphinx==2.2.0
 sphinx-bootstrap-theme==0.7.1
-
+numpydoc==1.0.0
