@@ -5,9 +5,14 @@
 Reference
 =========
 
+BFASTMonitor Implementation
+---------------------------
+    
 .. autoclass:: bfast.BFASTMonitor
-    :members: fit, get_params, set_params, timers, breaks, means
+    :members: 
+
+Helper Functions
+----------------
 
 .. automodule:: bfast.utils
     :members: crop_data_dates
-

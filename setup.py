@@ -27,6 +27,7 @@ if len(set(('develop', 'release', 'bdist_egg', 'bdist_rpm',
         include_package_data=True,
     )
 else:
+    import setuptools
     extra_setuptools_args = dict()
 
 

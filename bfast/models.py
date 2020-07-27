@@ -2,84 +2,104 @@ from bfast.monitor import BFASTMonitorPython
 from bfast.monitor import BFASTMonitorOpenCL
 
 class BFASTMonitor(object):
-
-    """ BFASTMonitor implements the BFASTMonitor approach and
-    provides several backends/implementations. The first one 
-    is a simple, non-optimized Python implementation. The
-    second one is an efficient massively-parallel OpenCL implementation. 
+    """ 
+    BFASTMonitor implements the BFASTMonitor approach and
+    provides two backends/implementations:
+    
+    - A pure Python implementation (based on the Numpy package).
+    - An optimized OpenCL implementation suited for massively-parallel devices.
     
     The interface follows the one of the corresponding R package, 
     see: https://cran.r-project.org/web/packages/bfast   
                          
     Parameters
     ----------
-    
     start_monitor : datetime
         A datetime object specifying the start of 
         the monitoring phase.
+        
     freq : int, default 365
-        The frequency for the seasonal model
+        The frequency for the seasonal model.
+        
     k : int, default 3
-        The number of harmonic terms
+        The number of harmonic terms.
+        
     hfrac : float, default 0.25
         Float in the interval (0,1) specifying the 
         bandwidth relative to the sample size in 
         the MOSUM/ME monitoring processes.
+        
     trend : bool, default True
-        Whether a tend offset term shall be used or not
+        Whether a tend offset term shall be used or not.
+        
     level : float, default 0.05
         Significance level of the monitoring (and ROC, 
         if selected) procedure, i.e., probability of 
         type I error.
+        
     verbose : int, optional (default=0)
-        The verbosity level (0=no output, 1=output)
+        The verbosity level (0=no output, 1=output).
+        
     backend : str, default 'opencl"
         Specifies the implementation that shall be used:
         backend='python' resorts to the non-optimized Python
         version; backend='opencl' resorts to the optimized
-        massively-parallel OpenCL implementation
+        massively-parallel OpenCL implementation.
+        
     platform_id : int, default 0
         Only relevant if backend='opencl'.
-        Specifies the OpenCL platform id
+        Specifies the OpenCL platform id.
+        
     device_id int, default 0
         Only relevant if backend='opencl'.
-        Specified the OpenCL device id        
+        Specified the OpenCL device id.
+                
     detailed_results : bool, default False
         Only relevant if backend='opencl'.
-        If detailed results should be returned or not
+        If detailed results should be returned or not.
+        
     old_version : bool, default False
         Only relevant if backend='opencl'.
         Specified if an older, non-optimized version
         shall be used
 
-        
-    Examples
-    --------
-    
-      >>> from bfast import BFASTMonitor
-      >>> from datetime import datetime
-      >>> start_monitor = datetime(2010, 1, 1)
-      >>> model = BFASTMonitor(start_monitor, backend='gpu')
-       
-    Notes
-    -----
+    Attributes
+    ----------
+    breaks : array 
+        An array containing the (first) break detected. A '-2' 
+        corresponds to pixels (time series) not containing 
+        sufficient data and a '-1' to pixels without any breaks. 
+        All other non-negative entries correspond to the first 
+        break that was detected in the monitor period (i.e., 
+        its index).
+            
+    means : array 
+        An array containing the mean values of the individual 
+        MOSUM processes (e.g., a positive mean for a pixel 
+        corresponds to an increase of the vegetation in case 
+        indices such as NDMI are considered).
+
+    timers : dict
+        An dictionary containing the runtimes  for the 
+        different phases.
         
     """
 
-    def __init__(self,
-                 start_monitor,
-                 freq=365,
-                 k=3,
-                 hfrac=0.25,
-                 trend=True,
-                 level=0.05,
-                 verbose=0,
-                 backend="opencl",
-                 platform_id=0,
-                 device_id=0,
-                 detailed_results=False,
-                 old_version=False,
-                 ):
+    def __init__(
+            self,
+            start_monitor,
+            freq=365,
+            k=3,
+            hfrac=0.25,
+            trend=True,
+            level=0.05,
+            verbose=0,
+            backend="opencl",
+            platform_id=0,
+            device_id=0,
+            detailed_results=False,
+            old_version=False,
+        ):
         
         self.start_monitor = start_monitor
         self.freq = freq
@@ -114,8 +134,7 @@ class BFASTMonitor(object):
         
         Returns
         -------
-        Returns : BFASTMonitor
-            The object itself
+        self : The BFASTMonitor object.
         """
         
         self._model = None
@@ -162,14 +181,13 @@ class BFASTMonitor(object):
         self._model_fitted = True
                         
         return self
-    
+        
     def get_params(self):
         """ Returns the parameters for this model.
         
         Returns
         -------
-        Returns : dict
-            Mapping of string to any
+        dict: Mapping of string to any
             parameter names mapped to their values.
         """
         
@@ -210,8 +228,7 @@ class BFASTMonitor(object):
 
         Returns
         -------
-        dict : dict
-            An array containing the runtimes 
+        dict : An dictionary containing the runtimes 
             for the different phases.
         """        
     
@@ -222,13 +239,16 @@ class BFASTMonitor(object):
 
     @property
     def breaks(self):
-        """ Returns the breaks computed
+        """ Returns the breaks that have been computed.
 
         Returns
         -------
-        Returns: array-like
-            An array containing the breaks
-            computed for the input data
+        array-like: An array containing the (first) breaks
+            detected by BFASTMonitor. A '-2' corresponds
+            to pixels (time series) not containing sufficient data
+            and a '-1' to pixels without any breaks. All other non-negative
+            entries correspond to the first break that was 
+            detected in the monitor period (i.e., its index).
         """        
     
         if self._is_fitted():
@@ -242,9 +262,10 @@ class BFASTMonitor(object):
 
         Returns
         -------
-        Returns : array-like
-            An array containing the means
-            computed for the input data
+        array-like : An array containing the mean values
+            of the individual MOSUM processes (e.g., a positive
+            mean for a pixel corresponds to an increase of the
+            vegetation in case indices such as NDMI are considered)
         """        
     
         if self._is_fitted():

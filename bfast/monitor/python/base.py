@@ -16,9 +16,9 @@ from bfast.base import BFASTMonitorBase
 
 class BFASTMonitorPython(BFASTMonitorBase):
 
-    """ BFAST Monitor implementation based on Python. The
-    interface follows the one of the corresponding R package, 
-    see: https://cran.r-project.org/web/packages/bfast   
+    """ BFAST Monitor implementation based on Python and Numpy. The
+    interface follows the one of the corresponding R package
+    (see https://cran.r-project.org/web/packages/bfast)   
 
     def __init__(self,
                  start_monitor,
@@ -37,24 +37,29 @@ class BFASTMonitorPython(BFASTMonitorBase):
     Parameters
     ----------
     
-    start_monitor : datetime
+    start_monitor : datetime object
         A datetime object specifying the start of 
         the monitoring phase.
         
     freq : int, default 365
-        The frequency for the seasonal model
+        The frequency for the seasonal model.
+        
     k : int, default 3
-        The number of harmonic terms
+        The number of harmonic terms.
+        
     hfrac : float, default 0.25
         Float in the interval (0,1) specifying the 
         bandwidth relative to the sample size in 
         the MOSUM/ME monitoring processes.
+        
     trend : bool, default True
         Whether a tend offset term shall be used or not
+        
     level : float, default 0.05
         Significance level of the monitoring (and ROC, 
         if selected) procedure, i.e., probability of 
         type I error.
+        
     verbose : int, optional (default=0)
         The verbosity level (0=no output, 1=output)
         
@@ -112,7 +117,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         Returns
         -------
         self : instance of BFASTMonitor
-            The object itself
+            The object itself.
         """
 
         data = data.astype(numpy.float32)
@@ -185,14 +190,6 @@ class BFASTMonitorPython(BFASTMonitorBase):
         h = numpy.int(float(ns) * self.hfrac)
         Ns = N - num_nans[N - 1]
         
-        #if self.verbose > 1:
-        #    print("y={}".format(y))
-        #    print("N={}".format(N))
-        #    print("n={}".format(self.n))
-        #    print("lam={}".format(self.lam))
-        #    print("ns={}".format(ns))
-        #    print("NS={}".format(Ns))
-        
         if ns <= 5 or Ns-ns <= 5:
             self.breaks = -2 * numpy.ones(N - self.n, dtype=numpy.int32)               
             self.mean = 0.0
@@ -249,11 +246,9 @@ class BFASTMonitorPython(BFASTMonitorBase):
         self.bounds = self.lam * numpy.sqrt(self._log_plus(self.mapped_indices[self.n:] / numpy.float(self.mapped_indices[-1])))
         
         self.breaks = numpy.abs(self.mosum) > self.bounds
-        
-        
+                
         self.first_break = numpy.where(self.breaks==True)[0]
         
-
         if len(self.first_break) > 0:
             self.first_break = self.first_break[0]
         else:
@@ -261,7 +256,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
                 
         self.y_error = y_error
         
-        return self
+        return self   
     
     def get_timers(self):
         """ Returns runtime measurements for the 

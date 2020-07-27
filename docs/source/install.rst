@@ -7,14 +7,13 @@ Installation
 
     The authors are not responsible for any implications that stem from the use of this software!
 
-We recommend to use `virtualenv <https://pypi.python.org/pypi/virtualenv>`_ to install the package and all dependencies (see below).
-
-Create a new virtual environment and activate it::
+We recommend to use `virtualenv <https://pypi.python.org/pypi/virtualenv>`_ to install the package and all dependencies. 
+In order to create and activate a new virtual environment, please execute::
 
   $ virtualenv -p python3 myenv
   $ source myenv/bin/activate
 
-The package is available on `PyPI <https://pypi.python.org/pypi>`_, but can also be installed directly from the source code.
+The package is available on `PyPI <https://pypi.python.org/pypi>`_, but can also be installed directly from the source code. Note that `OpenCL <https://www.khronos.org/opencl>`_ (version 1.2 or higher) must be installed on the machine.
 
 Installation via PyPI
 ---------------------
@@ -55,7 +54,7 @@ Execute the cell (hit Shift+Return). You might have to restart the runtime by cl
 Dependencies
 ------------
 
-The bfast package requires Python 3.*.`OpenCL <https://www.khronos.org/opencl>`_ (version 1.2 or higher) has to be installed correctly on the system. The installation of OpenCL depends on the particular system, see, e.g.,
+The bfast package requires Python 3.*. Furthermore, `OpenCL <https://www.khronos.org/opencl>`_ (version 1.2 or higher) has to be installed on the system. The installation of OpenCL depends on the particular system, see, e.g.,
 
 - `Intel <https://software.intel.com/en-us/intel-opencl/download>`_
 - `Nvidia <https://developer.nvidia.com/opencl>`_

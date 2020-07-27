@@ -23,4 +23,4 @@ datetimes, the data array and the dates are "cropped" .
 .. literalinclude:: ../../examples/howto.py
     :start-after: # apply BFASTMonitor using the OpenCL backend and the first device (e.g., GPU) 
     
-Finally, the BFASTMonitor model is defined and fitted using the 'gpu' backend. The data array is processed in 5 chunks.
+Finally, the BFASTMonitor model is defined and fitted using the 'opencl' backend. The data array is processed in 5 chunks.
