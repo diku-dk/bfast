@@ -20,7 +20,7 @@ import sphinx_bootstrap_theme
 # -- Project information -----------------------------------------------------
 
 project = 'BFAST'
-copyright = '2019, Fabian Gieseke, Cosmin Oancea, Sabina Rosca, Troels Henriksen, Jan Verbesselt'
+copyright = '2019-2020, Fabian Gieseke, Cosmin Oancea, Sabina Rosca, Troels Henriksen, Jan Verbesselt'
 author = 'Fabian Gieseke, Cosmin Oancea, Sabina Rosca, Troels Henriksen, Jan Verbesselt'
 
 # The full version, including alpha/beta/rc tags
@@ -37,6 +37,7 @@ release = bfast.__version__
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
+    'numpydoc',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -136,4 +137,12 @@ def setup(app):
     app.add_stylesheet("my-styles.css") # also can be a full URL
     # app.add_stylesheet("ANOTHER.css")
     # app.add_stylesheet("AND_ANOTHER.css")
+
+
+
+# see https://pypi.python.org/pypi/numpydoc
+numpydoc_show_class_members = False
+numpydoc_class_members_toctree = True
+autodoc_member_order = 'bysource'
+
 

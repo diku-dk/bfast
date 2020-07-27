@@ -3,6 +3,11 @@
 Release Notes
 =============
 
+Release 0.4 (July 2020)
+----------------------------
+* Minor changes in documentation
+* Code clean-up (e.g. old Futhark files have been removed)
+
 Release 0.3 (October 2019)
 ----------------------------
 * Added Google Colab installation instructions

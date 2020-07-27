@@ -16,9 +16,9 @@ from bfast.base import BFASTMonitorBase
 
 class BFASTMonitorPython(BFASTMonitorBase):
 
-    """ BFAST Monitor implementation based on Python. The
-    interface follows the one of the corresponding R package, 
-    see: https://cran.r-project.org/web/packages/bfast   
+    """ BFAST Monitor implementation based on Python and Numpy. The
+    interface follows the one of the corresponding R package
+    (see https://cran.r-project.org/web/packages/bfast)   
 
     def __init__(self,
                  start_monitor,
@@ -37,24 +37,29 @@ class BFASTMonitorPython(BFASTMonitorBase):
     Parameters
     ----------
     
-    start_monitor : datetime
+    start_monitor : datetime object
         A datetime object specifying the start of 
         the monitoring phase.
         
     freq : int, default 365
-        The frequency for the seasonal model
+        The frequency for the seasonal model.
+        
     k : int, default 3
-        The number of harmonic terms
+        The number of harmonic terms.
+        
     hfrac : float, default 0.25
         Float in the interval (0,1) specifying the 
         bandwidth relative to the sample size in 
         the MOSUM/ME monitoring processes.
+        
     trend : bool, default True
         Whether a tend offset term shall be used or not
+        
     level : float, default 0.05
         Significance level of the monitoring (and ROC, 
         if selected) procedure, i.e., probability of 
         type I error.
+        
     verbose : int, optional (default=0)
         The verbosity level (0=no output, 1=output)
         
