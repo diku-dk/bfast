@@ -90,7 +90,7 @@ def setup_package():
                     packages=setuptools.find_packages(),
                     install_requires=[
                         'numpy>=1.11.0',
-                        'pandas>=0.24.2',
+                        'pandas>=1.1.0',
                         'pyopencl>=2018.2.5',
                         'scikit-learn>=0.20.3',
                         'scipy>=1.2.1',

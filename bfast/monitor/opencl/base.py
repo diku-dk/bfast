@@ -216,7 +216,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         drange = pandas.date_range(start, end, freq="d")
         ts = pandas.Series(numpy.ones(len(dates)), dates)
         ts = ts.reindex(drange)
-        indices = numpy.argwhere(~numpy.isnan(ts)).T[0]
+        indices = numpy.argwhere(~numpy.isnan(ts).to_numpy()).T[0]
 
         return indices
     
