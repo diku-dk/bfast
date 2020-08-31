@@ -1,6 +1,7 @@
 import os
 import sys
 import shutil
+import setuptools
 from distutils.command.clean import clean as Clean
 
 DISTNAME = 'bfast'
