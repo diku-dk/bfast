@@ -22,13 +22,11 @@ if len(set(('develop', 'release', 'bdist_egg', 'bdist_rpm',
            'egg_info', 'easy_install', 'upload', 'bdist_wheel',
            '--single-version-externally-managed',
             )).intersection(sys.argv)) > 0:
-    import setuptools
     extra_setuptools_args = dict(
         zip_safe=False,
         include_package_data=True,
     )
 else:
-    import setuptools
     extra_setuptools_args = dict()
 
 
