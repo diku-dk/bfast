@@ -3,6 +3,10 @@
 Release Notes
 =============
 
+Release 0.5 (August 2020)
+----------------------------
+* Small fix in installation script 
+
 Release 0.4 (July 2020)
 ----------------------------
 * Minor changes in documentation
