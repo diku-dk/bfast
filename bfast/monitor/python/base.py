@@ -5,11 +5,16 @@ Created on Apr 19, 2018
 '''
 
 import copy
+import calendar
+import datetime
+
 import numpy
 numpy.warnings.filterwarnings('ignore')
+numpy.set_printoptions(suppress=True)
+
 import pandas
-import datetime
 from sklearn import linear_model
+import statsmodels.api as sm
 
 from bfast.utils import check, get_critval
 from bfast.base import BFASTMonitorBase
@@ -126,6 +131,10 @@ class BFASTMonitorPython(BFASTMonitorBase):
             (data.shape[1], data.shape[2]),
             dtype=numpy.float32
         )
+        magnitudes_global = numpy.zeros(
+            (data.shape[1], data.shape[2]),
+            dtype=numpy.float32
+        )
         breaks_global = numpy.zeros(
             (data.shape[1], data.shape[2]), dtype=numpy.int32
         )
@@ -134,19 +143,19 @@ class BFASTMonitorPython(BFASTMonitorBase):
         data[data==nan_value] = numpy.nan
 
         for i in range(data.shape[1]):
-
             if self.verbose > 0:
                 print("Processing row {}".format(i))
 
             for j in range(data.shape[2]):
-
                 y = data[:,i,j]
-                self.fit_single(y, dates)
-                breaks_global[i,j] = self.first_break
-                means_global[i,j] = self.mean
+                pix_break, pix_mean, pix_magnitude = self.fit_single(y, dates)
+                breaks_global[i,j] = pix_break
+                means_global[i,j] = pix_mean
+                magnitudes_global[i,j] = pix_magnitude
 
         self.breaks = breaks_global
         self.means = means_global
+        self.magnitudes = magnitudes_global
 
         return self
 
@@ -166,19 +175,17 @@ class BFASTMonitorPython(BFASTMonitorBase):
         self : instance of BFASTCPU
             The object itself
         """
-
         N = len(y)
-        self.n = self._compute_end_history(dates)
-        self.lam = self._compute_lam(len(y))
+        n = self._compute_end_history(dates)
+
+        period = N / numpy.float(n)
+
+        lam = self._compute_lam(len(y), period)
 
         # create (complete) seasonal matrix ("patterns" as columns here!)
-        self.mapped_indices = self._map_indices(dates).astype(numpy.int32)
+        mapped_indices = self._map_indices(dates).astype(numpy.int32)
 
-        X = self._create_data_matrix(self.mapped_indices)
-
-        # for visualization
-        self.y_h = y[:self.n]
-        self.y_m = y[self.n:]
+        X = self._create_data_matrix(mapped_indices)
 
         # compute nan mappings
         nans = numpy.isnan(y)
@@ -186,37 +193,46 @@ class BFASTMonitorPython(BFASTMonitorBase):
         val_inds = numpy.array(range(N))[~nans]
 
         # compute new limits (in data NOT containing missing values)
-        ns = self.n - num_nans[self.n]
+        ns = n - num_nans[n]
         h = numpy.int(float(ns) * self.hfrac)
         Ns = N - num_nans[N - 1]
 
-        if ns <= 5 or Ns-ns <= 5:
-            self.breaks = -2 * numpy.ones(N - self.n, dtype=numpy.int32)
-            self.mean = 0.0
+        if ns <= 5 or Ns - ns <= 5:
+            brk = -2
+            mean = 0.0
             if self.verbose > 1:
                 print("WARNING: Not enough observations: ns={ns}, Ns={Ns}".format(ns=ns, Ns=Ns))
-            return self
+            return brk, mean
 
         val_inds = val_inds[ns:]
-        val_inds -= self.n
-        self.val_inds = val_inds
+        val_inds -= n
 
         # remove nan values from patterns+targets
         X_nn = X[:, ~nans]
         y_nn = y[~nans]
 
         # split data into history and monitoring phases
-        self.X_nn_h = X_nn[:, :ns]
-        self.X_nn_m = X_nn[:, ns:]
-        self.y_nn_h = y_nn[:ns]
-        self.y_nn_m = y_nn[ns:]
+        X_nn_h = X_nn[:, :ns]
+        X_nn_m = X_nn[:, ns:]
+        y_nn_h = y_nn[:ns]
+        y_nn_m = y_nn[ns:]
 
         # (1) fit linear regression model for history period
-        model = linear_model.LinearRegression()
-        model.fit(self.X_nn_h.T, self.y_nn_h)
+        model = linear_model.LinearRegression(fit_intercept=False)
+        model.fit(X_nn_h.T, y_nn_h)
 
-        # for visualization: get predictions for all points
-        self.y_pred = model.predict(X.T)
+        if self.verbose > 1:
+            column_names = numpy.array(["Intercept",
+                                        "trend",
+                                        "harmonsin1",
+                                        "harmoncos1",
+                                        "harmonsin2",
+                                        "harmoncos2",
+                                        "harmonsin3",
+                                        "harmoncos3"])
+            indxs = numpy.array([0, 1, 3, 5, 7, 2, 4, 6])
+            print(column_names[indxs])
+            print(model.coef_[indxs])
 
         # get predictions for all non-nan points
         y_pred = model.predict(X_nn.T)
@@ -227,36 +243,40 @@ class BFASTMonitorPython(BFASTMonitorBase):
         for t in range(ns + 1, Ns + 1):
             mosum_nn[t - ns - 1] = y_error[t - h:t].sum()
             if t == ns + 1:
-                self.mo_first = y_error[t - h:t].sum()
-        self.sigma = numpy.sqrt(numpy.sum(y_error[0:ns] ** 2) / (ns - (2 + 2 * self.k)))
-        self.mosum_init = copy.deepcopy(mosum_nn)
-        mosum_nn = 1.0 / (self.sigma * numpy.sqrt(ns)) * mosum_nn
+                mo_first = y_error[t - h:t].sum()
 
-        self.mosum_nn = mosum_nn
-        self.mosum = numpy.empty(N - self.n)
-        self.mosum[:] = numpy.nan
+        sigma = numpy.sqrt(numpy.sum(y_error[0:ns] ** 2) / (ns - (2 + 2 * self.k)))
+        mosum_init = copy.deepcopy(mosum_nn)
+        mosum_nn = 1.0 / (sigma * numpy.sqrt(ns)) * mosum_nn
+
+        mosum = numpy.empty(N - n)
+        mosum[:] = numpy.nan
 
         for j in range(len(mosum_nn)):
             idx = val_inds[j]
-            self.mosum[idx] = mosum_nn[j]
+            mosum[idx] = mosum_nn[j]
 
-        self.mean = mosum_nn.mean()
+        # copute mean
+        mean = numpy.mean(mosum_nn)
+
+        # compute magnitude
+        magnitude = numpy.median(y_error[ns:])
 
         # boundary and breaks
-        self.bounds = self.lam * numpy.sqrt(self._log_plus(self.mapped_indices[self.n:] / numpy.float(self.mapped_indices[-1])))
+        bounds = lam * numpy.sqrt(self._log_plus(mapped_indices[n:] / numpy.float(mapped_indices[-1])))
 
-        self.breaks = numpy.abs(self.mosum) > self.bounds
+        breaks = numpy.abs(mosum) > bounds
 
-        self.first_break = numpy.where(self.breaks==True)[0]
+        first_break = numpy.where(breaks)[0]
 
-        if len(self.first_break) > 0:
-            self.first_break = self.first_break[0]
+        if len(first_break) > 0:
+            first_break = first_break[0]
         else:
-            self.first_break = -1
+            first_break = -1
 
-        self.y_error = y_error
-
-        return self
+        if self.verbose > 1:
+            print("first_break_date:", self._date_to_frac(dates[n + first_break + 1]))
+        return first_break, mean, magnitude
 
     def get_timers(self):
         """ Returns runtime measurements for the
@@ -270,20 +290,15 @@ class BFASTMonitorPython(BFASTMonitorBase):
 
         return self._timers
 
-    def _compute_lam(self, N):
+    def _compute_lam(self, N, period):
+        check(self.hfrac, period, 1 - self.level, "max")
 
-        self.period = N / numpy.float(self.n)
-
-        check(self.hfrac, self.period, 1 - self.level, "max")
-
-        return get_critval(self.hfrac, self.period, 1 - self.level, "max")
+        return get_critval(self.hfrac, period, 1 - self.level, "max")
 
     def _compute_end_history(self, dates):
-
         for i in range(len(dates)):
             if self.start_monitor < dates[i]:
-                return i
-
+                return i + 2
         raise Exception("Date 'start' not within the range of dates!")
 
     def _map_indices(self, dates):
@@ -298,16 +313,15 @@ class BFASTMonitorPython(BFASTMonitorBase):
         ts = ts.reindex(drange)
         inds = ~numpy.isnan(ts.to_numpy())
         indices = numpy.argwhere(inds).T[0]
-
         return indices
 
     def _create_data_matrix(self, mapped_indices):
-
         N = len(mapped_indices)
 
         temp = 2 * numpy.pi * mapped_indices / numpy.float(self.freq)
 
         if self.trend:
+            # X = numpy.vstack((numpy.ones(N), mapped_indices - mapped_indices[0]))
             X = numpy.vstack((numpy.ones(N), mapped_indices))
         else:
             X = numpy.ones(N)
@@ -315,7 +329,6 @@ class BFASTMonitorPython(BFASTMonitorBase):
         for j in numpy.arange(1, self.k + 1):
             X = numpy.vstack((X, numpy.sin(j * temp)))
             X = numpy.vstack((X, numpy.cos(j * temp)))
-
         return X
 
     def _log_plus(self, a):
@@ -345,3 +358,13 @@ class BFASTMonitorPython(BFASTMonitorBase):
         f.write("]")
 
         f.close()
+
+    def _date_to_frac(self, date):
+        year = date.year
+        month = date.month
+        day = date.day
+        month_comp = (month - 1) / 12
+
+        n_days = calendar.monthrange(year, month)[1]
+        day_comp = ((day - 1) / n_days) / 12
+        return year + month_comp + day_comp
