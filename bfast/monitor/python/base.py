@@ -14,7 +14,6 @@ numpy.set_printoptions(suppress=True)
 
 import pandas
 from sklearn import linear_model
-import statsmodels.api as sm
 
 from bfast.utils import check, get_critval
 from bfast.base import BFASTMonitorBase
@@ -193,7 +192,8 @@ class BFASTMonitorPython(BFASTMonitorBase):
         val_inds = numpy.array(range(N))[~nans]
 
         # compute new limits (in data NOT containing missing values)
-        ns = n - num_nans[n]
+        # ns = n - num_nans[n]
+        ns = n - num_nans[n - 1]
         h = numpy.int(float(ns) * self.hfrac)
         Ns = N - num_nans[N - 1]
 
@@ -230,7 +230,10 @@ class BFASTMonitorPython(BFASTMonitorBase):
                                         "harmoncos2",
                                         "harmonsin3",
                                         "harmoncos3"])
-            indxs = numpy.array([0, 1, 3, 5, 7, 2, 4, 6])
+            if self.trend:
+                indxs = numpy.array([0, 1, 3, 5, 7, 2, 4, 6])
+            else:
+                indxs = numpy.array([0, 2, 4, 6, 1, 3, 5])
             print(column_names[indxs])
             print(model.coef_[indxs])
 
@@ -274,8 +277,9 @@ class BFASTMonitorPython(BFASTMonitorBase):
         else:
             first_break = -1
 
+
         if self.verbose > 1:
-            print("first_break_date:", self._date_to_frac(dates[n + first_break + 1]))
+            print("first_break_date:", self._date_to_frac(dates[n + first_break]))
         return first_break, mean, magnitude
 
     def get_timers(self):
@@ -297,8 +301,9 @@ class BFASTMonitorPython(BFASTMonitorBase):
 
     def _compute_end_history(self, dates):
         for i in range(len(dates)):
-            if self.start_monitor < dates[i]:
-                return i + 2
+            # if self.start_monitor < dates[i]:
+            if self.start_monitor <= dates[i]:
+                return i
         raise Exception("Date 'start' not within the range of dates!")
 
     def _map_indices(self, dates):
