@@ -185,6 +185,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         mapped_indices = self._map_indices(dates).astype(numpy.int32)
 
         X = self._create_data_matrix(mapped_indices)
+        # X = self._create_data_matrix(mapped_indices, dates)
 
         # compute nan mappings
         nans = numpy.isnan(y)
@@ -277,8 +278,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         else:
             first_break = -1
 
-
-        if self.verbose > 1:
+        if self.verbose > 1 and first_break >= 0:
             print("first_break_date:", self._date_to_frac(dates[n + first_break]))
         return first_break, mean, magnitude
 
@@ -296,7 +296,6 @@ class BFASTMonitorPython(BFASTMonitorBase):
 
     def _compute_lam(self, N, period):
         check(self.hfrac, period, 1 - self.level, "max")
-
         return get_critval(self.hfrac, period, 1 - self.level, "max")
 
     def _compute_end_history(self, dates):
@@ -318,15 +317,30 @@ class BFASTMonitorPython(BFASTMonitorBase):
         ts = ts.reindex(drange)
         inds = ~numpy.isnan(ts.to_numpy())
         indices = numpy.argwhere(inds).T[0]
+
         return indices
+
+    # def _create_data_matrix(self, mapped_indices, dates):
+    #     N = len(mapped_indices)
+    #     temp = [self._date_to_frac(d) for d in dates]
+    #     temp = 2 * numpy.pi * numpy.array(temp) * (365 / numpy.float(self.freq))
+
+    #     if self.trend:
+    #         X = numpy.vstack((numpy.ones(N), mapped_indices))
+    #     else:
+    #         X = numpy.ones(N)
+
+    #     for j in numpy.arange(1, self.k + 1):
+    #         X = numpy.vstack((X, numpy.sin(j * temp)))
+    #         X = numpy.vstack((X, numpy.cos(j * temp)))
+
+    #     return X
 
     def _create_data_matrix(self, mapped_indices):
         N = len(mapped_indices)
-
         temp = 2 * numpy.pi * mapped_indices / numpy.float(self.freq)
 
         if self.trend:
-            # X = numpy.vstack((numpy.ones(N), mapped_indices - mapped_indices[0]))
             X = numpy.vstack((numpy.ones(N), mapped_indices))
         else:
             X = numpy.ones(N)
@@ -334,6 +348,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         for j in numpy.arange(1, self.k + 1):
             X = numpy.vstack((X, numpy.sin(j * temp)))
             X = numpy.vstack((X, numpy.cos(j * temp)))
+
         return X
 
     def _log_plus(self, a):
