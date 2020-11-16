@@ -201,9 +201,10 @@ class BFASTMonitorPython(BFASTMonitorBase):
         if ns <= 5 or Ns - ns <= 5:
             brk = -2
             mean = 0.0
+            magnitude = 0.0
             if self.verbose > 1:
                 print("WARNING: Not enough observations: ns={ns}, Ns={Ns}".format(ns=ns, Ns=Ns))
-            return brk, mean
+            return brk, mean, magnitude
 
         val_inds = val_inds[ns:]
         val_inds -= n
