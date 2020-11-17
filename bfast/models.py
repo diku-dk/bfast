@@ -345,7 +345,7 @@ class BFAST(object):
                  max_iter=10,
                  breaks=None,
                  level=0.05,
-                 backend="opencl",
+                 backend="python",
                  verbose=0,
                 ):
         self.frequency = frequency
