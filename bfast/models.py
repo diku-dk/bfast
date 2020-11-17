@@ -1,6 +1,9 @@
 from bfast.monitor import BFASTMonitorPython
 from bfast.monitor import BFASTMonitorOpenCL
 
+from bfast.bfast import BFASTPython
+
+
 class BFASTMonitor(object):
     """
     BFASTMonitor implements the BFASTMonitor approach and
@@ -292,6 +295,217 @@ class BFASTMonitor(object):
 
     def _is_fitted(self):
 
+        if hasattr(self, '_model_fitted'):
+            return self._model_fitted
+
+        return False
+
+
+class BFAST(object):
+    """
+    BFAST implements the BFAST Approach:
+    https://www.rdocumentation.org/packages/bfast/versions/1.5.7/topics/bfast
+
+    Parameters
+    ----------
+    frequency : int, default=10
+
+    h : float, default=0.15
+
+    season_type : string, default="dummy"
+
+    max_iter : int, default=10
+
+    breaks : array, optional
+
+    level : float, default=0.05
+
+    verbose : int, optional (default=0)
+        The verbosity level (0=no output, 1=info, 2=debug).
+
+
+    Attributes
+    ----------
+    trend : array
+
+    season : array
+
+    remainder : array
+
+    trend_breakpoints : array
+
+    season_breakpoints : array
+
+    """
+
+    def __init__(self,
+                 frequency,
+                 h=0.15,
+                 season_type="dummy",
+                 max_iter=10,
+                 breaks=None,
+                 level=0.05,
+                 backend="opencl",
+                 verbose=0,
+                ):
+        self.frequency = frequency
+        self.h = h
+        self.season_type = season_type
+        self.max_iter = max_iter
+        self.breaks = breaks
+        self.level = level
+        self.backend = backend
+        self.verbose = verbose
+
+    def fit(self, Yt, ti):
+        """ Fits the models for the ndarray 'data'
+
+        Parameters
+        ----------
+        Yt: ndarray of shape (N, W, H),
+            where N is the number of time
+            series points per pixel and W
+            and H the width and the height
+            of the image, respectively.
+        ti : array
+
+        Returns
+        -------
+        self : The BFAST object.
+        """
+        self._model = None
+
+        if self.backend == 'python':
+            self._model = BFASTPython(
+                frequency = self.frequency,
+                h = self.h,
+                season_type = self.season_type,
+                max_iter = self.max_iter,
+                breaks = self.breaks,
+                level = self.level,
+                verbose = self.verbose
+            )
+
+        elif self.backend == 'opencl':
+            raise Exception("OpenCL implementation will be added soon!")
+
+        else:
+            raise Exception("Unknown backend '{}".format(self.backend))
+
+        # fit BFASTMonitor models
+        self._model.fit(Yt=Yt,
+                        ti=ti)
+        self._model_fitted = True
+
+        return self
+
+
+    def get_params(self):
+        """ Returns the parameters for this model.
+
+        Returns
+        -------
+        dict: Mapping of string to any
+            parameter names mapped to their values.
+        """
+
+        params = {
+            "frequencly": self.frequency,
+            "h": self.h,
+            "season_type": self.season_type,
+            "max_iter": self.max_iter,
+            "breaks": self.breaks,
+            "level": self.level,
+            "backend": self.backend,
+            "verbose": self.verbose
+        }
+
+        return params
+
+    def set_params(self, **params):
+        """ Sets the parameters for this model.
+
+        Parameters
+        ----------
+        params : dict
+            Dictionary containing the
+            parameters to be used.
+        """
+
+        for parameter, value in params.items():
+            self.setattr(parameter, value)
+
+    @property
+    def trend(self):
+        """ Returns the trend component
+
+        Returns
+        -------
+        trend: array-like
+        """
+
+        if self._is_fitted():
+            return self._model.trend
+
+        raise Exception("Model not yet fitted!")
+
+    @property
+    def season(self):
+        """ Returns the season component
+
+        Returns
+        -------
+        season: array-like
+        """
+
+        if self._is_fitted():
+            return self._model.season
+
+        raise Exception("Model not yet fitted!")
+
+    @property
+    def remainder(self):
+        """ Returns the remainder component
+
+        Returns
+        -------
+        remainder: array-like
+        """
+
+        if self._is_fitted():
+            return self._model.remainder
+
+        raise Exception("Model not yet fitted!")
+
+    @property
+    def trend_breakpoints(self):
+        """ Returns the breakpoints of the trend component
+
+        Returns
+        -------
+        trend_breakpoints: array-like
+        """
+
+        if self._is_fitted():
+            return self._model.trend_breakpoints
+
+        raise Exception("Model not yet fitted!")
+
+    @property
+    def season_breakpoints(self):
+        """ Returns the breakpoints of the season component
+
+        Returns
+        -------
+        season_breakpoints: array-like
+        """
+
+        if self._is_fitted():
+            return self._model.season_breakpoints
+
+        raise Exception("Model not yet fitted!")
+
+    def _is_fitted(self):
         if hasattr(self, '_model_fitted'):
             return self._model_fitted
 
