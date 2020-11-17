@@ -11,6 +11,10 @@
 -- output @ data/peru.out.gz
 -- compiled input @ data/sahara.in.gz
 -- output @ data/sahara.out.gz
+
+-- REMEMBER TO RUN:
+-- futhark pkg add github.com/diku-dk/sorts
+-- futhark pkg sync
 import "lib/github.com/diku-dk/sorts/radix_sort"
 import "helpers"
 
