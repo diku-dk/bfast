@@ -188,7 +188,8 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
     def _compute_end_history_index(self, dates):
 
         for i in range(len(dates)):
-            if self.start_monitor < dates[i]:
+            # if self.start_monitor < dates[i]:
+            if self.start_monitor <= dates[i]:
                 return i
 
         raise Exception("Date 'start' not within the range of dates!")
@@ -256,6 +257,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
 
         self.breaks = results['breaks']
         self.means = results['means']
+        self.magnitudes = results['magnitudes']
 
         return self
 
@@ -362,17 +364,33 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         else:
             trend = 0
 
-        # MO_first, Ns, ns, sigmas, mosum, mosum_nn, bounds, breaks, means, y_error, y_pred = self.futobj.main(trend, self.k, self.n, self.freq, self.hfrac, self.lam, mapped_indices_cl, y_cl)
         if self.detailed_results:
-            MO_first, Ns, ns, sigmas, mosum, mosum_nn, bounds, breaks, means, y_error, y_pred = self.futobj.mainDetailed(trend,
-                                                                                                                         self.k,
-                                                                                                                         self.n,
-                                                                                                                         self.freq,
-                                                                                                                         self.hfrac,
-                                                                                                                         self.lam,
-                                                                                                                         mapped_indices_cl, y_cl)
+            MO_first, \
+                Ns, \
+                ns, \
+                sigmas, \
+                mosum, \
+                mosum_nn, \
+                bounds, \
+                breaks, \
+                means, \
+                magnitudes, \
+                y_error, \
+                y_pred = self.futobj.mainDetailed(trend,
+                                                  self.k,
+                                                  self.n,
+                                                  self.freq,
+                                                  self.hfrac,
+                                                  self.lam,
+                                                  mapped_indices_cl, y_cl)
         else:
-            breaks, means = self.futobj.main(trend, self.k, self.n, self.freq, self.hfrac, self.lam, mapped_indices_cl, y_cl)
+            breaks, means, magnitudes = self.futobj.main(trend,
+                                                         self.k,
+                                                         self.n,
+                                                         self.freq,
+                                                         self.hfrac,
+                                                         self.lam,
+                                                         mapped_indices_cl, y_cl)
         end = time.time()
 
         if self.verbose > 0:
@@ -386,6 +404,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
             results['y_pred'] = y_pred
         results['breaks'] = breaks
         results['means'] = means
+        results['magnitudes'] = magnitudes
 
         return results
 
@@ -401,6 +420,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
 
         results['breaks'] = results['breaks'].get().reshape(oshape[1:])
         results['means'] = results['means'].get().reshape(oshape[1:])
+        results['magnitudes'] = results['magnitudes'].get().reshape(oshape[1:])
 
         end = time.time()
 
@@ -431,6 +451,11 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
             results['means'] = numpy.concatenate([results['means'], res['means']], axis=0)
         else:
             results['means'] = res['means']
+
+        if 'magnitudes' in results.keys():
+            results['magnitudes'] = numpy.concatenate([results['magnitudes'], res['magnitudes']], axis=0)
+        else:
+            results['magnitudes'] = res['magnitudes']
 
         if self.detailed_results:
 
