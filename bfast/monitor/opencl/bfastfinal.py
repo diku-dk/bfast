@@ -38182,38 +38182,38 @@ class bfastfinal:
      ("", cl.device_type.CPU, "threshold",
       lambda device: device.get_info(getattr(cl.device_info, "MAX_COMPUTE_UNITS")))]
     self.global_failure_args_max = 2
-    self.failure_msgs=["Index [{}] out of bounds for array of shape [{}].\n-> #0  helpers.fut:58:16-19\n   #1  helpers.fut:78:15-53\n   #2  bfastfinal.fut:53:35-50\n   #3  bfastfinal.fut:175:5-58\n   #4  bfastfinal.fut:170:1-176:32\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:138:70-84\n   #1  bfastfinal.fut:138:29-141:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:118:50-158:9\n   #4  bfastfinal.fut:175:5-58\n   #5  bfastfinal.fut:170:1-176:32\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:139:45-59\n   #1  bfastfinal.fut:138:29-141:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:118:50-158:9\n   #4  bfastfinal.fut:175:5-58\n   #5  bfastfinal.fut:170:1-176:32\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:149:46-50\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:175:5-58\n   #6  bfastfinal.fut:170:1-176:32\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:149:54-58\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:175:5-58\n   #6  bfastfinal.fut:170:1-176:32\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:150:45-49\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:175:5-58\n   #6  bfastfinal.fut:170:1-176:32\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:138:70-84\n   #1  bfastfinal.fut:138:29-141:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:118:50-158:9\n   #4  bfastfinal.fut:175:5-58\n   #5  bfastfinal.fut:170:1-176:32\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:139:45-59\n   #1  bfastfinal.fut:138:29-141:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:118:50-158:9\n   #4  bfastfinal.fut:175:5-58\n   #5  bfastfinal.fut:170:1-176:32\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:149:46-50\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:175:5-58\n   #6  bfastfinal.fut:170:1-176:32\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:149:54-58\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:175:5-58\n   #6  bfastfinal.fut:170:1-176:32\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:150:45-49\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:175:5-58\n   #6  bfastfinal.fut:170:1-176:32\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:138:70-84\n   #1  bfastfinal.fut:138:29-141:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:118:50-158:9\n   #4  bfastfinal.fut:175:5-58\n   #5  bfastfinal.fut:170:1-176:32\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:139:45-59\n   #1  bfastfinal.fut:138:29-141:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:118:50-158:9\n   #4  bfastfinal.fut:175:5-58\n   #5  bfastfinal.fut:170:1-176:32\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:149:46-50\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:175:5-58\n   #6  bfastfinal.fut:170:1-176:32\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:149:54-58\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:175:5-58\n   #6  bfastfinal.fut:170:1-176:32\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:150:45-49\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:175:5-58\n   #6  bfastfinal.fut:170:1-176:32\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  helpers.fut:58:16-19\n   #1  helpers.fut:78:15-53\n   #2  bfastfinal.fut:53:35-50\n   #3  bfastfinal.fut:168:3-56\n   #4  bfastfinal.fut:164:1-168:56\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:138:70-84\n   #1  bfastfinal.fut:138:29-141:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:118:50-158:9\n   #4  bfastfinal.fut:168:3-56\n   #5  bfastfinal.fut:164:1-168:56\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:139:45-59\n   #1  bfastfinal.fut:138:29-141:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:118:50-158:9\n   #4  bfastfinal.fut:168:3-56\n   #5  bfastfinal.fut:164:1-168:56\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:149:46-50\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:168:3-56\n   #6  bfastfinal.fut:164:1-168:56\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:149:54-58\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:168:3-56\n   #6  bfastfinal.fut:164:1-168:56\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:150:45-49\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:168:3-56\n   #6  bfastfinal.fut:164:1-168:56\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:138:70-84\n   #1  bfastfinal.fut:138:29-141:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:118:50-158:9\n   #4  bfastfinal.fut:168:3-56\n   #5  bfastfinal.fut:164:1-168:56\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:139:45-59\n   #1  bfastfinal.fut:138:29-141:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:118:50-158:9\n   #4  bfastfinal.fut:168:3-56\n   #5  bfastfinal.fut:164:1-168:56\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:149:46-50\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:168:3-56\n   #6  bfastfinal.fut:164:1-168:56\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:149:54-58\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:168:3-56\n   #6  bfastfinal.fut:164:1-168:56\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:150:45-49\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:168:3-56\n   #6  bfastfinal.fut:164:1-168:56\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:138:70-84\n   #1  bfastfinal.fut:138:29-141:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:118:50-158:9\n   #4  bfastfinal.fut:168:3-56\n   #5  bfastfinal.fut:164:1-168:56\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:139:45-59\n   #1  bfastfinal.fut:138:29-141:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:118:50-158:9\n   #4  bfastfinal.fut:168:3-56\n   #5  bfastfinal.fut:164:1-168:56\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:149:46-50\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:168:3-56\n   #6  bfastfinal.fut:164:1-168:56\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:149:54-58\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:168:3-56\n   #6  bfastfinal.fut:164:1-168:56\n",
-     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:150:45-49\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:138:29-150:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:168:3-56\n   #6  bfastfinal.fut:164:1-168:56\n"]
+    self.failure_msgs=["Index [{}] out of bounds for array of shape [{}].\n-> #0  helpers.fut:58:16-19\n   #1  helpers.fut:78:15-53\n   #2  bfastfinal.fut:52:35-50\n   #3  bfastfinal.fut:179:5-58\n   #4  bfastfinal.fut:174:1-180:32\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:142:70-84\n   #1  bfastfinal.fut:142:29-145:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:121:50-162:9\n   #4  bfastfinal.fut:179:5-58\n   #5  bfastfinal.fut:174:1-180:32\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:143:45-59\n   #1  bfastfinal.fut:142:29-145:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:121:50-162:9\n   #4  bfastfinal.fut:179:5-58\n   #5  bfastfinal.fut:174:1-180:32\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:153:46-50\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:179:5-58\n   #6  bfastfinal.fut:174:1-180:32\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:153:54-58\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:179:5-58\n   #6  bfastfinal.fut:174:1-180:32\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:154:45-49\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:179:5-58\n   #6  bfastfinal.fut:174:1-180:32\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:142:70-84\n   #1  bfastfinal.fut:142:29-145:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:121:50-162:9\n   #4  bfastfinal.fut:179:5-58\n   #5  bfastfinal.fut:174:1-180:32\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:143:45-59\n   #1  bfastfinal.fut:142:29-145:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:121:50-162:9\n   #4  bfastfinal.fut:179:5-58\n   #5  bfastfinal.fut:174:1-180:32\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:153:46-50\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:179:5-58\n   #6  bfastfinal.fut:174:1-180:32\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:153:54-58\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:179:5-58\n   #6  bfastfinal.fut:174:1-180:32\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:154:45-49\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:179:5-58\n   #6  bfastfinal.fut:174:1-180:32\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:142:70-84\n   #1  bfastfinal.fut:142:29-145:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:121:50-162:9\n   #4  bfastfinal.fut:179:5-58\n   #5  bfastfinal.fut:174:1-180:32\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:143:45-59\n   #1  bfastfinal.fut:142:29-145:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:121:50-162:9\n   #4  bfastfinal.fut:179:5-58\n   #5  bfastfinal.fut:174:1-180:32\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:153:46-50\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:179:5-58\n   #6  bfastfinal.fut:174:1-180:32\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:153:54-58\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:179:5-58\n   #6  bfastfinal.fut:174:1-180:32\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:154:45-49\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:179:5-58\n   #6  bfastfinal.fut:174:1-180:32\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  helpers.fut:58:16-19\n   #1  helpers.fut:78:15-53\n   #2  bfastfinal.fut:52:35-50\n   #3  bfastfinal.fut:172:3-56\n   #4  bfastfinal.fut:168:1-172:56\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:142:70-84\n   #1  bfastfinal.fut:142:29-145:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:121:50-162:9\n   #4  bfastfinal.fut:172:3-56\n   #5  bfastfinal.fut:168:1-172:56\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:143:45-59\n   #1  bfastfinal.fut:142:29-145:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:121:50-162:9\n   #4  bfastfinal.fut:172:3-56\n   #5  bfastfinal.fut:168:1-172:56\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:153:46-50\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:172:3-56\n   #6  bfastfinal.fut:168:1-172:56\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:153:54-58\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:172:3-56\n   #6  bfastfinal.fut:168:1-172:56\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:154:45-49\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:172:3-56\n   #6  bfastfinal.fut:168:1-172:56\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:142:70-84\n   #1  bfastfinal.fut:142:29-145:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:121:50-162:9\n   #4  bfastfinal.fut:172:3-56\n   #5  bfastfinal.fut:168:1-172:56\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:143:45-59\n   #1  bfastfinal.fut:142:29-145:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:121:50-162:9\n   #4  bfastfinal.fut:172:3-56\n   #5  bfastfinal.fut:168:1-172:56\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:153:46-50\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:172:3-56\n   #6  bfastfinal.fut:168:1-172:56\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:153:54-58\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:172:3-56\n   #6  bfastfinal.fut:168:1-172:56\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:154:45-49\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:172:3-56\n   #6  bfastfinal.fut:168:1-172:56\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:142:70-84\n   #1  bfastfinal.fut:142:29-145:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:121:50-162:9\n   #4  bfastfinal.fut:172:3-56\n   #5  bfastfinal.fut:168:1-172:56\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:143:45-59\n   #1  bfastfinal.fut:142:29-145:52\n   #2  /prelude/functional.fut:9:42-44\n   #3  bfastfinal.fut:121:50-162:9\n   #4  bfastfinal.fut:172:3-56\n   #5  bfastfinal.fut:168:1-172:56\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:153:46-50\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:172:3-56\n   #6  bfastfinal.fut:168:1-172:56\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:153:54-58\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:172:3-56\n   #6  bfastfinal.fut:168:1-172:56\n",
+     "Index [{}] out of bounds for array of shape [{}].\n-> #0  bfastfinal.fut:154:45-49\n   #1  /prelude/functional.fut:9:42-44\n   #2  bfastfinal.fut:142:29-154:50\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:172:3-56\n   #6  bfastfinal.fut:168:1-172:56\n"]
     program = initialise_opencl_object(self,
                                        program_src=fut_opencl_src,
                                        command_queue=command_queue,
@@ -38840,7 +38840,7 @@ class bfastfinal:
                    hfrac_24757, lam_24758):
     dim_match_24761 = (N_24750 == N_24752)
     empty_or_match_cert_24762 = True
-    assert dim_match_24761, ("Error: %s\n\nBacktrace:\n-> #0  bfastfinal.fut:170:1-176:32\n" % ("function arguments of wrong shape",))
+    assert dim_match_24761, ("Error: %s\n\nBacktrace:\n-> #0  bfastfinal.fut:174:1-180:32\n" % ("function arguments of wrong shape",))
     res_24764 = sext_i32_i64(n_24755)
     x_24765 = (np.int32(2) * k_24754)
     k2p2_24766 = (np.int32(2) + x_24765)
@@ -38857,7 +38857,7 @@ class bfastfinal:
       bounds_invalid_upwards_24772 = slt64(res_24770, np.int64(0))
       valid_24773 = not(bounds_invalid_upwards_24772)
       range_valid_c_24774 = True
-      assert valid_24773, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:2:3-8\n   #2  helpers.fut:37:10-20\n   #3  bfastfinal.fut:31:11-60\n   #4  bfastfinal.fut:175:5-58\n   #5  bfastfinal.fut:170:1-176:32\n" % ("Range ",
+      assert valid_24773, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:2:3-8\n   #2  helpers.fut:37:10-20\n   #3  bfastfinal.fut:30:17-66\n   #4  bfastfinal.fut:179:5-58\n   #5  bfastfinal.fut:174:1-180:32\n" % ("Range ",
                                                                                                                                                                                                                                                                     np.int64(0),
                                                                                                                                                                                                                                                                     "..",
                                                                                                                                                                                                                                                                     np.int64(1),
@@ -38885,7 +38885,7 @@ class bfastfinal:
       bounds_invalid_upwards_24798 = slt64(res_24770, np.int64(0))
       valid_24799 = not(bounds_invalid_upwards_24798)
       range_valid_c_24800 = True
-      assert valid_24799, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:2:3-8\n   #2  helpers.fut:49:10-22\n   #3  bfastfinal.fut:32:11-58\n   #4  bfastfinal.fut:175:5-58\n   #5  bfastfinal.fut:170:1-176:32\n" % ("Range ",
+      assert valid_24799, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:2:3-8\n   #2  helpers.fut:49:10-22\n   #3  bfastfinal.fut:31:17-64\n   #4  bfastfinal.fut:179:5-58\n   #5  bfastfinal.fut:174:1-180:32\n" % ("Range ",
                                                                                                                                                                                                                                                                     np.int64(0),
                                                                                                                                                                                                                                                                     "..",
                                                                                                                                                                                                                                                                     np.int64(1),
@@ -38917,7 +38917,7 @@ class bfastfinal:
     zzero_24828 = (y_24827 == np.int64(0))
     nonzzero_24829 = not(zzero_24828)
     nonzzero_cert_24830 = True
-    assert nonzzero_24829, ("Error: %s\n\nBacktrace:\n-> #0  bfastfinal.fut:38:32-56\n   #1  bfastfinal.fut:175:5-58\n   #2  bfastfinal.fut:170:1-176:32\n" % ("division by zero",))
+    assert nonzzero_24829, ("Error: %s\n\nBacktrace:\n-> #0  bfastfinal.fut:37:32-56\n   #1  bfastfinal.fut:179:5-58\n   #2  bfastfinal.fut:174:1-180:32\n" % ("division by zero",))
     x_24831 = sdiv64(x_24826, y_24827)
     x_24832 = (x_24831 - N_24750)
     binop_p_24833 = (x_24832 - np.int64(1))
@@ -38964,7 +38964,7 @@ class bfastfinal:
     ok_or_empty_24862 = (empty_slice_24855 or y_24861)
     index_ok_24863 = (ok_or_empty_24854 and ok_or_empty_24862)
     index_certs_24864 = True
-    assert index_ok_24863, ("Error: %s%d%s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  bfastfinal.fut:41:15-23\n   #1  bfastfinal.fut:175:5-58\n   #2  bfastfinal.fut:170:1-176:32\n" % ("Index [",
+    assert index_ok_24863, ("Error: %s%d%s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  bfastfinal.fut:40:15-23\n   #1  bfastfinal.fut:179:5-58\n   #2  bfastfinal.fut:174:1-180:32\n" % ("Index [",
                                                                                                                                                                                np.int64(0),
                                                                                                                                                                                ":, :",
                                                                                                                                                                                res_24764,
@@ -38977,7 +38977,7 @@ class bfastfinal:
     ok_or_empty_24867 = (y_24853 or empty_slice_24866)
     index_ok_24868 = (ok_or_empty_24862 and ok_or_empty_24867)
     index_certs_24869 = True
-    assert index_ok_24868, ("Error: %s%d%s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  bfastfinal.fut:42:15-24\n   #1  bfastfinal.fut:175:5-58\n   #2  bfastfinal.fut:170:1-176:32\n" % ("Index [:",
+    assert index_ok_24868, ("Error: %s%d%s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  bfastfinal.fut:41:15-24\n   #1  bfastfinal.fut:179:5-58\n   #2  bfastfinal.fut:174:1-180:32\n" % ("Index [:",
                                                                                                                                                                                res_24764,
                                                                                                                                                                                ", ",
                                                                                                                                                                                np.int64(0),
@@ -38996,7 +38996,7 @@ class bfastfinal:
     ok_or_empty_24878 = (empty_slice_24871 or y_24877)
     index_ok_24879 = (ok_or_empty_24862 and ok_or_empty_24878)
     index_certs_24880 = True
-    assert index_ok_24879, ("Error: %s%d%s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  bfastfinal.fut:43:15-28\n   #1  bfastfinal.fut:175:5-58\n   #2  bfastfinal.fut:170:1-176:32\n" % ("Index [",
+    assert index_ok_24879, ("Error: %s%d%s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  bfastfinal.fut:42:15-28\n   #1  bfastfinal.fut:179:5-58\n   #2  bfastfinal.fut:174:1-180:32\n" % ("Index [",
                                                                                                                                                                                np.int64(0),
                                                                                                                                                                                ":, :",
                                                                                                                                                                                res_24764,
@@ -39201,7 +39201,7 @@ class bfastfinal:
     bounds_invalid_upwards_24903 = slt64(nm_24902, np.int64(0))
     valid_24904 = not(bounds_invalid_upwards_24903)
     range_valid_c_24905 = True
-    assert valid_24904, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:77:21-27\n   #2  bfastfinal.fut:53:35-50\n   #3  bfastfinal.fut:175:5-58\n   #4  bfastfinal.fut:170:1-176:32\n" % ("Range ",
+    assert valid_24904, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:77:21-27\n   #2  bfastfinal.fut:52:35-50\n   #3  bfastfinal.fut:179:5-58\n   #4  bfastfinal.fut:174:1-180:32\n" % ("Range ",
                                                                                                                                                                                                                                         np.int64(0),
                                                                                                                                                                                                                                         "..",
                                                                                                                                                                                                                                         np.int64(1),
@@ -39211,7 +39211,7 @@ class bfastfinal:
     zzero_24907 = (m_24901 == np.int64(0))
     nonzzero_24908 = not(zzero_24907)
     nonzzero_cert_24909 = True
-    assert nonzzero_24908, ("Error: %s\n\nBacktrace:\n-> #0  helpers.fut:72:41-47\n   #1  helpers.fut:72:14-77:28\n   #2  bfastfinal.fut:53:35-50\n   #3  bfastfinal.fut:175:5-58\n   #4  bfastfinal.fut:170:1-176:32\n" % ("division by zero",))
+    assert nonzzero_24908, ("Error: %s\n\nBacktrace:\n-> #0  helpers.fut:72:41-47\n   #1  helpers.fut:72:14-77:28\n   #2  bfastfinal.fut:52:35-50\n   #3  bfastfinal.fut:179:5-58\n   #4  bfastfinal.fut:174:1-180:32\n" % ("division by zero",))
     res_24910 = sext_i64_i32(m_24901)
     loop_nonempty_24911 = slt32(np.int32(0), k2p2zq_24768)
     zzero_24912 = (res_24910 == np.int32(0))
@@ -39219,7 +39219,7 @@ class bfastfinal:
     loop_not_taken_24914 = not(loop_nonempty_24911)
     protect_assert_disj_24915 = (nonzzero_24913 or loop_not_taken_24914)
     nonzzero_cert_24916 = True
-    assert protect_assert_disj_24915, ("Error: %s\n\nBacktrace:\n-> #0  helpers.fut:59:43-49\n   #1  helpers.fut:59:16-65:32\n   #2  helpers.fut:78:15-53\n   #3  bfastfinal.fut:53:35-50\n   #4  bfastfinal.fut:175:5-58\n   #5  bfastfinal.fut:170:1-176:32\n" % ("division by zero",))
+    assert protect_assert_disj_24915, ("Error: %s\n\nBacktrace:\n-> #0  helpers.fut:59:43-49\n   #1  helpers.fut:59:16-65:32\n   #2  helpers.fut:78:15-53\n   #3  bfastfinal.fut:52:35-50\n   #4  bfastfinal.fut:179:5-58\n   #5  bfastfinal.fut:174:1-180:32\n" % ("division by zero",))
     y_31270 = smin64(res_24770, nm_24902)
     intra_avail_par_31271 = smin64(y_31162, y_31270)
     y_31272 = smax64(res_24770, nm_24902)
@@ -39304,7 +39304,7 @@ class bfastfinal:
         y_32008 = slt64(i_32006, nm_24902)
         bounds_check_32009 = (x_32007 and y_32008)
         index_certs_32010 = True
-        assert bounds_check_32009, ("Error: %s%d%s%d%s\n\nBacktrace:\n-> #0  helpers.fut:58:16-19\n   #1  helpers.fut:78:15-53\n   #2  bfastfinal.fut:53:35-50\n   #3  bfastfinal.fut:175:5-58\n   #4  bfastfinal.fut:170:1-176:32\n" % ("Index [",
+        assert bounds_check_32009, ("Error: %s%d%s%d%s\n\nBacktrace:\n-> #0  helpers.fut:58:16-19\n   #1  helpers.fut:78:15-53\n   #2  bfastfinal.fut:52:35-50\n   #3  bfastfinal.fut:179:5-58\n   #4  bfastfinal.fut:174:1-180:32\n" % ("Index [",
                                                                                                                                                                                                                                          i_32006,
                                                                                                                                                                                                                                          "] out of bounds for array of shape [",
                                                                                                                                                                                                                                          nm_24902,
@@ -39937,7 +39937,7 @@ class bfastfinal:
     y_25019 = slt64(i_25017, N_24750)
     bounds_check_25020 = (x_25018 and y_25019)
     index_certs_25021 = True
-    assert bounds_check_25020, ("Error: %s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:18:29-34\n   #1  helpers.fut:20:13-20\n   #2  bfastfinal.fut:80:30-91\n   #3  /prelude/soacs.fut:56:19-23\n   #4  /prelude/soacs.fut:56:3-37\n   #5  bfastfinal.fut:74:5-83:25\n   #6  bfastfinal.fut:175:5-58\n   #7  bfastfinal.fut:170:1-176:32\n" % ("Index [",
+    assert bounds_check_25020, ("Error: %s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:18:29-34\n   #1  helpers.fut:20:13-20\n   #2  bfastfinal.fut:79:30-91\n   #3  /prelude/soacs.fut:56:19-23\n   #4  /prelude/soacs.fut:56:3-37\n   #5  bfastfinal.fut:73:5-82:25\n   #6  bfastfinal.fut:179:5-58\n   #7  bfastfinal.fut:174:1-180:32\n" % ("Index [",
                                                                                                                                                                                                                                                                                                                                                      i_25017,
                                                                                                                                                                                                                                                                                                                                                      "] out of bounds for array of shape [",
                                                                                                                                                                                                                                                                                                                                                      N_24750,
@@ -40435,7 +40435,7 @@ class bfastfinal:
     bounds_invalid_upwards_25135 = slt64(iota32_arg_25134, np.int64(0))
     valid_25136 = not(bounds_invalid_upwards_25135)
     range_valid_c_25137 = True
-    assert valid_25136, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:2:3-8\n   #2  bfastfinal.fut:113:22-35\n   #3  bfastfinal.fut:175:5-58\n   #4  bfastfinal.fut:170:1-176:32\n" % ("Range ",
+    assert valid_25136, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:2:3-8\n   #2  bfastfinal.fut:116:22-35\n   #3  bfastfinal.fut:179:5-58\n   #4  bfastfinal.fut:174:1-180:32\n" % ("Range ",
                                                                                                                                                                                                                                       np.int64(0),
                                                                                                                                                                                                                                       "..",
                                                                                                                                                                                                                                       np.int64(1),
@@ -40444,7 +40444,7 @@ class bfastfinal:
                                                                                                                                                                                                                                       " is invalid."))
     x_25139 = (np.int32(1) + n_24755)
     index_certs_25140 = True
-    assert bounds_check_25020, ("Error: %s%d%s%d%s\n\nBacktrace:\n-> #0  bfastfinal.fut:111:63-81\n   #1  bfastfinal.fut:109:15-113:36\n   #2  bfastfinal.fut:175:5-58\n   #3  bfastfinal.fut:170:1-176:32\n" % ("Index [",
+    assert bounds_check_25020, ("Error: %s%d%s%d%s\n\nBacktrace:\n-> #0  bfastfinal.fut:114:63-81\n   #1  bfastfinal.fut:112:15-116:36\n   #2  bfastfinal.fut:179:5-58\n   #3  bfastfinal.fut:174:1-180:32\n" % ("Index [",
                                                                                                                                                                                                                  i_25017,
                                                                                                                                                                                                                  "] out of bounds for array of shape [",
                                                                                                                                                                                                                  N_24750,
@@ -40457,7 +40457,7 @@ class bfastfinal:
     r32_arg_25141 = read_res_39010[0]
     res_25142 = sitofp_i32_f32(r32_arg_25141)
     range_valid_c_25143 = True
-    assert valid_25136, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:2:3-8\n   #2  bfastfinal.fut:124:29-44\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:175:5-58\n   #6  bfastfinal.fut:170:1-176:32\n" % ("Range ",
+    assert valid_25136, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:2:3-8\n   #2  bfastfinal.fut:128:29-44\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:179:5-58\n   #6  bfastfinal.fut:174:1-180:32\n" % ("Range ",
                                                                                                                                                                                                                                                                                                                   np.int64(0),
                                                                                                                                                                                                                                                                                                                   "..",
                                                                                                                                                                                                                                                                                                                   np.int64(1),
@@ -40497,7 +40497,7 @@ class bfastfinal:
     loop_not_taken_25166 = not(loop_nonempty_25161)
     protect_assert_disj_25167 = (bounds_check_25165 or loop_not_taken_25166)
     index_certs_25168 = True
-    assert protect_assert_disj_25167, ("Error: %s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:18:29-34\n   #1  lib/github.com/diku-dk/sorts/radix_sort.fut:25:24-35\n   #2  lib/github.com/diku-dk/sorts/radix_sort.fut:53:31-62\n   #3  lib/github.com/diku-dk/sorts/radix_sort.fut:104:6-36\n   #4  /prelude/functional.fut:9:42-44\n   #5  bfastfinal.fut:138:29-143:72\n   #6  /prelude/functional.fut:9:42-44\n   #7  bfastfinal.fut:118:50-158:9\n   #8  bfastfinal.fut:175:5-58\n   #9  bfastfinal.fut:170:1-176:32\n" % ("Index [",
+    assert protect_assert_disj_25167, ("Error: %s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:18:29-34\n   #1  lib/github.com/diku-dk/sorts/radix_sort.fut:25:24-35\n   #2  lib/github.com/diku-dk/sorts/radix_sort.fut:53:31-62\n   #3  lib/github.com/diku-dk/sorts/radix_sort.fut:104:6-36\n   #4  /prelude/functional.fut:9:42-44\n   #5  bfastfinal.fut:142:29-147:72\n   #6  /prelude/functional.fut:9:42-44\n   #7  bfastfinal.fut:121:50-162:9\n   #8  bfastfinal.fut:179:5-58\n   #9  bfastfinal.fut:174:1-180:32\n" % ("Index [",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       i_25162,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "] out of bounds for array of shape [",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       iota32_arg_25134,
@@ -41039,7 +41039,7 @@ class bfastfinal:
                            n_24018, freq_24019, hfrac_24020, lam_24021):
     dim_match_24024 = (N_24013 == N_24015)
     empty_or_match_cert_24025 = True
-    assert dim_match_24024, ("Error: %s\n\nBacktrace:\n-> #0  bfastfinal.fut:164:1-168:56\n" % ("function arguments of wrong shape",))
+    assert dim_match_24024, ("Error: %s\n\nBacktrace:\n-> #0  bfastfinal.fut:168:1-172:56\n" % ("function arguments of wrong shape",))
     res_24027 = sext_i32_i64(n_24018)
     x_24028 = (np.int32(2) * k_24017)
     k2p2_24029 = (np.int32(2) + x_24028)
@@ -41056,7 +41056,7 @@ class bfastfinal:
       bounds_invalid_upwards_24035 = slt64(res_24033, np.int64(0))
       valid_24036 = not(bounds_invalid_upwards_24035)
       range_valid_c_24037 = True
-      assert valid_24036, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:2:3-8\n   #2  helpers.fut:37:10-20\n   #3  bfastfinal.fut:31:11-60\n   #4  bfastfinal.fut:168:3-56\n   #5  bfastfinal.fut:164:1-168:56\n" % ("Range ",
+      assert valid_24036, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:2:3-8\n   #2  helpers.fut:37:10-20\n   #3  bfastfinal.fut:30:17-66\n   #4  bfastfinal.fut:172:3-56\n   #5  bfastfinal.fut:168:1-172:56\n" % ("Range ",
                                                                                                                                                                                                                                                                     np.int64(0),
                                                                                                                                                                                                                                                                     "..",
                                                                                                                                                                                                                                                                     np.int64(1),
@@ -41085,7 +41085,7 @@ class bfastfinal:
       bounds_invalid_upwards_24061 = slt64(res_24033, np.int64(0))
       valid_24062 = not(bounds_invalid_upwards_24061)
       range_valid_c_24063 = True
-      assert valid_24062, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:2:3-8\n   #2  helpers.fut:49:10-22\n   #3  bfastfinal.fut:32:11-58\n   #4  bfastfinal.fut:168:3-56\n   #5  bfastfinal.fut:164:1-168:56\n" % ("Range ",
+      assert valid_24062, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:2:3-8\n   #2  helpers.fut:49:10-22\n   #3  bfastfinal.fut:31:17-64\n   #4  bfastfinal.fut:172:3-56\n   #5  bfastfinal.fut:168:1-172:56\n" % ("Range ",
                                                                                                                                                                                                                                                                     np.int64(0),
                                                                                                                                                                                                                                                                     "..",
                                                                                                                                                                                                                                                                     np.int64(1),
@@ -41118,7 +41118,7 @@ class bfastfinal:
     zzero_24091 = (y_24090 == np.int64(0))
     nonzzero_24092 = not(zzero_24091)
     nonzzero_cert_24093 = True
-    assert nonzzero_24092, ("Error: %s\n\nBacktrace:\n-> #0  bfastfinal.fut:38:32-56\n   #1  bfastfinal.fut:168:3-56\n   #2  bfastfinal.fut:164:1-168:56\n" % ("division by zero",))
+    assert nonzzero_24092, ("Error: %s\n\nBacktrace:\n-> #0  bfastfinal.fut:37:32-56\n   #1  bfastfinal.fut:172:3-56\n   #2  bfastfinal.fut:168:1-172:56\n" % ("division by zero",))
     x_24094 = sdiv64(x_24089, y_24090)
     x_24095 = (x_24094 - N_24013)
     binop_p_24096 = (x_24095 - np.int64(1))
@@ -41166,7 +41166,7 @@ class bfastfinal:
     ok_or_empty_24125 = (empty_slice_24118 or y_24124)
     index_ok_24126 = (ok_or_empty_24117 and ok_or_empty_24125)
     index_certs_24127 = True
-    assert index_ok_24126, ("Error: %s%d%s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  bfastfinal.fut:41:15-23\n   #1  bfastfinal.fut:168:3-56\n   #2  bfastfinal.fut:164:1-168:56\n" % ("Index [",
+    assert index_ok_24126, ("Error: %s%d%s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  bfastfinal.fut:40:15-23\n   #1  bfastfinal.fut:172:3-56\n   #2  bfastfinal.fut:168:1-172:56\n" % ("Index [",
                                                                                                                                                                                np.int64(0),
                                                                                                                                                                                ":, :",
                                                                                                                                                                                res_24027,
@@ -41179,7 +41179,7 @@ class bfastfinal:
     ok_or_empty_24130 = (y_24116 or empty_slice_24129)
     index_ok_24131 = (ok_or_empty_24125 and ok_or_empty_24130)
     index_certs_24132 = True
-    assert index_ok_24131, ("Error: %s%d%s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  bfastfinal.fut:42:15-24\n   #1  bfastfinal.fut:168:3-56\n   #2  bfastfinal.fut:164:1-168:56\n" % ("Index [:",
+    assert index_ok_24131, ("Error: %s%d%s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  bfastfinal.fut:41:15-24\n   #1  bfastfinal.fut:172:3-56\n   #2  bfastfinal.fut:168:1-172:56\n" % ("Index [:",
                                                                                                                                                                                res_24027,
                                                                                                                                                                                ", ",
                                                                                                                                                                                np.int64(0),
@@ -41198,7 +41198,7 @@ class bfastfinal:
     ok_or_empty_24141 = (empty_slice_24134 or y_24140)
     index_ok_24142 = (ok_or_empty_24125 and ok_or_empty_24141)
     index_certs_24143 = True
-    assert index_ok_24142, ("Error: %s%d%s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  bfastfinal.fut:43:15-28\n   #1  bfastfinal.fut:168:3-56\n   #2  bfastfinal.fut:164:1-168:56\n" % ("Index [",
+    assert index_ok_24142, ("Error: %s%d%s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  bfastfinal.fut:42:15-28\n   #1  bfastfinal.fut:172:3-56\n   #2  bfastfinal.fut:168:1-172:56\n" % ("Index [",
                                                                                                                                                                                np.int64(0),
                                                                                                                                                                                ":, :",
                                                                                                                                                                                res_24027,
@@ -41411,7 +41411,7 @@ class bfastfinal:
     bounds_invalid_upwards_24166 = slt64(nm_24165, np.int64(0))
     valid_24167 = not(bounds_invalid_upwards_24166)
     range_valid_c_24168 = True
-    assert valid_24167, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:77:21-27\n   #2  bfastfinal.fut:53:35-50\n   #3  bfastfinal.fut:168:3-56\n   #4  bfastfinal.fut:164:1-168:56\n" % ("Range ",
+    assert valid_24167, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:77:21-27\n   #2  bfastfinal.fut:52:35-50\n   #3  bfastfinal.fut:172:3-56\n   #4  bfastfinal.fut:168:1-172:56\n" % ("Range ",
                                                                                                                                                                                                                                         np.int64(0),
                                                                                                                                                                                                                                         "..",
                                                                                                                                                                                                                                         np.int64(1),
@@ -41421,7 +41421,7 @@ class bfastfinal:
     zzero_24170 = (m_24164 == np.int64(0))
     nonzzero_24171 = not(zzero_24170)
     nonzzero_cert_24172 = True
-    assert nonzzero_24171, ("Error: %s\n\nBacktrace:\n-> #0  helpers.fut:72:41-47\n   #1  helpers.fut:72:14-77:28\n   #2  bfastfinal.fut:53:35-50\n   #3  bfastfinal.fut:168:3-56\n   #4  bfastfinal.fut:164:1-168:56\n" % ("division by zero",))
+    assert nonzzero_24171, ("Error: %s\n\nBacktrace:\n-> #0  helpers.fut:72:41-47\n   #1  helpers.fut:72:14-77:28\n   #2  bfastfinal.fut:52:35-50\n   #3  bfastfinal.fut:172:3-56\n   #4  bfastfinal.fut:168:1-172:56\n" % ("division by zero",))
     res_24173 = sext_i64_i32(m_24164)
     loop_nonempty_24174 = slt32(np.int32(0), k2p2zq_24031)
     zzero_24175 = (res_24173 == np.int32(0))
@@ -41429,7 +41429,7 @@ class bfastfinal:
     loop_not_taken_24177 = not(loop_nonempty_24174)
     protect_assert_disj_24178 = (nonzzero_24176 or loop_not_taken_24177)
     nonzzero_cert_24179 = True
-    assert protect_assert_disj_24178, ("Error: %s\n\nBacktrace:\n-> #0  helpers.fut:59:43-49\n   #1  helpers.fut:59:16-65:32\n   #2  helpers.fut:78:15-53\n   #3  bfastfinal.fut:53:35-50\n   #4  bfastfinal.fut:168:3-56\n   #5  bfastfinal.fut:164:1-168:56\n" % ("division by zero",))
+    assert protect_assert_disj_24178, ("Error: %s\n\nBacktrace:\n-> #0  helpers.fut:59:43-49\n   #1  helpers.fut:59:16-65:32\n   #2  helpers.fut:78:15-53\n   #3  bfastfinal.fut:52:35-50\n   #4  bfastfinal.fut:172:3-56\n   #5  bfastfinal.fut:168:1-172:56\n" % ("division by zero",))
     y_26331 = smin64(res_24033, nm_24165)
     intra_avail_par_26332 = smin64(y_26223, y_26331)
     y_26333 = smax64(res_24033, nm_24165)
@@ -41515,7 +41515,7 @@ class bfastfinal:
         y_27069 = slt64(i_27067, nm_24165)
         bounds_check_27070 = (x_27068 and y_27069)
         index_certs_27071 = True
-        assert bounds_check_27070, ("Error: %s%d%s%d%s\n\nBacktrace:\n-> #0  helpers.fut:58:16-19\n   #1  helpers.fut:78:15-53\n   #2  bfastfinal.fut:53:35-50\n   #3  bfastfinal.fut:168:3-56\n   #4  bfastfinal.fut:164:1-168:56\n" % ("Index [",
+        assert bounds_check_27070, ("Error: %s%d%s%d%s\n\nBacktrace:\n-> #0  helpers.fut:58:16-19\n   #1  helpers.fut:78:15-53\n   #2  bfastfinal.fut:52:35-50\n   #3  bfastfinal.fut:172:3-56\n   #4  bfastfinal.fut:168:1-172:56\n" % ("Index [",
                                                                                                                                                                                                                                          i_27067,
                                                                                                                                                                                                                                          "] out of bounds for array of shape [",
                                                                                                                                                                                                                                          nm_24165,
@@ -42167,7 +42167,7 @@ class bfastfinal:
     y_24282 = slt64(i_24280, N_24013)
     bounds_check_24283 = (x_24281 and y_24282)
     index_certs_24284 = True
-    assert bounds_check_24283, ("Error: %s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:18:29-34\n   #1  helpers.fut:20:13-20\n   #2  bfastfinal.fut:80:30-91\n   #3  /prelude/soacs.fut:56:19-23\n   #4  /prelude/soacs.fut:56:3-37\n   #5  bfastfinal.fut:74:5-83:25\n   #6  bfastfinal.fut:168:3-56\n   #7  bfastfinal.fut:164:1-168:56\n" % ("Index [",
+    assert bounds_check_24283, ("Error: %s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:18:29-34\n   #1  helpers.fut:20:13-20\n   #2  bfastfinal.fut:79:30-91\n   #3  /prelude/soacs.fut:56:19-23\n   #4  /prelude/soacs.fut:56:3-37\n   #5  bfastfinal.fut:73:5-82:25\n   #6  bfastfinal.fut:172:3-56\n   #7  bfastfinal.fut:168:1-172:56\n" % ("Index [",
                                                                                                                                                                                                                                                                                                                                                      i_24280,
                                                                                                                                                                                                                                                                                                                                                      "] out of bounds for array of shape [",
                                                                                                                                                                                                                                                                                                                                                      N_24013,
@@ -42680,7 +42680,7 @@ class bfastfinal:
     bounds_invalid_upwards_24398 = slt64(iota32_arg_24397, np.int64(0))
     valid_24399 = not(bounds_invalid_upwards_24398)
     range_valid_c_24400 = True
-    assert valid_24399, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:2:3-8\n   #2  bfastfinal.fut:113:22-35\n   #3  bfastfinal.fut:168:3-56\n   #4  bfastfinal.fut:164:1-168:56\n" % ("Range ",
+    assert valid_24399, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:2:3-8\n   #2  bfastfinal.fut:116:22-35\n   #3  bfastfinal.fut:172:3-56\n   #4  bfastfinal.fut:168:1-172:56\n" % ("Range ",
                                                                                                                                                                                                                                       np.int64(0),
                                                                                                                                                                                                                                       "..",
                                                                                                                                                                                                                                       np.int64(1),
@@ -42689,7 +42689,7 @@ class bfastfinal:
                                                                                                                                                                                                                                       " is invalid."))
     x_24402 = (np.int32(1) + n_24018)
     index_certs_24403 = True
-    assert bounds_check_24283, ("Error: %s%d%s%d%s\n\nBacktrace:\n-> #0  bfastfinal.fut:111:63-81\n   #1  bfastfinal.fut:109:15-113:36\n   #2  bfastfinal.fut:168:3-56\n   #3  bfastfinal.fut:164:1-168:56\n" % ("Index [",
+    assert bounds_check_24283, ("Error: %s%d%s%d%s\n\nBacktrace:\n-> #0  bfastfinal.fut:114:63-81\n   #1  bfastfinal.fut:112:15-116:36\n   #2  bfastfinal.fut:172:3-56\n   #3  bfastfinal.fut:168:1-172:56\n" % ("Index [",
                                                                                                                                                                                                                  i_24280,
                                                                                                                                                                                                                  "] out of bounds for array of shape [",
                                                                                                                                                                                                                  N_24013,
@@ -42702,7 +42702,7 @@ class bfastfinal:
     r32_arg_24404 = read_res_39025[0]
     res_24405 = sitofp_i32_f32(r32_arg_24404)
     range_valid_c_24406 = True
-    assert valid_24399, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:2:3-8\n   #2  bfastfinal.fut:124:29-44\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:118:50-158:9\n   #5  bfastfinal.fut:168:3-56\n   #6  bfastfinal.fut:164:1-168:56\n" % ("Range ",
+    assert valid_24399, ("Error: %s%d%s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:60:3-10\n   #1  helpers.fut:2:3-8\n   #2  bfastfinal.fut:128:29-44\n   #3  /prelude/functional.fut:9:42-44\n   #4  bfastfinal.fut:121:50-162:9\n   #5  bfastfinal.fut:172:3-56\n   #6  bfastfinal.fut:168:1-172:56\n" % ("Range ",
                                                                                                                                                                                                                                                                                                                   np.int64(0),
                                                                                                                                                                                                                                                                                                                   "..",
                                                                                                                                                                                                                                                                                                                   np.int64(1),
@@ -42743,7 +42743,7 @@ class bfastfinal:
     loop_not_taken_24429 = not(loop_nonempty_24424)
     protect_assert_disj_24430 = (bounds_check_24428 or loop_not_taken_24429)
     index_certs_24431 = True
-    assert protect_assert_disj_24430, ("Error: %s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:18:29-34\n   #1  lib/github.com/diku-dk/sorts/radix_sort.fut:25:24-35\n   #2  lib/github.com/diku-dk/sorts/radix_sort.fut:53:31-62\n   #3  lib/github.com/diku-dk/sorts/radix_sort.fut:104:6-36\n   #4  /prelude/functional.fut:9:42-44\n   #5  bfastfinal.fut:138:29-143:72\n   #6  /prelude/functional.fut:9:42-44\n   #7  bfastfinal.fut:118:50-158:9\n   #8  bfastfinal.fut:168:3-56\n   #9  bfastfinal.fut:164:1-168:56\n" % ("Index [",
+    assert protect_assert_disj_24430, ("Error: %s%d%s%d%s\n\nBacktrace:\n-> #0  /prelude/array.fut:18:29-34\n   #1  lib/github.com/diku-dk/sorts/radix_sort.fut:25:24-35\n   #2  lib/github.com/diku-dk/sorts/radix_sort.fut:53:31-62\n   #3  lib/github.com/diku-dk/sorts/radix_sort.fut:104:6-36\n   #4  /prelude/functional.fut:9:42-44\n   #5  bfastfinal.fut:142:29-147:72\n   #6  /prelude/functional.fut:9:42-44\n   #7  bfastfinal.fut:121:50-162:9\n   #8  bfastfinal.fut:172:3-56\n   #9  bfastfinal.fut:168:1-172:56\n" % ("Index [",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       i_24425,
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       "] out of bounds for array of shape [",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       iota32_arg_24397,

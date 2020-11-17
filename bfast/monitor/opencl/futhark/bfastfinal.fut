@@ -26,11 +26,10 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
   let n64 = i64.i32 n
   let k2p2 = 2*k + 2
   let k2p2' = if trend > 0 then k2p2 else k2p2-1
-  let X =
-    (if trend > 0
-     then mkX_with_trend (i64.i32 k2p2') freq mappingindices
-     else mkX_no_trend (i64.i32 k2p2') freq mappingindices)
-    |> intrinsics.opaque
+  let X = (if trend > 0
+           then mkX_with_trend (i64.i32 k2p2') freq mappingindices
+           else mkX_no_trend (i64.i32 k2p2') freq mappingindices)
+          |> intrinsics.opaque
 
 
   -- PERFORMANCE BUG: instead of `let Xt = copy (transpose X)`
@@ -100,11 +99,15 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
   -- 7. moving sums first and bounds:        --
   ---------------------------------------------
   let hmax = reduce_comm (i32.max) 0 hs
-  let MO_fsts = zip3 y_errors nss hs |>
-    map (\(y_error, ns, h) -> #[unsafe]
-            map (\i -> if i < h then #[unsafe] y_error[i + ns-h+1] else 0.0) (iota3232 hmax)
-            |> reduce (+) 0.0
-        ) |> intrinsics.opaque
+  let MO_fsts = zip3 y_errors nss hs
+                |> map (\(y_error, ns, h) ->
+                          #[unsafe]
+                          map (\i -> if i < h
+                                     then #[unsafe] y_error[i + ns-h+1]
+                                     else 0.0
+                              ) (iota3232 hmax)
+                          |> reduce (+) 0.0
+                       ) |> intrinsics.opaque
 
   let BOUND = map (\q -> let t   = n+1+q
                          let time = #[unsafe] mappingindices[t-1]
@@ -115,7 +118,8 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
   ---------------------------------------------
   -- 8. moving sums computation:             --
   ---------------------------------------------
-  let (MOs, MOs_NN, breaks, means, magnitudes) = zip (zip4 Nss nss sigmas hs) (zip3 MO_fsts y_errors val_indss) |>
+  let (MOs, MOs_NN, breaks, means, magnitudes) = zip (zip4 Nss nss sigmas hs)
+                                                     (zip3 MO_fsts y_errors val_indss) |>
     map (\ ( (Ns,ns,sigma, h), (MO_fst,y_error,val_inds) ) ->
             -- let Nmn = N-n
             let MO = map (\j -> if j >= Ns-ns then 0.0
