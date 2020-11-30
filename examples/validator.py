@@ -39,7 +39,7 @@ def run_bfast_(backend,
                start_monitor = datetime(2010, 1, 1),
                end_monitor = datetime(2018, 1, 1)):
 
-    print("Running for the {} backend".format(backend))
+    print("Running the {} backend".format(backend))
 
     # download and parse input data
     ifile_meta = "data/peru_small/dates.txt"

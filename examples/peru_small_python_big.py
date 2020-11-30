@@ -53,8 +53,8 @@ model = BFASTMonitor(
             hfrac=hfrac,
             trend=trend,
             level=level,
-            backend='python',
-            # backend='python-mp',
+            # backend='python',
+            backend='python-mp',
             verbose=1,
             device_id=0,
         )
