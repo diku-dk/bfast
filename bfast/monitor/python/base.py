@@ -346,25 +346,3 @@ class BFASTMonitorPython(BFASTMonitorBase):
         fv = np.vectorize(f, otypes=[np.float])
 
         return fv(a)
-
-    def _store_indices(self, fname):
-
-        f = open(fname,'w')
-        f.write("[")
-
-        elt = [str(a) for a in self.mapped_indices.tolist()]
-        line = ",".join(elt)
-        f.write(line)
-        f.write("]")
-
-        f.close()
-
-    def _date_to_frac(self, date):
-        year = date.year
-        month = date.month
-        day = date.day
-        month_comp = (month - 1) / 12
-
-        n_days = calendar.monthrange(year, month)[1]
-        day_comp = ((day - 1) / n_days) / 12
-        return year + month_comp + day_comp
