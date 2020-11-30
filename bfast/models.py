@@ -150,6 +150,18 @@ class BFASTMonitor(object):
                  verbose=self.verbose,
                 )
 
+        elif self.backend == 'python-mp':
+            self._model = BFASTMonitorPython(
+                 start_monitor=self.start_monitor,
+                 freq=self.freq,
+                 k=self.k,
+                 hfrac=self.hfrac,
+                 trend=self.trend,
+                 level=self.level,
+                 verbose=self.verbose,
+                 use_mp=True
+                )
+
         elif self.backend == 'opencl':
             self._model = BFASTMonitorOpenCL(
                  start_monitor=self.start_monitor,

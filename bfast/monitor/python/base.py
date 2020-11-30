@@ -7,6 +7,9 @@ Created on Apr 19, 2018
 import calendar
 import datetime
 
+import multiprocessing as mp
+from functools import partial
+
 import numpy as np
 np.warnings.filterwarnings('ignore')
 np.set_printoptions(suppress=True)
@@ -85,6 +88,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
                  trend=True,
                  level=0.05,
                  verbose=0,
+                 use_mp=False
                  ):
 
         super(BFASTMonitorPython, self).__init__(start_monitor,
@@ -96,6 +100,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
                                        verbose=verbose)
 
         self._timers = {}
+        self.use_mp = use_mp
 
     def fit(self, data, dates, n_chunks=None, nan_value=0):
         """ Fits the models for the ndarray 'data'
@@ -123,18 +128,6 @@ class BFASTMonitorPython(BFASTMonitorBase):
 
         data = data.astype(np.float32)
 
-        means_global = np.zeros(
-            (data.shape[1], data.shape[2]),
-            dtype=np.float32
-        )
-        magnitudes_global = np.zeros(
-            (data.shape[1], data.shape[2]),
-            dtype=np.float32
-        )
-        breaks_global = np.zeros(
-            (data.shape[1], data.shape[2]), dtype=np.int32
-        )
-
         # set NaN values
         data[data==nan_value] = np.nan
 
@@ -145,20 +138,36 @@ class BFASTMonitorPython(BFASTMonitorBase):
 
         X = self._create_data_matrix(mapped_indices)
 
-        for i in range(data.shape[1]):
-            if self.verbose > 0:
-                print("Processing row {}".format(i))
+        if self.use_mp:
+            print("Python backend is running in parallel for {} threads".format(mp.cpu_count()))
+            my_fun = partial(self.fit_single, X=X, n=n, mapped_indices=mapped_indices)
+            y = np.transpose(data, (1, 2, 0)).reshape(data.shape[1] * data.shape[2], data.shape[0])
+            pool = mp.Pool(mp.cpu_count())
+            rval = pool.map(my_fun, y)
+            rval = np.array(rval, dtype=object).reshape(data.shape[1], data.shape[2], 3)
 
-            for j in range(data.shape[2]):
-                y = data[:,i,j]
-                pix_break, pix_mean, pix_magnitude = self.fit_single(y, X, n, mapped_indices)
-                breaks_global[i,j] = pix_break
-                means_global[i,j] = pix_mean
-                magnitudes_global[i,j] = pix_magnitude
+            self.breaks = rval[:,:,0].astype(np.int32)
+            self.means = rval[:,:,1].astype(np.float32)
+            self.magnitudes = rval[:,:,2].astype(np.float32)
+        else:
+            means_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.float32)
+            magnitudes_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.float32)
+            breaks_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.int32)
 
-        self.breaks = breaks_global
-        self.means = means_global
-        self.magnitudes = magnitudes_global
+            for i in range(data.shape[1]):
+                if self.verbose > 0:
+                    print("Processing row {}".format(i))
+
+                for j in range(data.shape[2]):
+                    y = data[:,i,j]
+                    pix_break, pix_mean, pix_magnitude = self.fit_single(y, X, n, mapped_indices)
+                    breaks_global[i,j] = pix_break
+                    means_global[i,j] = pix_mean
+                    magnitudes_global[i,j] = pix_magnitude
+
+            self.breaks = breaks_global
+            self.means = means_global
+            self.magnitudes = magnitudes_global
 
         return self
 
