@@ -125,11 +125,11 @@ class BFASTMonitorPython(BFASTMonitorBase):
         self : instance of BFASTMonitor
             The object itself.
         """
-
-        data = data.astype(np.float32)
+        data_ints = data
+        data = np.copy(data_ints).astype(np.float32)
 
         # set NaN values
-        data[data==nan_value] = np.nan
+        data[data_ints==nan_value] = np.nan
 
         self.n = self._compute_end_history(dates)
 
@@ -225,13 +225,13 @@ class BFASTMonitorPython(BFASTMonitorBase):
 
         if self.verbose > 1:
             column_names = np.array(["Intercept",
-                                        "trend",
-                                        "harmonsin1",
-                                        "harmoncos1",
-                                        "harmonsin2",
-                                        "harmoncos2",
-                                        "harmonsin3",
-                                        "harmoncos3"])
+                                     "trend",
+                                     "harmonsin1",
+                                     "harmoncos1",
+                                     "harmonsin2",
+                                     "harmoncos2",
+                                     "harmonsin3",
+                                     "harmoncos3"])
             if self.trend:
                 indxs = np.array([0, 1, 3, 5, 7, 2, 4, 6])
             else:
