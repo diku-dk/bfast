@@ -242,9 +242,8 @@ class BFASTMonitorPython(BFASTMonitorBase):
         y_error = y_nn - y_pred
 
         # (2) evaluate model on monitoring period mosum_nn process
-        mosum_nn = np.zeros(Ns - ns)
-        for t in range(ns + 1, Ns + 1):
-            mosum_nn[t - ns - 1] = y_error[t - h:t].sum()
+        err_cs = np.cumsum(y_error[ns - h:Ns + 1])
+        mosum_nn = err_cs[h:] - err_cs[:-h]
 
         sigma = np.sqrt(np.sum(y_error[:ns] ** 2) / (ns - (2 + 2 * self.k)))
         mosum_nn = 1.0 / (sigma * np.sqrt(ns)) * mosum_nn
