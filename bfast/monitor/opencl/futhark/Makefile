@@ -1,5 +1,3 @@
-export FUTHARK_INCREMENTAL_FLATTENING=1
-
 # REMEMBER TO RUN:
 # $ futhark pkg add github.com/diku-dk/sorts
 # $ futhark pkg sync
