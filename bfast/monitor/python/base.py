@@ -64,8 +64,16 @@ class BFASTMonitorPython(BFASTMonitorBase):
         if selected) procedure, i.e., probability of
         type I error.
 
+    period : int, default 10
+        Maximum time (relative to the history period)
+        that will be monitored.
+
     verbose : int, optional (default=0)
         The verbosity level (0=no output, 1=output)
+
+    use_mp : bool, default False
+        Determines whether to use the (very primitive) Python
+        multiprocessing or not. Enable for a speedup
 
     Examples
     --------
@@ -87,6 +95,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
                  hfrac=0.25,
                  trend=True,
                  level=0.05,
+                 period=10,
                  verbose=0,
                  use_mp=False
                  ):
@@ -97,6 +106,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
                                        hfrac=hfrac,
                                        trend=trend,
                                        level=level,
+                                       period=period,
                                        verbose=verbose)
 
         self._timers = {}
@@ -137,8 +147,8 @@ class BFASTMonitorPython(BFASTMonitorBase):
         self.mapped_indices = self._map_indices(dates).astype(np.int32)
         self.X = self._create_data_matrix(self.mapped_indices)
 
-        period = data.shape[0] / np.float(self.n)
-        self.lam = self._compute_lam(data.shape[0], period)
+        # period = data.shape[0] / np.float(self.n)
+        self.lam = self._compute_lam(data.shape[0])
 
         if self.use_mp:
             print("Python backend is running in parallel using {} threads".format(mp.cpu_count()))
@@ -236,6 +246,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
                 indxs = np.array([0, 1, 3, 5, 7, 2, 4, 6])
             else:
                 indxs = np.array([0, 2, 4, 6, 1, 3, 5])
+            # print(column_names[indxs])
             print(column_names[indxs])
             print(model.coef_[indxs])
 
@@ -252,6 +263,8 @@ class BFASTMonitorPython(BFASTMonitorBase):
 
         mosum = np.repeat(np.nan, N - self.n)
         mosum[val_inds[:Ns - ns]] = mosum_nn
+        if self.verbose:
+            print("MOSUM process", mosum_nn)
 
         # copute mean
         mean = np.mean(mosum_nn)
@@ -262,6 +275,11 @@ class BFASTMonitorPython(BFASTMonitorBase):
         # boundary and breaks
         a = self.mapped_indices[self.n:] / self.mapped_indices[-1].astype(np.float)
         bounds = self.lam * np.sqrt(self._log_plus(a))
+
+        if self.verbose:
+            print("lambda", self.lam)
+            print("bound", bounds[0])
+
         breaks = np.abs(mosum) > bounds
         first_break = np.where(breaks)[0]
 
@@ -284,9 +302,9 @@ class BFASTMonitorPython(BFASTMonitorBase):
 
         return self._timers
 
-    def _compute_lam(self, N, period):
-        check(self.hfrac, period, 1 - self.level, "max")
-        return get_critval(self.hfrac, period, 1 - self.level, "max")
+    def _compute_lam(self, N):
+        check(self.hfrac, self.period, 1 - self.level, "max")
+        return get_critval(self.hfrac, self.period, 1 - self.level, "max")
 
     def _compute_end_history(self, dates):
         for i in range(len(dates)):

@@ -75,6 +75,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
                  hfrac=0.25,
                  trend=True,
                  level=0.05,
+                 period=10,
                  detailed_results=False,
                  old_version=False,
                  verbose=0,
@@ -93,6 +94,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
                                        hfrac=hfrac,
                                        trend=trend,
                                        level=level,
+                                       period=period,
                                        verbose=verbose)
 
         self.detailed_results = detailed_results
@@ -177,13 +179,11 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
 
         return sizes
 
-    def _compute_lam(self, N, n):
+    def _compute_lam(self, N):
 
-        period = N / numpy.float(n)
+        check(self.hfrac, self.period, 1 - self.level, "max")
 
-        check(self.hfrac, period, 1 - self.level, "max")
-
-        return get_critval(self.hfrac, period, 1 - self.level, "max")
+        return get_critval(self.hfrac, self.period, 1 - self.level, "max")
 
     def _compute_end_history_index(self, dates):
 
@@ -331,8 +331,10 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         mapped_indices = self._map_indices(dates).astype(numpy.int32)
         N = data.shape[0]
         self.n = self._compute_end_history_index(dates)
-        self.lam = self._compute_lam(N, self.n)
+        # self.lam = self._compute_lam(N, self.n)
+        self.lam = self._compute_lam(N)
         end = time.time()
+
         if self.verbose > 0:
             self._timers['initialization'] += end - start
             print("--- runtime for data initialization:\t\t{}".format(end - start))

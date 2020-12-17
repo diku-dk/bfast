@@ -93,6 +93,7 @@ class BFASTMonitor(object):
             hfrac=0.25,
             trend=True,
             level=0.05,
+            period=10,
             verbose=0,
             backend="opencl",
             platform_id=0,
@@ -107,6 +108,7 @@ class BFASTMonitor(object):
         self.hfrac = hfrac
         self.trend = trend
         self.level = level
+        self.period = period
         self.verbose = verbose
         self.backend = backend
         self.platform_id = platform_id
@@ -147,6 +149,7 @@ class BFASTMonitor(object):
                  hfrac=self.hfrac,
                  trend=self.trend,
                  level=self.level,
+                 period=self.period,
                  verbose=self.verbose,
                 )
 
@@ -158,6 +161,7 @@ class BFASTMonitor(object):
                  hfrac=self.hfrac,
                  trend=self.trend,
                  level=self.level,
+                 period=self.period,
                  verbose=self.verbose,
                  use_mp=True
                 )
@@ -170,6 +174,7 @@ class BFASTMonitor(object):
                  hfrac=self.hfrac,
                  trend=self.trend,
                  level=self.level,
+                 period=self.period,
                  detailed_results=self.detailed_results,
                  old_version=self.old_version,
                  verbose=self.verbose,
@@ -210,6 +215,7 @@ class BFASTMonitor(object):
             "hfrac": self.hfrac,
             "trend": self.trend,
             "level": self.level,
+            "period": self.period,
             "verbose": self.verbose,
             "backend": self.backend,
             "platform_id": self.platform_id,

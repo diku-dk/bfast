@@ -383,7 +383,7 @@ __critval_level = np.arange(0.95, 0.999, 0.001)
 __critval_mr = np.array(["max", "range"])
 
 def check(h, period, level, mr):
-    
+
     if not h in __critval_h:
         raise ValueError("h can only be one of", __critval_h)
 
@@ -397,12 +397,12 @@ def check(h, period, level, mr):
         raise ValueError("mr can only be one of", __critval_mr)
 
 def get_critval(h, period, level, mr):
-    
+
     # Sanity check
     check(h, period, level, mr)
 
-    index = np.zeros(4, dtype=np.int) 
-    
+    index = np.zeros(4, dtype=np.int)
+
     # Get index into table from arguments
     index[0] = np.where(mr == __critval_mr)[0][0]
     index[1] = np.where(level == __critval_level)[0][0]
@@ -410,7 +410,6 @@ def get_critval(h, period, level, mr):
     # print((np.abs(__critval_period - period)).argmin())
     index[2] = (np.abs(__critval_period - period)).argmin()
     index[3] = np.where(h == __critval_h)[0][0]
-
     # For historical reasons, the critvals are scaled by sqrt(2)
     return __critvals[tuple(index)] * np.sqrt(2)
 
@@ -419,20 +418,20 @@ def _find_index_date(dates, t):
     for i in range(len(dates)):
         if t < dates[i]:
             return i
-    
+
     return len(dates)
-                
+
 def crop_data_dates(data, dates, start, end):
     """ Crops the input data and the associated
-    dates w.r.t. the provided start and end 
+    dates w.r.t. the provided start and end
     datetime object.
-    
+
     Parameters
     ----------
     data: ndarray of shape (N, W, H)
-        Here, N is the number of time 
-        series points per pixel and W 
-        and H are the width and the height 
+        Here, N is the number of time
+        series points per pixel and W
+        and H are the width and the height
         of the image, respectively.
     dates : list of datetime objects
         Specifies the dates of the elements
@@ -442,21 +441,21 @@ def crop_data_dates(data, dates, start, end):
         The start datetime object
     end : datetime
         The end datetime object
-            
+
     Returns
     -------
     Returns: data, dates
-        The cropped data array and the 
-        cropped list. Only those images 
+        The cropped data array and the
+        cropped list. Only those images
         and dates that are with the start/end
         period are contained in the returned
         objects.
     """
-    
+
     start_idx = _find_index_date(dates, start)
     end_idx = _find_index_date(dates, end)
 
     data_cropped = data[start_idx:end_idx, :, :]
     dates_cropped = list(np.array(dates)[start_idx:end_idx])
-    
+
     return data_cropped, dates_cropped
