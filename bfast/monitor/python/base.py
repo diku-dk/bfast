@@ -264,21 +264,21 @@ class BFASTMonitorPython(BFASTMonitorBase):
         mosum = np.repeat(np.nan, N - self.n)
         mosum[val_inds[:Ns - ns]] = mosum_nn
         if self.verbose:
-            print("MOSUM process", mosum_nn)
+            print("MOSUM process", mosum_nn.shape)
 
-        # copute mean
+        # compute mean
         mean = np.mean(mosum_nn)
 
         # compute magnitude
         magnitude = np.median(y_error[ns:])
 
         # boundary and breaks
-        a = self.mapped_indices[self.n:] / self.mapped_indices[-1].astype(np.float)
+        a = self.mapped_indices[self.n:] / self.mapped_indices[self.n - 1].astype(np.float)
         bounds = self.lam * np.sqrt(self._log_plus(a))
 
         if self.verbose:
             print("lambda", self.lam)
-            print("bound", bounds[0])
+            print("bounds", bounds)
 
         breaks = np.abs(mosum) > bounds
         first_break = np.where(breaks)[0]
@@ -344,7 +344,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
 
     def _log_plus(self, a):
         retval = np.ones(a.shape, dtype=np.float)
-        fl = a > np.exp(1)
+        fl = a > np.e
         retval[fl] = np.log(a[fl])
 
         return retval

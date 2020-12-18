@@ -114,7 +114,7 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
 
   let BOUND = map (\q -> let t    = n+1+q
                          let time = #[unsafe] mappingindices[t - 1]
-                         let tmp  = logplus ((r32 time) / (r32 mappingindices[N - 1]))
+                         let tmp  = logplus ((r32 time) / (r32 mappingindices[n - 1]))
                          in  lam * (f32.sqrt tmp)
                   ) (iota32 (N-n64))
 
