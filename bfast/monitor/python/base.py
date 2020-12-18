@@ -3,21 +3,17 @@ Created on Apr 19, 2018
 
 @author: fgieseke
 '''
-
-import calendar
-import datetime
-
 import multiprocessing as mp
 from functools import partial
 
 import numpy as np
 np.warnings.filterwarnings('ignore')
 np.set_printoptions(suppress=True)
-import pandas
 from sklearn import linear_model
 
-from bfast.utils import check, get_critval
 from bfast.base import BFASTMonitorBase
+from bfast.monitor.utils import compute_end_history, compute_lam, map_indices
+
 
 class BFASTMonitorPython(BFASTMonitorBase):
     """ BFAST Monitor implementation based on Python and Numpy. The
@@ -141,14 +137,14 @@ class BFASTMonitorPython(BFASTMonitorBase):
         # set NaN values
         data[data_ints==nan_value] = np.nan
 
-        self.n = self._compute_end_history(dates)
+        self.n = compute_end_history(dates, self.start_monitor)
 
         # create (complete) seasonal matrix ("patterns" as columns here!)
-        self.mapped_indices = self._map_indices(dates).astype(np.int32)
+        self.mapped_indices = map_indices(dates).astype(np.int32)
         self.X = self._create_data_matrix(self.mapped_indices)
 
         # period = data.shape[0] / np.float(self.n)
-        self.lam = self._compute_lam(data.shape[0])
+        self.lam = compute_lam(data.shape[0], self.hfrac, self.level, self.period)
 
         if self.use_mp:
             print("Python backend is running in parallel using {} threads".format(mp.cpu_count()))
@@ -301,31 +297,6 @@ class BFASTMonitorPython(BFASTMonitorBase):
         """
 
         return self._timers
-
-    def _compute_lam(self, N):
-        check(self.hfrac, self.period, 1 - self.level, "max")
-        return get_critval(self.hfrac, self.period, 1 - self.level, "max")
-
-    def _compute_end_history(self, dates):
-        for i in range(len(dates)):
-            # if self.start_monitor < date:
-            if self.start_monitor <= dates[i]:
-                return i
-        raise Exception("Date 'start' not within the range of dates!")
-
-    def _map_indices(self, dates):
-        start = dates[0]
-        end = dates[-1]
-        start = datetime.datetime(start.year, 1, 1)
-        end = datetime.datetime(end.year, 12, 31)
-
-        drange = pandas.date_range(start, end, freq="d")
-        ts = pandas.Series(np.ones(len(dates)), dates)
-        ts = ts.reindex(drange)
-        inds = ~np.isnan(ts.to_numpy())
-        indices = np.argwhere(inds).T[0]
-
-        return indices
 
     def _create_data_matrix(self, mapped_indices):
         N = mapped_indices.shape[0]

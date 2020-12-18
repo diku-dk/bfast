@@ -1,4 +1,7 @@
+from datetime import datetime
+
 import numpy as np
+import pandas
 
 __critvals = np.array([1.22762665817831, 1.68732328328598, 2.22408818231127,
 1.33623105388957, 1.88633090100410, 2.70443676308234, 1.34108685187662,
@@ -459,3 +462,29 @@ def crop_data_dates(data, dates, start, end):
     dates_cropped = list(np.array(dates)[start_idx:end_idx])
 
     return data_cropped, dates_cropped
+
+
+def compute_lam(N, hfrac, level, period):
+    check(hfrac, period, 1 - level, "max")
+
+    return get_critval(hfrac, period, 1 - level, "max")
+
+def compute_end_history(dates, start_monitor):
+    for i in range(len(dates)):
+        if start_monitor <= dates[i]:
+            return i
+
+    raise Exception("Date 'start' not within the range of dates!")
+
+def map_indices(dates):
+    start = dates[0]
+    end = dates[-1]
+    start = datetime(start.year, 1, 1)
+    end = datetime(end.year, 12, 31)
+
+    drange = pandas.date_range(start, end, freq="d")
+    ts = pandas.Series(np.ones(len(dates)), dates)
+    ts = ts.reindex(drange)
+    indices = np.argwhere(~np.isnan(ts).to_numpy()).T[0]
+
+    return indices

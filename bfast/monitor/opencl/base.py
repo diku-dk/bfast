@@ -6,14 +6,15 @@ Created on Apr 19, 2018
 
 import gc
 import time
-import pandas
 from datetime import datetime
+
+import pandas
 import numpy
 import pyopencl
 import pyopencl.array as pycl_array
 
-from bfast.utils import check, get_critval
 from bfast.base import BFASTMonitorBase
+from bfast.monitor.utils import compute_end_history, compute_lam, map_indices
 
 from .bfastfinal import bfastfinal
 
@@ -179,34 +180,6 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
 
         return sizes
 
-    def _compute_lam(self, N):
-
-        check(self.hfrac, self.period, 1 - self.level, "max")
-
-        return get_critval(self.hfrac, self.period, 1 - self.level, "max")
-
-    def _compute_end_history_index(self, dates):
-
-        for i in range(len(dates)):
-            # if self.start_monitor < dates[i]:
-            if self.start_monitor <= dates[i]:
-                return i
-
-        raise Exception("Date 'start' not within the range of dates!")
-
-    def _map_indices(self, dates):
-
-        start = dates[0]
-        end = dates[-1]
-        start = datetime(start.year, 1, 1)
-        end = datetime(end.year, 12, 31)
-
-        drange = pandas.date_range(start, end, freq="d")
-        ts = pandas.Series(numpy.ones(len(dates)), dates)
-        ts = ts.reindex(drange)
-        indices = numpy.argwhere(~numpy.isnan(ts).to_numpy()).T[0]
-
-        return indices
 
     def fit(self, data, dates, n_chunks=None, nan_value=0):
         """ Fits the BFAST model for the ndarray 'data'
@@ -274,7 +247,6 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         return self._timers
 
     def _fit_chunks(self, data, dates, n_chunks=10, nan_value=0):
-
         data_chunks = numpy.array_split(data, n_chunks, axis=1)
 
         results = []
@@ -311,7 +283,6 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         return self._merge_results(results)
 
     def _fit_single(self, data, dates, nan_value):
-
         oshape = data.shape
 
         # (1) preprocessing
@@ -326,13 +297,11 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         return results
 
     def _fit_single_preprocess(self, data, dates, nan_value):
-
         start = time.time()
-        mapped_indices = self._map_indices(dates).astype(numpy.int32)
+        mapped_indices = map_indices(dates).astype(numpy.int32)
         N = data.shape[0]
-        self.n = self._compute_end_history_index(dates)
-        # self.lam = self._compute_lam(N, self.n)
-        self.lam = self._compute_lam(N)
+        self.n = compute_end_history(dates, self.start_monitor)
+        self.lam = compute_lam(N, self.hfrac, self.level, self.period)
         end = time.time()
 
         if self.verbose > 0:
@@ -359,7 +328,6 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         return y_cl, mapped_indices_cl
 
     def _fit_single_kernel(self, y_cl, mapped_indices_cl):
-
         start = time.time()
         if self.trend:
             trend = 1
@@ -411,7 +379,6 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         return results
 
     def _fit_single_postprocessing(self, results, oshape):
-
         start = time.time()
         if self.detailed_results:
             mosum = results['mosum'].get().T
@@ -431,7 +398,6 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
             print("--- runtime for data transfer (device->host):\t{}".format(end - start))
 
     def _merge_results(self, results):
-
         final_results = {}
 
         while(len(results) > 0):
@@ -443,7 +409,6 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         return final_results
 
     def __append_results(self, res, results):
-
         if 'breaks' in results.keys():
             results['breaks'] = numpy.concatenate([results['breaks'], res['breaks']], axis=0)
         else:
@@ -475,10 +440,3 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
                 results['mosum'] = res['mosum']
 
         return results
-
-#     def _normaliseArray(self, x):
-#
-#         if (x.base is x) or (x.base is None):
-#             return x
-#         else:
-#             return x.copy()
