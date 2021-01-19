@@ -1,5 +1,7 @@
 -- BFAST-irregular: version handling obscured observations (e.g., clouds)
 -- ==
+-- compiled input @ data/peru.in.gz
+
 -- compiled input @ data/D1.in.gz
 -- compiled input @ data/D2.in.gz
 -- compiled input @ data/D3.in.gz
@@ -8,11 +10,14 @@
 -- compiled input @ data/D6.in.gz
 -- compiled input @ data/peru.in.gz
 
+-- output @ data/peru.out.gz
+-- compiled input @ data/sahara.in.gz
+-- output @ data/sahara.out.gz
+
 -- REMEMBER TO RUN:
 -- futhark pkg add github.com/diku-dk/sorts
 -- futhark pkg sync
---import "lib/github.com/diku-dk/sorts/radix_sort"
-import "lib/github.com/diku-dk/sorts/insertion_sort"
+import "lib/github.com/diku-dk/sorts/radix_sort"
 import "helpers"
 
 -- | implementation is in this entry point
@@ -140,13 +145,12 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
             let mean = map2 (\x j -> if j < Ns - ns then x else 0.0 ) MO' (iota32 (N - n64))
                        |> reduce (+) 0.0
                        |> (\x -> if (Ns - ns) == 0 then 0f32 else x / (r32 (Ns - ns)))
-            let magnitude = map (\i -> if i < Ns - ns && !(f32.isnan y_error[ns + i])
+            let magnitude' = map (\i -> if i < Ns - ns && !(f32.isnan y_error[ns + i])
                                        then y_error[ns + i]
                                        else f32.inf
                                 ) (iota32 (N - n64))
                             -- sort
-                            --|> radix_sort_float f32.num_bits f32.get_bit
-                            |> insertion_sort (f32.<=)
+                            |> radix_sort_float f32.num_bits f32.get_bit
                             -- median_sorted
                             |> (\xs -> let i = (Ns - ns) / 2
                                        let j = i - 1
@@ -155,6 +159,7 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
                                        else if (Ns - ns) % 2 == 0
                                             then (xs[j] + xs[i]) / 2
                                        else xs[i])
+            let magnitude = 0
             let fst_break' = if !is_break then -1
                              else adjustValInds n ns Ns val_inds fst_break
             let fst_break' = if ns <=5 || Ns-ns <= 5 then -2 else fst_break'
