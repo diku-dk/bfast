@@ -1,5 +1,7 @@
 -- BFAST-irregular: version handling obscured observations (e.g., clouds)
 -- ==
+-- compiled input @ data/peru.in.gz
+
 -- compiled input @ data/D1.in.gz
 -- compiled input @ data/D2.in.gz
 -- compiled input @ data/D3.in.gz
@@ -174,13 +176,21 @@ entry mainDetailed [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
                   (images : [m][N]f32) =
   mainFun trend k n freq hfrac lam mappingindices images
 
+entry mainMagnitude [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
+                           (hfrac: f32) (lam: f32)
+                           (mappingindices : [N]i32)
+                           (images : [m][N]f32) =
+  let (_, _, _, _, _, _, _, breaks, means, magnitudes, _, _) =
+    mainFun trend k n freq hfrac lam mappingindices images
+  in (breaks, means, magnitudes)
+
 entry main [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
                   (hfrac: f32) (lam: f32)
                   (mappingindices : [N]i32)
                   (images : [m][N]f32) =
-  let (_, _, _, _, _, _, _, breaks, means, magnitudes, _, _) =
+  let (_, _, _, _, _, _, _, breaks, means, _, _, _) =
     mainFun trend k n freq hfrac lam mappingindices images
-  in (breaks, means, magnitudes)
+  in (breaks, means)
 
 -- | implementation is in this entry point
 --   the outer map is distributed directly
