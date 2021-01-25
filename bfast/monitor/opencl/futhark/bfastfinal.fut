@@ -10,10 +10,6 @@
 -- compiled input @ data/D6.in.gz
 -- compiled input @ data/peru.in.gz
 
--- REMEMBER TO RUN:
--- futhark pkg add github.com/diku-dk/sorts
--- futhark pkg sync
---import "lib/github.com/diku-dk/sorts/radix_sort"
 import "lib/github.com/diku-dk/sorts/insertion_sort"
 import "helpers"
 
@@ -111,6 +107,31 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
                           |> reduce (+) 0.0
                        ) |> intrinsics.opaque
 
+  ---------------------------------------------
+  -- 8. error magnitude computation:             --
+  ---------------------------------------------
+  let magnitudes = zip3 Nss nss y_errors |>
+    map (\ (Ns, ns, y_error) ->
+            let magnitude = map (\i -> if i < Ns - ns && !(f32.isnan y_error[ns + i])
+                                       then y_error[ns + i]
+                                       else f32.inf
+                                ) (iota32 (N - n64))
+                            -- sort
+                            |> insertion_sort (f32.<=)
+                            -- extract median
+                            |> (\xs -> let i = (Ns - ns) / 2
+                                       let j = i - 1
+                                       in
+                                       if Ns == ns then 0f32
+                                       else if (Ns - ns) % 2 == 0
+                                            then (xs[j] + xs[i]) / 2
+                                       else xs[i])
+            in magnitude
+        ) |> intrinsics.opaque
+
+  ---------------------------------------------
+  -- 9. bound computation:             --
+  ---------------------------------------------
   let BOUND = map (\q -> let t    = n+1+q
                          let time = #[unsafe] mappingindices[t - 1]
                          let tmp  = logplus ((r32 time) / (r32 mappingindices[n - 1]))
@@ -118,12 +139,11 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
                   ) (iota32 (N-n64))
 
   ---------------------------------------------
-  -- 8. moving sums computation:             --
+  -- 10. moving sums computation:             --
   ---------------------------------------------
-  let (MOs, MOs_NN, breaks, means, magnitudes) = zip (zip4 Nss nss sigmas hs)
-                                                     (zip3 MO_fsts y_errors val_indss) |>
+  let (MOs, MOs_NN, breaks, means) = zip (zip4 Nss nss sigmas hs)
+                                         (zip3 MO_fsts y_errors val_indss) |>
     map (\ ( (Ns,ns,sigma, h), (MO_fst,y_error,val_inds) ) ->
-            -- let Nmn = N-n
             let MO = map (\j -> if j >= Ns - ns then 0.0
                                 else if j == 0 then MO_fst
                                 else #[unsafe] (y_error[ns + j] - y_error[ns - h + j])
@@ -142,29 +162,14 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
             let mean = map2 (\x j -> if j < Ns - ns then x else 0.0 ) MO' (iota32 (N - n64))
                        |> reduce (+) 0.0
                        |> (\x -> if (Ns - ns) == 0 then 0f32 else x / (r32 (Ns - ns)))
-            let magnitude = map (\i -> if i < Ns - ns && !(f32.isnan y_error[ns + i])
-                                       then y_error[ns + i]
-                                       else f32.inf
-                                ) (iota32 (N - n64))
-                            -- sort
-                            --|> radix_sort_float f32.num_bits f32.get_bit
-                            |> insertion_sort (f32.<=)
-                            -- median_sorted
-                            |> (\xs -> let i = (Ns - ns) / 2
-                                       let j = i - 1
-                                       in
-                                       if Ns == ns then 0f32
-                                       else if (Ns - ns) % 2 == 0
-                                            then (xs[j] + xs[i]) / 2
-                                       else xs[i])
             let fst_break' = if !is_break then -1
                              else adjustValInds n ns Ns val_inds fst_break
             let fst_break' = if ns <=5 || Ns-ns <= 5 then -2 else fst_break'
             -- The computation of MO'' should be moved just after MO' to make bounds consistent
             let val_inds' = map (adjustValInds n ns Ns val_inds) (iota32 (N - n64))
             let MO'' = scatter (replicate (N - n64) f32.nan) (map i64.i32 val_inds') MO'
-            in (MO'', MO', fst_break', mean, magnitude)
-        ) |> unzip5
+            in (MO'', MO', fst_break', mean)
+        ) |> unzip4
 
   in (MO_fsts, Nss, nss, sigmas, MOs, MOs_NN, BOUND, breaks, means, magnitudes, y_errors, y_preds)
 
