@@ -116,21 +116,20 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
   ---------------------------------------------
   let magnitudes = zip3 Nss nss y_errors |>
     map (\ (Ns, ns, y_error) ->
-            let magnitude = map (\i -> if i < Ns - ns && !(f32.isnan y_error[ns + i])
-                                       then y_error[ns + i]
-                                       else f32.inf
-                                ) (iota32 (N - n64))
-                            -- sort
-                            |> insertion_sort (f32.<=)
-                            -- extract median
-                            |> (\xs -> let i = (Ns - ns) / 2
-                                       let j = i - 1
-                                       in
-                                       if Ns == ns then 0f32
-                                       else if (Ns - ns) % 2 == 0
-                                            then (xs[j] + xs[i]) / 2
-                                       else xs[i])
-            in magnitude
+            map (\i -> if i < Ns - ns && !(f32.isnan y_error[ns + i])
+                       then y_error[ns + i]
+                       else f32.inf
+                ) (iota32 (N - n64))
+                -- sort
+                |> insertion_sort (f32.<=)
+                -- extract median
+                |> (\xs -> let i = (Ns - ns) / 2
+                           let j = i - 1
+                           in
+                           if Ns == ns then 0f32
+                           else if (Ns - ns) % 2 == 0
+                           then (xs[j] + xs[i]) / 2
+                           else xs[i])
         ) |> intrinsics.opaque
 
   ---------------------------------------------
