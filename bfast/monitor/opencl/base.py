@@ -143,42 +143,40 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
 
 
     def _get_futhark_params(self):
-
-        # sizes = {
-
-        #     "main.suff_outer_par_6":50000000,
-        #     "main.suff_intra_par_7":2048,
-        #     "main.suff_outer_par_8":50000000,
-        #     "main.suff_intra_par_9":2048,
-        #     "main.suff_outer_par_10":1,
-        #     "main.suff_intra_par_11":2048,
-        #     "main.suff_intra_par_13":1,
-        #     "main.suff_outer_par_17":50000000,
-        #     "main.suff_intra_par_18":2048,
-        #     "main.suff_outer_par_19":1,
-        #     "main.suff_intra_par_20":2048,
-        #     "main.suff_outer_par_21":50000000,
-        #     "main.suff_intra_par_22":2048,
-        #     "main.suff_outer_par_23":50000000,
-        #     "main.suff_intra_par_24":2048,
-        #     "main.suff_outer_par_25":50000000,
-        #     "main.suff_intra_par_26":2048,
-        #     "main.suff_outer_par_27":1,
-        #     "main.suff_intra_par_28":2048,
-        #     "main.suff_outer_par_29":50000000,
-        #     "main.suff_intra_par_30":1,
-        #     "main.suff_outer_par_33":50000000,
-        #     "main.suff_intra_par_34":1,
-        #     "main.suff_outer_par_35":50000000,
-        #     "main.suff_intra_par_36":2048,
-        #     "main.suff_outer_par_38":50000000,
-        #     "main.suff_intra_par_39":1,
-
-        #     }
         sizes = {
-
-            }
-
+            "main.suff_intra_par_11":128,
+            "main.suff_intra_par_13":2000000000,
+            "main.suff_intra_par_24":235,
+            "main.suff_intra_par_29":113,
+            "main.suff_intra_par_34":122,
+            "main.suff_outer_par_16":2000000000,
+            "main.suff_outer_par_17":892448,
+            "main.suff_outer_par_18":2000000000,
+            "main.suff_outer_par_19":892448,
+            "main.suff_outer_par_20":2000000000,
+            "main.suff_outer_par_21":26215660,
+            "main.suff_outer_par_28":2000000000,
+            "main.suff_outer_par_31":111556,
+            "main.suff_outer_par_6":2000000000,
+            "main.suff_outer_par_7":2000000000,
+            "main.suff_outer_par_8":7139584,
+            "mainMagnitude.suff_intra_par_11":128,
+            "mainMagnitude.suff_intra_par_13":128,
+            "mainMagnitude.suff_intra_par_24":235,
+            "mainMagnitude.suff_intra_par_29":113,
+            "mainMagnitude.suff_intra_par_34":2000000000,
+            "mainMagnitude.suff_outer_par_16":2000000000,
+            "mainMagnitude.suff_outer_par_17":892448,
+            "mainMagnitude.suff_outer_par_18":2000000000,
+            "mainMagnitude.suff_outer_par_19":892448,
+            "mainMagnitude.suff_outer_par_20":2000000000,
+            "mainMagnitude.suff_outer_par_21":26215660,
+            "mainMagnitude.suff_outer_par_28":2000000000,
+            "mainMagnitude.suff_outer_par_31":111556,
+            "mainMagnitude.suff_outer_par_6":2000000000,
+            "mainMagnitude.suff_outer_par_7":2000000000,
+            "mainMagnitude.suff_outer_par_8":7139584,
+        }
         return sizes
 
 
