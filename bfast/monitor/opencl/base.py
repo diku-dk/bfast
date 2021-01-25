@@ -51,9 +51,8 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         type I error.
     detailed_results : bool, default False
         If detailed results should be returned or not
-    old_version : bool, default False
-        Specified if an older, non-optimized version
-        shall be used
+    find_magnitudes : bool, default True
+        If magnitudes should be calculated or not
     verbose : int, optional (default=0)
         The verbosity level (0=no output, 1=output)
     platform_id : int, default 0
@@ -78,7 +77,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
                  level=0.05,
                  period=10,
                  detailed_results=False,
-                 old_version=False,
+                 find_magnitudes=True,
                  verbose=0,
                  platform_id=0,
                  device_id=0
@@ -99,7 +98,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
                                        verbose=verbose)
 
         self.detailed_results = detailed_results
-        self.old_version = old_version
+        self.find_magnitudes = find_magnitudes
         self.platform_id = platform_id
         self.device_id = device_id
 
@@ -222,14 +221,15 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
             results = self._fit_chunks(data, dates, n_chunks=n_chunks, nan_value=nan_value)
 
         if self.detailed_results:
-
             self.y_pred = results['y_pred']
             self.mosum = results['mosum']
             self.bounds = results['bounds']
 
         self.breaks = results['breaks']
         self.means = results['means']
-        self.magnitudes = results['magnitudes']
+
+        if self.find_magnitudes or self.detailed_results:
+            self.magnitudes = results['magnitudes']
 
         return self
 
@@ -352,7 +352,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
                                                   self.hfrac,
                                                   self.lam,
                                                   mapped_indices_cl, y_cl)
-        else:
+        elif self.find_magnitudes:
             breaks, means, magnitudes = self.futobj.mainMagnitude(trend,
                                                                   self.k,
                                                                   self.n,
@@ -360,6 +360,15 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
                                                                   self.hfrac,
                                                                   self.lam,
                                                                   mapped_indices_cl, y_cl)
+        else:
+            breaks, means = self.futobj.main(trend,
+                                             self.k,
+                                             self.n,
+                                             self.freq,
+                                             self.hfrac,
+                                             self.lam,
+                                             mapped_indices_cl, y_cl)
+
         end = time.time()
 
         if self.verbose > 0:
@@ -373,7 +382,9 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
             results['y_pred'] = y_pred
         results['breaks'] = breaks
         results['means'] = means
-        results['magnitudes'] = magnitudes
+
+        if self.find_magnitudes or self.detailed_results:
+            results['magnitudes'] = magnitudes
 
         return results
 
@@ -388,7 +399,9 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
 
         results['breaks'] = results['breaks'].get().reshape(oshape[1:])
         results['means'] = results['means'].get().reshape(oshape[1:])
-        results['magnitudes'] = results['magnitudes'].get().reshape(oshape[1:])
+
+        if self.find_magnitudes or self.detailed_results:
+            results['magnitudes'] = results['magnitudes'].get().reshape(oshape[1:])
 
         end = time.time()
 
@@ -418,10 +431,11 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         else:
             results['means'] = res['means']
 
-        if 'magnitudes' in results.keys():
-            results['magnitudes'] = numpy.concatenate([results['magnitudes'], res['magnitudes']], axis=0)
-        else:
-            results['magnitudes'] = res['magnitudes']
+        if self.find_magnitudes or self.detailed:
+            if 'magnitudes' in results.keys():
+                results['magnitudes'] = numpy.concatenate([results['magnitudes'], res['magnitudes']], axis=0)
+            else:
+                results['magnitudes'] = res['magnitudes']
 
         if self.detailed_results:
 
