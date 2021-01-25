@@ -144,7 +144,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
     def _get_futhark_params(self):
         sizes = {
             "main.suff_intra_par_11":128,
-            "main.suff_intra_par_13":2000000000,
+            "main.suff_intra_par_13":128,
             "main.suff_intra_par_24":235,
             "main.suff_intra_par_29":113,
             "main.suff_intra_par_34":122,
@@ -160,21 +160,21 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
             "main.suff_outer_par_7":2000000000,
             "main.suff_outer_par_8":7139584,
             "mainMagnitude.suff_intra_par_11":128,
-            "mainMagnitude.suff_intra_par_13":128,
+            "mainMagnitude.suff_intra_par_13":2000000000,
             "mainMagnitude.suff_intra_par_24":235,
             "mainMagnitude.suff_intra_par_29":113,
-            "mainMagnitude.suff_intra_par_34":2000000000,
+            "mainMagnitude.suff_intra_par_37":122,
             "mainMagnitude.suff_outer_par_16":2000000000,
             "mainMagnitude.suff_outer_par_17":892448,
-            "mainMagnitude.suff_outer_par_18":2000000000,
-            "mainMagnitude.suff_outer_par_19":892448,
+            "mainMagnitude.suff_outer_par_18":111556,
+            "mainMagnitude.suff_outer_par_19":2000000000,
             "mainMagnitude.suff_outer_par_20":2000000000,
             "mainMagnitude.suff_outer_par_21":26215660,
             "mainMagnitude.suff_outer_par_28":2000000000,
             "mainMagnitude.suff_outer_par_31":111556,
             "mainMagnitude.suff_outer_par_6":2000000000,
             "mainMagnitude.suff_outer_par_7":2000000000,
-            "mainMagnitude.suff_outer_par_8":7139584,
+            "mainMagnitude.suff_outer_par_8":7139584
         }
         return sizes
 
