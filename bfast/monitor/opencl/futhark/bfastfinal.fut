@@ -1,7 +1,5 @@
 -- BFAST-irregular: version handling obscured observations (e.g., clouds)
 -- ==
--- compiled input @ data/peru.in.gz
-
 -- compiled input @ data/D1.in.gz
 -- compiled input @ data/D2.in.gz
 -- compiled input @ data/D3.in.gz
@@ -107,6 +105,12 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
                           |> reduce (+) 0.0
                        ) |> intrinsics.opaque
 
+  let BOUND = map (\q -> let t    = n+1+q
+                         let time = #[unsafe] mappingindices[t - 1]
+                         let tmp  = logplus ((r32 time) / (r32 mappingindices[n - 1]))
+                         in  lam * (f32.sqrt tmp)
+                  ) (iota32 (N-n64))
+
   ---------------------------------------------
   -- 8. error magnitude computation:             --
   ---------------------------------------------
@@ -130,16 +134,7 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
         ) |> intrinsics.opaque
 
   ---------------------------------------------
-  -- 9. bound computation:             --
-  ---------------------------------------------
-  let BOUND = map (\q -> let t    = n+1+q
-                         let time = #[unsafe] mappingindices[t - 1]
-                         let tmp  = logplus ((r32 time) / (r32 mappingindices[n - 1]))
-                         in  lam * (f32.sqrt tmp)
-                  ) (iota32 (N-n64))
-
-  ---------------------------------------------
-  -- 10. moving sums computation:             --
+  -- 9. moving sums computation:             --
   ---------------------------------------------
   let (MOs, MOs_NN, breaks, means) = zip (zip4 Nss nss sigmas hs)
                                          (zip3 MO_fsts y_errors val_indss) |>
