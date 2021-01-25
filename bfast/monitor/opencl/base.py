@@ -353,13 +353,13 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
                                                   self.lam,
                                                   mapped_indices_cl, y_cl)
         else:
-            breaks, means, magnitudes = self.futobj.main(trend,
-                                                         self.k,
-                                                         self.n,
-                                                         self.freq,
-                                                         self.hfrac,
-                                                         self.lam,
-                                                         mapped_indices_cl, y_cl)
+            breaks, means, magnitudes = self.futobj.mainMagnitude(trend,
+                                                                  self.k,
+                                                                  self.n,
+                                                                  self.freq,
+                                                                  self.hfrac,
+                                                                  self.lam,
+                                                                  mapped_indices_cl, y_cl)
         end = time.time()
 
         if self.verbose > 0:
