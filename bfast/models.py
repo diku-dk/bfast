@@ -58,10 +58,11 @@ class BFASTMonitor(object):
         Only relevant if backend='opencl'.
         If detailed results should be returned or not.
 
-    old_version : bool, default False
+    find_magnitudes : bool, default True
         Only relevant if backend='opencl'.
-        Specified if an older, non-optimized version
-        shall be used
+        If magnitudes should be returned or not.
+        Disabling this would improve the performance greatly
+
 
     Attributes
     ----------
@@ -99,7 +100,7 @@ class BFASTMonitor(object):
             platform_id=0,
             device_id=0,
             detailed_results=False,
-            old_version=False,
+            find_magnitudes=True,
         ):
 
         self.start_monitor = start_monitor
@@ -114,7 +115,7 @@ class BFASTMonitor(object):
         self.platform_id = platform_id
         self.device_id = device_id
         self.detailed_results = detailed_results
-        self.old_version = old_version
+        self.find_magnitudes = find_magnitudes
 
     def fit(self, data, dates, n_chunks=None, nan_value=0):
         """ Fits the models for the ndarray 'data'
@@ -176,7 +177,7 @@ class BFASTMonitor(object):
                  level=self.level,
                  period=self.period,
                  detailed_results=self.detailed_results,
-                 old_version=self.old_version,
+                 find_magnitudes=self.find_magnitudes,
                  verbose=self.verbose,
                  platform_id=self.platform_id,
                  device_id=self.device_id
@@ -221,7 +222,7 @@ class BFASTMonitor(object):
             "platform_id": self.platform_id,
             "device_id": self.device_id,
             "detailed_results": self.detailed_results,
-            "old_version": self.old_version
+            "find_magnitudes": self.find_magnitudes
         }
 
         return params

@@ -1,5 +1,7 @@
 -- BFAST-irregular: version handling obscured observations (e.g., clouds)
 -- ==
+-- compiled input @ data/peru.in.gz
+
 -- compiled input @ data/D1.in.gz
 -- compiled input @ data/D2.in.gz
 -- compiled input @ data/D3.in.gz
@@ -8,14 +10,7 @@
 -- compiled input @ data/D6.in.gz
 -- compiled input @ data/peru.in.gz
 
--- output @ data/peru.out.gz
--- compiled input @ data/sahara.in.gz
--- output @ data/sahara.out.gz
-
--- REMEMBER TO RUN:
--- futhark pkg add github.com/diku-dk/sorts
--- futhark pkg sync
-import "lib/github.com/diku-dk/sorts/radix_sort"
+import "lib/github.com/diku-dk/sorts/insertion_sort"
 import "helpers"
 
 -- | implementation is in this entry point
@@ -119,12 +114,32 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
                   ) (iota32 (N-n64))
 
   ---------------------------------------------
-  -- 8. moving sums computation:             --
+  -- 8. error magnitude computation:             --
   ---------------------------------------------
-  let (MOs, MOs_NN, breaks, means, magnitudes) = zip (zip4 Nss nss sigmas hs)
-                                                     (zip3 MO_fsts y_errors val_indss) |>
+  let magnitudes = zip3 Nss nss y_errors |>
+    map (\ (Ns, ns, y_error) ->
+            map (\i -> if i < Ns - ns && !(f32.isnan y_error[ns + i])
+                       then y_error[ns + i]
+                       else f32.inf
+                ) (iota32 (N - n64))
+                -- sort
+                |> insertion_sort (f32.<=)
+                -- extract median
+                |> (\xs -> let i = (Ns - ns) / 2
+                           let j = i - 1
+                           in
+                           if Ns == ns then 0f32
+                           else if (Ns - ns) % 2 == 0
+                           then (xs[j] + xs[i]) / 2
+                           else xs[i])
+        ) |> intrinsics.opaque
+
+  ---------------------------------------------
+  -- 9. moving sums computation:             --
+  ---------------------------------------------
+  let (MOs, MOs_NN, breaks, means) = zip (zip4 Nss nss sigmas hs)
+                                         (zip3 MO_fsts y_errors val_indss) |>
     map (\ ( (Ns,ns,sigma, h), (MO_fst,y_error,val_inds) ) ->
-            -- let Nmn = N-n
             let MO = map (\j -> if j >= Ns - ns then 0.0
                                 else if j == 0 then MO_fst
                                 else #[unsafe] (y_error[ns + j] - y_error[ns - h + j])
@@ -143,28 +158,14 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
             let mean = map2 (\x j -> if j < Ns - ns then x else 0.0 ) MO' (iota32 (N - n64))
                        |> reduce (+) 0.0
                        |> (\x -> if (Ns - ns) == 0 then 0f32 else x / (r32 (Ns - ns)))
-            let magnitude = map (\i -> if i < Ns - ns && !(f32.isnan y_error[ns + i])
-                                       then y_error[ns + i]
-                                       else f32.inf
-                                ) (iota32 (N - n64))
-                            -- sort
-                            |> radix_sort_float f32.num_bits f32.get_bit
-                            -- median_sorted
-                            |> (\xs -> let i = (Ns - ns) / 2
-                                       let j = i - 1
-                                       in
-                                       if Ns == ns then 0f32
-                                       else if (Ns - ns) % 2 == 0
-                                            then (xs[j] + xs[i]) / 2
-                                       else xs[i])
             let fst_break' = if !is_break then -1
                              else adjustValInds n ns Ns val_inds fst_break
             let fst_break' = if ns <=5 || Ns-ns <= 5 then -2 else fst_break'
             -- The computation of MO'' should be moved just after MO' to make bounds consistent
             let val_inds' = map (adjustValInds n ns Ns val_inds) (iota32 (N - n64))
             let MO'' = scatter (replicate (N - n64) f32.nan) (map i64.i32 val_inds') MO'
-            in (MO'', MO', fst_break', mean, magnitude)
-        ) |> unzip5
+            in (MO'', MO', fst_break', mean)
+        ) |> unzip4
 
   in (MO_fsts, Nss, nss, sigmas, MOs, MOs_NN, BOUND, breaks, means, magnitudes, y_errors, y_preds)
 
@@ -176,13 +177,21 @@ entry mainDetailed [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
                   (images : [m][N]f32) =
   mainFun trend k n freq hfrac lam mappingindices images
 
+entry mainMagnitude [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
+                           (hfrac: f32) (lam: f32)
+                           (mappingindices : [N]i32)
+                           (images : [m][N]f32) =
+  let (_, _, _, _, _, _, _, breaks, means, magnitudes, _, _) =
+    mainFun trend k n freq hfrac lam mappingindices images
+  in (breaks, means, magnitudes)
+
 entry main [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
                   (hfrac: f32) (lam: f32)
                   (mappingindices : [N]i32)
                   (images : [m][N]f32) =
-  let (_, _, _, _, _, _, _, breaks, means, magnitudes, _, _) =
+  let (_, _, _, _, _, _, _, breaks, means, _, _, _) =
     mainFun trend k n freq hfrac lam mappingindices images
-  in (breaks, means, magnitudes)
+  in (breaks, means)
 
 -- | implementation is in this entry point
 --   the outer map is distributed directly
