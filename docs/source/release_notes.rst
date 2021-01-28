@@ -3,6 +3,12 @@
 Release Notes
 =============
 
+Release 0.6 (January 2021)
+-------------------------
+* Performance improvements
+* Various bug fixes 
+* New Python backend
+
 Release 0.5 (August 2020)
 ----------------------------
 * Small fix in installation script 
