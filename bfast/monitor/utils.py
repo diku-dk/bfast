@@ -1,4 +1,7 @@
+from datetime import datetime
+
 import numpy as np
+import pandas
 
 __critvals = np.array([1.22762665817831, 1.68732328328598, 2.22408818231127,
 1.33623105388957, 1.88633090100410, 2.70443676308234, 1.34108685187662,
@@ -383,7 +386,7 @@ __critval_level = np.arange(0.95, 0.999, 0.001)
 __critval_mr = np.array(["max", "range"])
 
 def check(h, period, level, mr):
-    
+
     if not h in __critval_h:
         raise ValueError("h can only be one of", __critval_h)
 
@@ -397,12 +400,12 @@ def check(h, period, level, mr):
         raise ValueError("mr can only be one of", __critval_mr)
 
 def get_critval(h, period, level, mr):
-    
+
     # Sanity check
     check(h, period, level, mr)
 
-    index = np.zeros(4, dtype=np.int) 
-    
+    index = np.zeros(4, dtype=np.int)
+
     # Get index into table from arguments
     index[0] = np.where(mr == __critval_mr)[0][0]
     index[1] = np.where(level == __critval_level)[0][0]
@@ -410,7 +413,6 @@ def get_critval(h, period, level, mr):
     # print((np.abs(__critval_period - period)).argmin())
     index[2] = (np.abs(__critval_period - period)).argmin()
     index[3] = np.where(h == __critval_h)[0][0]
-
     # For historical reasons, the critvals are scaled by sqrt(2)
     return __critvals[tuple(index)] * np.sqrt(2)
 
@@ -419,20 +421,20 @@ def _find_index_date(dates, t):
     for i in range(len(dates)):
         if t < dates[i]:
             return i
-    
+
     return len(dates)
-                
+
 def crop_data_dates(data, dates, start, end):
     """ Crops the input data and the associated
-    dates w.r.t. the provided start and end 
+    dates w.r.t. the provided start and end
     datetime object.
-    
+
     Parameters
     ----------
     data: ndarray of shape (N, W, H)
-        Here, N is the number of time 
-        series points per pixel and W 
-        and H are the width and the height 
+        Here, N is the number of time
+        series points per pixel and W
+        and H are the width and the height
         of the image, respectively.
     dates : list of datetime objects
         Specifies the dates of the elements
@@ -442,21 +444,47 @@ def crop_data_dates(data, dates, start, end):
         The start datetime object
     end : datetime
         The end datetime object
-            
+
     Returns
     -------
     Returns: data, dates
-        The cropped data array and the 
-        cropped list. Only those images 
+        The cropped data array and the
+        cropped list. Only those images
         and dates that are with the start/end
         period are contained in the returned
         objects.
     """
-    
+
     start_idx = _find_index_date(dates, start)
     end_idx = _find_index_date(dates, end)
 
     data_cropped = data[start_idx:end_idx, :, :]
     dates_cropped = list(np.array(dates)[start_idx:end_idx])
-    
+
     return data_cropped, dates_cropped
+
+
+def compute_lam(N, hfrac, level, period):
+    check(hfrac, period, 1 - level, "max")
+
+    return get_critval(hfrac, period, 1 - level, "max")
+
+def compute_end_history(dates, start_monitor):
+    for i in range(len(dates)):
+        if start_monitor <= dates[i]:
+            return i
+
+    raise Exception("Date 'start' not within the range of dates!")
+
+def map_indices(dates):
+    start = dates[0]
+    end = dates[-1]
+    start = datetime(start.year, 1, 1)
+    end = datetime(end.year, 12, 31)
+
+    drange = pandas.date_range(start, end, freq="d")
+    ts = pandas.Series(np.ones(len(dates)), dates)
+    ts = ts.reindex(drange)
+    indices = np.argwhere(~np.isnan(ts).to_numpy()).T[0]
+
+    return indices
