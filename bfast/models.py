@@ -61,10 +61,11 @@ class BFASTMonitor(object):
         Only relevant if backend='opencl'.
         If detailed results should be returned or not.
 
-    old_version : bool, default False
+    find_magnitudes : bool, default True
         Only relevant if backend='opencl'.
-        Specified if an older, non-optimized version
-        shall be used
+        If magnitudes should be returned or not.
+        Disabling this would improve the performance greatly
+
 
     Attributes
     ----------
@@ -96,12 +97,13 @@ class BFASTMonitor(object):
             hfrac=0.25,
             trend=True,
             level=0.05,
+            period=10,
             verbose=0,
             backend="opencl",
             platform_id=0,
             device_id=0,
             detailed_results=False,
-            old_version=False,
+            find_magnitudes=True,
         ):
 
         self.start_monitor = start_monitor
@@ -110,12 +112,13 @@ class BFASTMonitor(object):
         self.hfrac = hfrac
         self.trend = trend
         self.level = level
+        self.period = period
         self.verbose = verbose
         self.backend = backend
         self.platform_id = platform_id
         self.device_id = device_id
         self.detailed_results = detailed_results
-        self.old_version = old_version
+        self.find_magnitudes = find_magnitudes
 
     def fit(self, data, dates, n_chunks=None, nan_value=0):
         """ Fits the models for the ndarray 'data'
@@ -150,7 +153,21 @@ class BFASTMonitor(object):
                  hfrac=self.hfrac,
                  trend=self.trend,
                  level=self.level,
+                 period=self.period,
                  verbose=self.verbose,
+                )
+
+        elif self.backend == 'python-mp':
+            self._model = BFASTMonitorPython(
+                 start_monitor=self.start_monitor,
+                 freq=self.freq,
+                 k=self.k,
+                 hfrac=self.hfrac,
+                 trend=self.trend,
+                 level=self.level,
+                 period=self.period,
+                 verbose=self.verbose,
+                 use_mp=True
                 )
 
         elif self.backend == 'opencl':
@@ -161,8 +178,9 @@ class BFASTMonitor(object):
                  hfrac=self.hfrac,
                  trend=self.trend,
                  level=self.level,
+                 period=self.period,
                  detailed_results=self.detailed_results,
-                 old_version=self.old_version,
+                 find_magnitudes=self.find_magnitudes,
                  verbose=self.verbose,
                  platform_id=self.platform_id,
                  device_id=self.device_id
@@ -201,12 +219,13 @@ class BFASTMonitor(object):
             "hfrac": self.hfrac,
             "trend": self.trend,
             "level": self.level,
+            "period": self.period,
             "verbose": self.verbose,
             "backend": self.backend,
             "platform_id": self.platform_id,
             "device_id": self.device_id,
             "detailed_results": self.detailed_results,
-            "old_version": self.old_version
+            "find_magnitudes": self.find_magnitudes
         }
 
         return params

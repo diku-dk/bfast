@@ -16,15 +16,16 @@ class BFASTMonitorBase(ABC):
             hfrac=0.25,
             trend=True,
             level=0.05,
+            period=10,
             verbose=0,
-    ):
-
+         ):
         self.start_monitor = start_monitor
         self.freq = freq
         self.k = k
         self.hfrac = hfrac
         self.trend = trend
         self.level = level
+        self.period = period
         self.verbose = verbose
 
     @abstractmethod
@@ -55,4 +56,3 @@ class BFASTBase(ABC):
     @abstractmethod
     def fit(self, Yt, ti):
         raise Exception("Function 'fit' not implemented!")
-
