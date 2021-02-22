@@ -4,7 +4,7 @@ import numpy
 from datetime import datetime
 
 from bfast import BFASTMonitor
-from bfast.utils import crop_data_dates
+from bfast.monitor.utils import crop_data_dates
 
 import copy
 

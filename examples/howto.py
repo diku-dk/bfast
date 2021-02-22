@@ -24,7 +24,7 @@ with open(ifile_meta) as f:
     dates = [datetime.strptime(d, '%Y-%m-%d') for d in dates if len(d) > 0]
 
 # define history and monitoring period and crop input data
-from bfast.utils import crop_data_dates
+from bfast.monitor.utils import crop_data_dates
 start_hist = datetime(2002, 1, 1)
 start_monitor = datetime(2010, 1, 1)
 end_monitor = datetime(2018, 1, 1)

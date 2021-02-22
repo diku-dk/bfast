@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 
 from bfast import BFASTMonitor
-from bfast.utils import crop_data_dates
+from bfast.monitor.utils import crop_data_dates
 
 
 def cached(file_name):
