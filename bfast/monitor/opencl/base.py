@@ -442,7 +442,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         else:
             results['valids'] = res['valids']
 
-        if self.find_magnitudes or self.detailed:
+        if self.find_magnitudes or self.detailed_results:
             if 'magnitudes' in results.keys():
                 results['magnitudes'] = numpy.concatenate([results['magnitudes'], res['magnitudes']], axis=0)
             else:
