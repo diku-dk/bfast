@@ -224,6 +224,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
             self.y_pred = results['y_pred']
             self.mosum = results['mosum']
             self.bounds = results['bounds']
+            self.valids = results['valids']
 
         self.breaks = results['breaks']
         self.means = results['means']
@@ -380,6 +381,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
             results['mosum'] = mosum
             results['bounds'] = bounds
             results['y_pred'] = y_pred
+            results['valids'] = Ns
         results['breaks'] = breaks
         results['means'] = means
 
@@ -396,6 +398,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
             results['mosum'] = mosum
             results['bounds'] = results['bounds'].get()
             results['y_pred'] = results['y_pred'].get().T.reshape(oshape)
+            results['valids'] = results['valids'].get().T.reshape(oshape[1:])
 
         results['breaks'] = results['breaks'].get().reshape(oshape[1:])
         results['means'] = results['means'].get().reshape(oshape[1:])
@@ -451,5 +454,10 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
                 results['mosum'] = numpy.concatenate([results['mosum'], res['mosum']], axis=1)
             else:
                 results['mosum'] = res['mosum']
+
+            if 'valids' in results.keys():
+                results['valids'] = numpy.concatenate([results['valids'], res['valids']], axis=0)
+            else:
+                results['valids'] = res['valids']
 
         return results
