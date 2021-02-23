@@ -73,7 +73,6 @@ def run_bfast_(backend,
             backend=backend,
             verbose=1,
             device_id=0,
-            detailed_results=True,
     )
 
     #data = data[:,:50,:50]
