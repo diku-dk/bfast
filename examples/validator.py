@@ -71,7 +71,7 @@ def run_bfast_(backend,
             trend=trend,
             level=level,
             backend=backend,
-            verbose=1,
+            verbose=0,
             device_id=0,
     )
 

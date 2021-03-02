@@ -1,15 +1,15 @@
 import os
 import wget
+import time
+import copy
 import numpy
+# numpy.warnings.filterwarnings('ignore')
+import matplotlib.pyplot as plt
+import matplotlib
 from datetime import datetime
 
 from bfast import BFASTMonitor
 from bfast.monitor.utils import crop_data_dates
-
-import copy
-
-import matplotlib.pyplot as plt
-import matplotlib
 
 # parameters
 k = 3
@@ -20,7 +20,6 @@ level = 0.05
 start_hist = datetime(2002, 1, 1)
 start_monitor = datetime(2010, 1, 1)
 end_monitor = datetime(2018, 1, 1)
-position = (100,100)
 
 # download and parse input data
 ifile_meta = "data/peru_small/dates.txt"
@@ -46,7 +45,7 @@ print("First date: {}".format(dates[0]))
 print("Last date: {}".format(dates[-1]))
 print("Shape of data array: {}".format(data.shape))
 
-# fit BFAST using the CPU implementation (single pixel)
+# fit BFASTMontiro model
 model = BFASTMonitor(
             start_monitor,
             freq=freq,
@@ -55,16 +54,22 @@ model = BFASTMonitor(
             trend=trend,
             level=level,
             backend='python',
-            verbose=1
-            )
+            # backend='python-mp',
+            verbose=0,
+            device_id=0,
+        )
 
-# only apply on a small subset
-data = data[:,:50,:50]
-model.fit(data, dates, nan_value=-32768)
+
+start_time = time.time()
+model.fit(data, dates, n_chunks=5, nan_value=-32768)
+
+end_time = time.time()
+print("All computations have taken {} seconds.".format(end_time - start_time))
 
 # visualize results
 breaks = model.breaks
 means = model.means
+
 no_breaks_indices = (breaks == -1)
 means[no_breaks_indices] = 0
 means[means > 0] = 0
@@ -112,3 +117,5 @@ fig.colorbar(im, cax=cbar_ax, ticks=[0, 1, 2, 3, 4, 5, 6])
 labels = cbar_ax.set_yticklabels(['2010', '2011', '2012', '2013', '2014', '2015', '2016'])
 
 plt.show()
+
+# plt.savefig("peru_python1.png")
