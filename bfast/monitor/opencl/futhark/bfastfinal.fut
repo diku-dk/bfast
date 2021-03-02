@@ -181,17 +181,17 @@ entry mainMagnitude [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
                            (hfrac: f32) (lam: f32)
                            (mappingindices : [N]i32)
                            (images : [m][N]f32) =
-  let (_, _, _, _, _, _, _, breaks, means, magnitudes, _, _) =
+  let (_, Nss, _, _, _, _, _, breaks, means, magnitudes, _, _) =
     mainFun trend k n freq hfrac lam mappingindices images
-  in (breaks, means, magnitudes)
+  in (Nss, breaks, means, magnitudes)
 
 entry main [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
                   (hfrac: f32) (lam: f32)
                   (mappingindices : [N]i32)
                   (images : [m][N]f32) =
-  let (_, _, _, _, _, _, _, breaks, means, _, _, _) =
+  let (_, Nss, _, _, _, _, _, breaks, means, _, _, _) =
     mainFun trend k n freq hfrac lam mappingindices images
-  in (breaks, means)
+  in (Nss, breaks, means)
 
 -- | implementation is in this entry point
 --   the outer map is distributed directly

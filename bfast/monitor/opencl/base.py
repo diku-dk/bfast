@@ -227,6 +227,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
 
         self.breaks = results['breaks']
         self.means = results['means']
+        self.valids = results['valids']
 
         if self.find_magnitudes or self.detailed_results:
             self.magnitudes = results['magnitudes']
@@ -353,21 +354,24 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
                                                   self.lam,
                                                   mapped_indices_cl, y_cl)
         elif self.find_magnitudes:
-            breaks, means, magnitudes = self.futobj.mainMagnitude(trend,
-                                                                  self.k,
-                                                                  self.n,
-                                                                  self.freq,
-                                                                  self.hfrac,
-                                                                  self.lam,
-                                                                  mapped_indices_cl, y_cl)
+            Ns, \
+                breaks, \
+                means, \
+                magnitudes = self.futobj.mainMagnitude(trend,
+                                                       self.k,
+                                                       self.n,
+                                                       self.freq,
+                                                       self.hfrac,
+                                                       self.lam,
+                                                       mapped_indices_cl, y_cl)
         else:
-            breaks, means = self.futobj.main(trend,
-                                             self.k,
-                                             self.n,
-                                             self.freq,
-                                             self.hfrac,
-                                             self.lam,
-                                             mapped_indices_cl, y_cl)
+            Ns, breaks, means = self.futobj.main(trend,
+                                                 self.k,
+                                                 self.n,
+                                                 self.freq,
+                                                 self.hfrac,
+                                                 self.lam,
+                                                 mapped_indices_cl, y_cl)
 
         end = time.time()
 
@@ -382,6 +386,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
             results['y_pred'] = y_pred
         results['breaks'] = breaks
         results['means'] = means
+        results['valids'] = Ns
 
         if self.find_magnitudes or self.detailed_results:
             results['magnitudes'] = magnitudes
@@ -399,6 +404,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
 
         results['breaks'] = results['breaks'].get().reshape(oshape[1:])
         results['means'] = results['means'].get().reshape(oshape[1:])
+        results['valids'] = results['valids'].get().T.reshape(oshape[1:])
 
         if self.find_magnitudes or self.detailed_results:
             results['magnitudes'] = results['magnitudes'].get().reshape(oshape[1:])
@@ -431,7 +437,12 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         else:
             results['means'] = res['means']
 
-        if self.find_magnitudes or self.detailed:
+        if 'valids' in results.keys():
+            results['valids'] = numpy.concatenate([results['valids'], res['valids']], axis=0)
+        else:
+            results['valids'] = res['valids']
+
+        if self.find_magnitudes or self.detailed_results:
             if 'magnitudes' in results.keys():
                 results['magnitudes'] = numpy.concatenate([results['magnitudes'], res['magnitudes']], axis=0)
             else:

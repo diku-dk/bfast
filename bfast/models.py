@@ -315,3 +315,18 @@ class BFASTMonitor(object):
             return self._model_fitted
 
         return False
+
+    @property
+    def valids(self):
+        """ Returns the number of valid values for each pixel
+
+        Returns
+        -------
+         array-like : An array containing the number
+             of valid values for each pixel in the
+             aray data
+        """
+        if self._is_fitted():
+            return self._model.valids
+
+        raise Exception("Model not yet fitted!")

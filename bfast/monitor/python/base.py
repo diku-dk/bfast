@@ -151,15 +151,17 @@ class BFASTMonitorPython(BFASTMonitorBase):
             y = np.transpose(data, (1, 2, 0)).reshape(data.shape[1] * data.shape[2], data.shape[0])
             pool = mp.Pool(mp.cpu_count())
             p_map = pool.map(self.fit_single, y)
-            rval = np.array(p_map, dtype=object).reshape(data.shape[1], data.shape[2], 3)
+            rval = np.array(p_map, dtype=object).reshape(data.shape[1], data.shape[2], 4)
 
             self.breaks = rval[:,:,0].astype(np.int32)
             self.means = rval[:,:,1].astype(np.float32)
             self.magnitudes = rval[:,:,2].astype(np.float32)
+            self.valids = rval[:,:,3].astype(np.int32)
         else:
             means_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.float32)
             magnitudes_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.float32)
             breaks_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.int32)
+            valids_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.int32)
 
             for i in range(data.shape[1]):
                 if self.verbose > 0:
@@ -167,14 +169,19 @@ class BFASTMonitorPython(BFASTMonitorBase):
 
                 for j in range(data.shape[2]):
                     y = data[:,i,j]
-                    pix_break, pix_mean, pix_magnitude = self.fit_single(y)
+                    (pix_break,
+                     pix_mean,
+                     pix_magnitude,
+                     pix_num_valid) = self.fit_single(y)
                     breaks_global[i,j] = pix_break
                     means_global[i,j] = pix_mean
                     magnitudes_global[i,j] = pix_magnitude
+                    valids_global[i,j] = pix_num_valid
 
             self.breaks = breaks_global
             self.means = means_global
             self.magnitudes = magnitudes_global
+            self.valids = valids_global
 
         return self
 
@@ -210,7 +217,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
             magnitude = 0.0
             if self.verbose > 1:
                 print("WARNING: Not enough observations: ns={ns}, Ns={Ns}".format(ns=ns, Ns=Ns))
-            return brk, mean, magnitude
+            return brk, mean, magnitude, Ns
 
         val_inds = val_inds[ns:]
         val_inds -= self.n
@@ -284,7 +291,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         else:
             first_break = -1
 
-        return first_break, mean, magnitude
+        return first_break, mean, magnitude, Ns
 
     def get_timers(self):
         """ Returns runtime measurements for the
