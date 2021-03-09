@@ -3,13 +3,11 @@ import "utils"
 
 let loess_proc [n] [n_m] (xx: [n]f32)          -- time values - should be 1:n unless there are nans
                          (yy: [n]f32)          -- the corresponding y values
-                         (span32: i32)         -- span of smoothing
+                         (span: i64)           -- span of smoothing
                          (m: [n_m]i64)         -- points at which to evaluate the smooth
                          (l_idx: [n_m]i64)     -- index of left starting points
                          (max_dist: [n_m]f32)  -- distance between nn bounds for each point
                          : ([n_m]f32, [n_m]f32) =
-  let span = i64.i32 span32
-  in
   map3 (\i_l_idx i_m i_max_dist ->
          -- get weights, x, and a
          let (x, w) =
@@ -32,8 +30,12 @@ let loess_proc [n] [n_m] (xx: [n]f32)          -- time values - should be 1:n un
          let a1 = c * det
          let b1 = -b * det
          let c1 = a * det
-         let result = tabulate span (\j -> (w[j] * a1 + xw[j] * b1) * yy[i_l_idx + j]) |> f32.sum
-         let slopes = tabulate span (\j -> (w[j] * b1 + xw[j] * c1) * yy[i_l_idx + j]) |> f32.sum
+
+         let fun (par1: f32) (par2: f32) : f32 =
+           tabulate span (\j -> (w[j] * par1 + xw[j] * par2) * yy[i_l_idx + j]) |> f32.sum
+
+         let result = fun a1 b1
+         let slopes = fun b1 c1
          in (result, slopes)
        ) l_idx m max_dist |> unzip
 
@@ -77,7 +79,7 @@ let loess [N] [n_m] (y: [N]f32)        -- observations
       in
       loess_proc (map w64 x)
                  y
-                 (i32.i64 span)
+                 span
                  m
                  l_idx
                  max_dist
@@ -95,7 +97,7 @@ let loess [N] [n_m] (y: [N]f32)        -- observations
       in
       loess_proc (map w64 x2)
                  (pad_gather y y_idx 0f32)
-                 (i32.i64 span)
+                 span
                  m
                  l_idx_nn
                  max_dist
