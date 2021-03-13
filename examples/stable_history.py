@@ -1,4 +1,5 @@
 import os
+import argparse
 import wget
 import time
 import copy
@@ -10,6 +11,11 @@ from functools import wraps
 
 from bfast import BFASTMonitor
 from bfast.monitor.utils import crop_data_dates
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--backend", type=str, action="store", default="python",
+                    help="backend for BFASTMonitor")
+args = parser.parse_args()
 
 # parameters
 k = 3
@@ -29,16 +35,16 @@ if not os.path.isdir("data/peru_small"):
     os.makedirs("data/peru_small")
 
 if not os.path.exists(ifile_meta):
-    url = 'https://sid.erda.dk/share_redirect/fcwjD77gUY/dates.txt'
+    url = "https://sid.erda.dk/share_redirect/fcwjD77gUY/dates.txt"
     wget.download(url, ifile_meta)
 if not os.path.exists(ifile_data):
-    url = 'https://sid.erda.dk/share_redirect/fcwjD77gUY/data.npy'
+    url = "https://sid.erda.dk/share_redirect/fcwjD77gUY/data.npy"
     wget.download(url, ifile_data)
 
 data_orig = np.load(ifile_data)
 with open(ifile_meta) as f:
-    dates = f.read().split('\n')
-    dates = [datetime.strptime(d, '%Y-%m-%d') for d in dates if len(d) > 0]
+    dates = f.read().split("\n")
+    dates = [datetime.strptime(d, "%Y-%m-%d") for d in dates if len(d) > 0]
 
 data, dates = crop_data_dates(data_orig, dates, start_hist, end_monitor)
 print("First date: {}".format(dates[0]))
@@ -53,7 +59,7 @@ model = BFASTMonitor(
             hfrac=hfrac,
             trend=trend,
             level=level,
-            backend='python',
+            backend=args.backend,
             verbose=0,
             device_id=0,
         )
@@ -74,7 +80,7 @@ else:
     np.save(f, hist)
 
   
-# visualize results
+# visualize stable history starts
 not_enough_obs = hist == -2
 hist = hist.astype(np.float)
 hist[not_enough_obs] = np.nan
@@ -108,6 +114,6 @@ im = axes.imshow(hist_years, cmap=cmap, vmin=0, vmax=8)
 fig.subplots_adjust(right=0.8)
 cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
 fig.colorbar(im, cax=cbar_ax, ticks=[0, 1, 2, 3, 4, 5, 6, 7, 8])
-labels = cbar_ax.set_yticklabels(['nan', '2003', '2004', '2005', '2006', '2007', '2008', '2009', '2010'])
+labels = cbar_ax.set_yticklabels(["nan", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010"])
 
-plt.savefig("peru_python_roc1.png")
+plt.savefig("peru_roc.png")

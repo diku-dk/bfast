@@ -162,6 +162,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
             self.means = rval[:,:,1].astype(np.float32)
             self.magnitudes = rval[:,:,2].astype(np.float32)
             self.valids = rval[:,:,3].astype(np.int32)
+            self.history_starts = rval[:,:,4].astype(np.int32)
         else:
             means_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.float32)
             magnitudes_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.float32)
