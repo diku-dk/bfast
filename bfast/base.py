@@ -14,6 +14,7 @@ class BFASTMonitorBase(ABC):
             start_monitor,
             freq=365,
             k=3,
+            history=None,
             hfrac=0.25,
             trend=True,
             level=0.05,
@@ -24,6 +25,7 @@ class BFASTMonitorBase(ABC):
         self.start_monitor = start_monitor
         self.freq = freq
         self.k = k
+        self.history = history
         self.hfrac = hfrac
         self.trend = trend
         self.level = level

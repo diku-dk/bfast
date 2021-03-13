@@ -12,7 +12,10 @@ np.set_printoptions(suppress=True)
 from sklearn import linear_model
 
 from bfast.base import BFASTMonitorBase
-from bfast.monitor.utils import compute_end_history, compute_lam, map_indices
+from bfast.monitor.utils import (
+    compute_end_history, compute_lam, map_indices,
+    rcusum, sctest, boundary,
+)
 
 
 class BFASTMonitorPython(BFASTMonitorBase):
@@ -88,6 +91,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
                  start_monitor,
                  freq=365,
                  k=3,
+                 history=None,
                  hfrac=0.25,
                  trend=True,
                  level=0.05,
@@ -99,6 +103,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         super(BFASTMonitorPython, self).__init__(start_monitor,
                                        freq,
                                        k=k,
+                                       history=history,
                                        hfrac=hfrac,
                                        trend=trend,
                                        level=level,
@@ -151,7 +156,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
             y = np.transpose(data, (1, 2, 0)).reshape(data.shape[1] * data.shape[2], data.shape[0])
             pool = mp.Pool(mp.cpu_count())
             p_map = pool.map(self.fit_single, y)
-            rval = np.array(p_map, dtype=object).reshape(data.shape[1], data.shape[2], 4)
+            rval = np.array(p_map, dtype=object).reshape(data.shape[1], data.shape[2], 5)
 
             self.breaks = rval[:,:,0].astype(np.int32)
             self.means = rval[:,:,1].astype(np.float32)
@@ -162,6 +167,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
             magnitudes_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.float32)
             breaks_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.int32)
             valids_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.int32)
+            hists_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.int32)
 
             for i in range(data.shape[1]):
                 if self.verbose > 0:
@@ -172,16 +178,19 @@ class BFASTMonitorPython(BFASTMonitorBase):
                     (pix_break,
                      pix_mean,
                      pix_magnitude,
-                     pix_num_valid) = self.fit_single(y)
+                     pix_num_valid,
+                     pix_hist_start) = self.fit_single(y)
                     breaks_global[i,j] = pix_break
                     means_global[i,j] = pix_mean
                     magnitudes_global[i,j] = pix_magnitude
                     valids_global[i,j] = pix_num_valid
+                    hists_global[i,j] = pix_hist_start
 
             self.breaks = breaks_global
             self.means = means_global
             self.magnitudes = magnitudes_global
             self.valids = valids_global
+            self.history_starts = hists_global
 
         return self
 
@@ -215,9 +224,10 @@ class BFASTMonitorPython(BFASTMonitorBase):
             brk = -2
             mean = 0.0
             magnitude = 0.0
+            hist_start = -2
             if self.verbose > 1:
                 print("WARNING: Not enough observations: ns={ns}, Ns={Ns}".format(ns=ns, Ns=Ns))
-            return brk, mean, magnitude, Ns
+            return brk, mean, magnitude, Ns, hist_start
 
         val_inds = val_inds[ns:]
         val_inds -= self.n
@@ -227,9 +237,13 @@ class BFASTMonitorPython(BFASTMonitorBase):
         y_nn = y[~nans]
 
         # split data into history and monitoring phases
-        X_nn_h = X_nn[:, :ns]
+        hist_start = 0
+        if self.history == "ROC":
+            hist_start = self._history_roc(X_nn[:, :ns], y_nn[:ns])
+            assert(ns > hist_start)
+        X_nn_h = X_nn[:, hist_start:ns]
         X_nn_m = X_nn[:, ns:]
-        y_nn_h = y_nn[:ns]
+        y_nn_h = y_nn[hist_start:ns]
         y_nn_m = y_nn[ns:]
 
         # (1) fit linear regression model for history period
@@ -291,7 +305,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         else:
             first_break = -1
 
-        return first_break, mean, magnitude, Ns
+        return first_break, mean, magnitude, Ns, val_inds[hist_start]
 
     def get_timers(self):
         """ Returns runtime measurements for the
@@ -326,3 +340,16 @@ class BFASTMonitorPython(BFASTMonitorBase):
         retval[fl] = np.log(a[fl])
 
         return retval
+
+    def _history_roc(self, X, y):
+        X_rev = np.flip(X, axis=1)
+        y_rev = y[::-1]
+        rcus = rcusum(X_rev, y_rev)
+
+        pval = sctest(rcus)
+        y_start = 1
+        if not np.isnan(pval) and pval < self.level:
+            bounds = boundary(rcus, alpha=self.level)
+            inds = (np.abs(rcus[1:]) > bounds[1:]).nonzero()[0]
+            y_start = rcus.shape[0] - np.min(inds) if inds.size > 0 else 0
+        return y_start

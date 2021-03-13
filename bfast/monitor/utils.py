@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import statsmodels.api as sm
+from scipy import stats, optimize
 import numpy as np
 import pandas
 
@@ -488,3 +490,88 @@ def map_indices(dates):
     indices = np.argwhere(~np.isnan(ts).to_numpy()).T[0]
 
     return indices
+
+def _nonans(xs):
+  return not np.any(np.isnan(xs))
+
+def recresid(X, y, tol=None):
+    n, k = X.shape
+    assert(n == y.shape[0])
+
+    if tol is None:
+        tol = np.finfo(np.float32).eps / k
+
+    y = y.reshape(n, 1)
+    ret = np.zeros(n - k)
+
+    # initialize recursion
+    yh = y[:k] # k x 1
+    Xh = X[:k] # k x k
+    model = sm.OLS(yh, Xh, missing="drop").fit()
+
+    X1 = model.normalized_cov_params   # (X'X)^(-1), k x k
+    bhat = np.nan_to_num(model.params) # k x 1
+
+    # Initial iteration (no check)
+    x = X[k]
+    d = X1 @ x
+    fr = 1 + (x @ d)
+    resid = y[k] - x @ bhat
+    ret[0] =  resid / np.sqrt(fr)
+
+    check = True
+    for r in range(k + 1, n):
+        # Update formulas
+        X1 = X1 - (np.outer(d, d))/fr
+        bhat += X1 @ x * resid
+
+        # Check numerical stability (rectify if unstable).
+        if check:
+            # We check update formula value against full OLS fit
+            Xh = X[:r]
+            model = sm.OLS(y[:r], Xh, missing="drop").fit()
+
+            nona = _nonans(bhat) and _nonans(model.params)
+            check = not (nona and np.allclose(model.params, bhat, atol=tol))
+            X1 = model.normalized_cov_params
+            bhat = np.nan_to_num(model.params, 0.0)
+
+        # Compute recursive residual
+        x = X[r]
+        d = X1 @ x
+        fr = 1 + (x @ d)
+        resid = y[r] - np.nansum(x * bhat) # dotprod ignoring nans
+        ret[r-k] = resid / np.sqrt(fr)
+
+    return ret
+
+# From Brown, Durbin, Evans (1975).
+def _pval_brownian_motion_max(x):
+    Q = lambda x: 1 - stats.norm.cdf(x, loc=0, scale=1)
+    p = 2 * (Q(3*x) + np.exp(-4*x**2) - np.exp(-4*x**2)*Q(x))
+    return p
+
+# CUSUM process on recursive residuals.
+def rcusum(X, y):
+    k, n = X.shape
+    w = recresid(X.T, y)
+    sigma = np.std(w)
+    process = np.nancumsum(np.append([0],w))/(sigma*np.sqrt(n-k))
+    return process
+
+# Linear boundary for Brownian motion (limiting process of rec.resid. CUSUM).
+def boundary(process, alpha=0.05):
+    n = process.shape[0]
+    lam = optimize.brentq(lambda x: _pval_brownian_motion_max(x) - alpha, 0, 20)
+    t = np.linspace(0, 1, num=n)
+    bounds = lam + (2*lam*t) # from Zeileis' strucchange description.
+    return bounds
+
+# Structural change test for Brownian motion.
+def sctest(process):
+    x = process[1:]
+    n = x.shape[0]
+    j = np.linspace(1/n, 1, num=n)
+    x = x * 1/(1 + 2*j)
+    stat = np.max(np.abs(x))
+    return _pval_brownian_motion_max(stat)

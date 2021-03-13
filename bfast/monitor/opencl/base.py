@@ -72,6 +72,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
                  start_monitor,
                  freq=365,
                  k=3,
+                 history=None,
                  hfrac=0.25,
                  trend=True,
                  level=0.05,

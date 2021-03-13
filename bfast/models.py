@@ -24,6 +24,13 @@ class BFASTMonitor(object):
     k : int, default 3
         The number of harmonic terms.
 
+    history : str, default None
+        Specifies the method for selecting the start
+        of the stable history period. Currently only
+        reverse-ordered CUSUM ('ROC') is supported.
+        If history=None (default), the first
+        observation is chosen.
+
     hfrac : float, default 0.25
         Float in the interval (0,1) specifying the
         bandwidth relative to the sample size in
@@ -91,6 +98,7 @@ class BFASTMonitor(object):
             start_monitor,
             freq=365,
             k=3,
+            history=None,
             hfrac=0.25,
             trend=True,
             level=0.05,
@@ -106,6 +114,7 @@ class BFASTMonitor(object):
         self.start_monitor = start_monitor
         self.freq = freq
         self.k = k
+        self.history = history
         self.hfrac = hfrac
         self.trend = trend
         self.level = level
@@ -147,6 +156,7 @@ class BFASTMonitor(object):
                  start_monitor=self.start_monitor,
                  freq=self.freq,
                  k=self.k,
+                 history=self.history,
                  hfrac=self.hfrac,
                  trend=self.trend,
                  level=self.level,
@@ -159,6 +169,7 @@ class BFASTMonitor(object):
                  start_monitor=self.start_monitor,
                  freq=self.freq,
                  k=self.k,
+                 history=self.history,
                  hfrac=self.hfrac,
                  trend=self.trend,
                  level=self.level,
@@ -172,6 +183,7 @@ class BFASTMonitor(object):
                  start_monitor=self.start_monitor,
                  freq=self.freq,
                  k=self.k,
+                 history=self.history,
                  hfrac=self.hfrac,
                  trend=self.trend,
                  level=self.level,
@@ -213,6 +225,7 @@ class BFASTMonitor(object):
             "start_monitor": self.start_monitor,
             "freq": self.freq,
             "k": self.k,
+            "history": self.history,
             "hfrac": self.hfrac,
             "trend": self.trend,
             "level": self.level,
@@ -328,5 +341,21 @@ class BFASTMonitor(object):
         """
         if self._is_fitted():
             return self._model.valids
+
+        raise Exception("Model not yet fitted!")
+
+    @property
+    def history_starts(self):
+        """ Returns index of the start of the stable
+        history period for each pixel
+
+        Returns
+        -------
+         array-like : An array containing indices
+             of starts of the stable history periods
+             in the aray data
+        """
+        if self._is_fitted():
+            return self._model.history_starts
 
         raise Exception("Model not yet fitted!")
