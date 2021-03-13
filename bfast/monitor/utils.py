@@ -512,15 +512,15 @@ def recresid(X, y, tol=None):
     X1 = model.normalized_cov_params   # (X'X)^(-1), k x k
     bhat = np.nan_to_num(model.params) # k x 1
 
-    # Initial iteration (no check)
-    x = X[k]
-    d = X1 @ x
-    fr = 1 + (x @ d)
-    resid = y[k] - x @ bhat
-    ret[0] =  resid / np.sqrt(fr)
-
     check = True
-    for r in range(k + 1, n):
+    for r in range(k, n):
+        # Compute recursive residual
+        x = X[r]
+        d = X1 @ x
+        fr = 1 + (x @ d)
+        resid = y[r] - np.nansum(x * bhat) # dotprod ignoring nans
+        ret[r-k] = resid / np.sqrt(fr)
+
         # Update formulas
         X1 = X1 - (np.outer(d, d))/fr
         bhat += X1 @ x * resid
@@ -528,20 +528,13 @@ def recresid(X, y, tol=None):
         # Check numerical stability (rectify if unstable).
         if check:
             # We check update formula value against full OLS fit
-            Xh = X[:r]
-            model = sm.OLS(y[:r], Xh, missing="drop").fit()
+            Xh = X[:r+1]
+            model = sm.OLS(y[:r+1], Xh, missing="drop").fit()
 
             nona = _nonans(bhat) and _nonans(model.params)
             check = not (nona and np.allclose(model.params, bhat, atol=tol))
             X1 = model.normalized_cov_params
             bhat = np.nan_to_num(model.params, 0.0)
-
-        # Compute recursive residual
-        x = X[r]
-        d = X1 @ x
-        fr = 1 + (x @ d)
-        resid = y[r] - np.nansum(x * bhat) # dotprod ignoring nans
-        ret[r-k] = resid / np.sqrt(fr)
 
     return ret
 
