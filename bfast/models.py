@@ -40,7 +40,7 @@ class BFASTMonitor(object):
     verbose : int, optional (default=0)
         The verbosity level (0=no output, 1=output).
 
-    backend : str, default 'opencl"
+    backend : str, default 'opencl'
         Specifies the implementation that shall be used:
         backend='python' resorts to the non-optimized Python
         version; backend='opencl' resorts to the optimized
