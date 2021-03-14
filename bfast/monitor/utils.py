@@ -499,7 +499,7 @@ def recresid(X, y, tol=None):
     assert(n == y.shape[0])
 
     if tol is None:
-        tol = np.finfo(np.float32).eps / k
+        tol = np.sqrt(np.finfo(np.float32).eps) / k
 
     y = y.reshape(n, 1)
     ret = np.zeros(n - k)
