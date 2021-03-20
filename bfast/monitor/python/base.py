@@ -231,8 +231,8 @@ class BFASTMonitorPython(BFASTMonitorBase):
                 print("WARNING: Not enough observations: ns={ns}, Ns={Ns}".format(ns=ns, Ns=Ns))
             return brk, mean, magnitude, Ns, hist_start
 
-        val_inds = val_inds[ns:]
-        val_inds -= self.n
+        val_inds_monitor = val_inds[ns:]
+        val_inds_monitor -= self.n
 
         # remove nan values from patterns+targets
         X_nn = self.X[:, ~nans]
@@ -281,7 +281,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         mosum_nn = 1.0 / (sigma * np.sqrt(ns)) * mosum_nn
 
         mosum = np.repeat(np.nan, N - self.n)
-        mosum[val_inds[:Ns - ns]] = mosum_nn
+        mosum[val_inds_monitor[:Ns - ns]] = mosum_nn
         if self.verbose:
             print("MOSUM process", mosum_nn.shape)
 
