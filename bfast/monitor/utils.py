@@ -548,16 +548,19 @@ def _pval_brownian_motion_max(x):
 def rcusum(X, y):
     k, n = X.shape
     w = recresid(X.T, y)
-    sigma = np.std(w)
+    sigma = np.std(w, ddof=1) # ddof=1 for sample sd
     process = np.nancumsum(np.append([0],w))/(sigma*np.sqrt(n-k))
     return process
 
+# Used in boundary, but hoisted outside because it is the same for all pixels.
+def compute_confidence_brownian(alpha):
+  return optimize.brentq(lambda x: _pval_brownian_motion_max(x) - alpha, 0, 20)
+
 # Linear boundary for Brownian motion (limiting process of rec.resid. CUSUM).
-def boundary(process, alpha=0.05):
+def boundary(process, confidence):
     n = process.shape[0]
-    lam = optimize.brentq(lambda x: _pval_brownian_motion_max(x) - alpha, 0, 20)
     t = np.linspace(0, 1, num=n)
-    bounds = lam + (2*lam*t) # from Zeileis' strucchange description.
+    bounds = confidence + (2*confidence*t) # from Zeileis' strucchange description.
     return bounds
 
 # Structural change test for Brownian motion.

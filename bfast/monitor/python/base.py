@@ -14,7 +14,7 @@ from sklearn import linear_model
 from bfast.base import BFASTMonitorBase
 from bfast.monitor.utils import (
     compute_end_history, compute_lam, map_indices,
-    rcusum, sctest, boundary,
+    rcusum, sctest, boundary, compute_confidence_brownian
 )
 
 
@@ -150,6 +150,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
 
         # period = data.shape[0] / np.float(self.n)
         self.lam = compute_lam(data.shape[0], self.hfrac, self.level, self.period)
+        self.lam_brown = compute_confidence_brownian(self.level)
 
         if self.use_mp:
             print("Python backend is running in parallel using {} threads".format(mp.cpu_count()))
@@ -348,9 +349,9 @@ class BFASTMonitorPython(BFASTMonitorBase):
         rcus = rcusum(X_rev, y_rev)
 
         pval = sctest(rcus)
-        y_start = 1
+        y_start = 0
         if not np.isnan(pval) and pval < self.level:
-            bounds = boundary(rcus, alpha=self.level)
+            bounds = boundary(rcus, self.lam_brown)
             inds = (np.abs(rcus[1:]) > bounds[1:]).nonzero()[0]
-            y_start = rcus.shape[0] - np.min(inds) if inds.size > 0 else 0
+            y_start = rcus.size - np.min(inds) - 1 if inds.size > 0 else 0
         return y_start
