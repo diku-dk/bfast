@@ -96,14 +96,14 @@ idx_start_2009 = np.argmax((dates >= datetime(2009, 1, 1)) > False)
 idx_start_2010 = np.argmax((dates >= datetime(2010, 1, 1)) > False)
 
 hist_years = copy.deepcopy(hist)
-hist_years[hist <= idx_start_2003] = 0
-hist_years[np.where(np.logical_and(idx_start_2003 < hist, hist <= idx_start_2004))] = 1
-hist_years[np.where(np.logical_and(idx_start_2004 < hist, hist <= idx_start_2005))] = 2
-hist_years[np.where(np.logical_and(idx_start_2005 < hist, hist <= idx_start_2006))] = 3
-hist_years[np.where(np.logical_and(idx_start_2006 < hist, hist <= idx_start_2007))] = 4
-hist_years[np.where(np.logical_and(idx_start_2007 < hist, hist <= idx_start_2008))] = 5
-hist_years[np.where(np.logical_and(idx_start_2008 < hist, hist <= idx_start_2009))] = 6
-hist_years[np.where(np.logical_and(idx_start_2009 < hist, hist <= idx_start_2010))] = 7
+hist_years[np.isnan(hist)] = 0
+hist_years[np.where(np.logical_and(idx_start_2003 <= hist, hist < idx_start_2004))] = 1
+hist_years[np.where(np.logical_and(idx_start_2004 <= hist, hist < idx_start_2005))] = 2
+hist_years[np.where(np.logical_and(idx_start_2005 <= hist, hist < idx_start_2006))] = 3
+hist_years[np.where(np.logical_and(idx_start_2006 <= hist, hist < idx_start_2007))] = 4
+hist_years[np.where(np.logical_and(idx_start_2007 <= hist, hist < idx_start_2008))] = 5
+hist_years[np.where(np.logical_and(idx_start_2008 <= hist, hist < idx_start_2009))] = 6
+hist_years[np.where(np.logical_and(idx_start_2009 <= hist, hist < idx_start_2010))] = 7
 hist_years[np.where(idx_start_2010 < hist)] = 8
 
 bounds = np.linspace(0, 8, 9)
