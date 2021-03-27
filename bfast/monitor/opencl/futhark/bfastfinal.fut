@@ -30,15 +30,14 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
            else mkX_no_trend (i64.i32 k2p2') freq mappingindices)
           |> intrinsics.opaque
 
-
   -- PERFORMANCE BUG: instead of `let Xt = copy (transpose X)`
   --   we need to write the following ugly thing to force manifestation:
   let zero = r32 <| i32.i64 <| (N * N + 2 * N + 1) / (N + 1) - N - 1
   let Xt  = intrinsics.opaque <| map (map (+zero)) (copy (transpose X))
 
-  let Xh  =  (X[:,:n64])
-  let Xth =  (Xt[:n64,:])
-  let Yh  =  (images[:,:n64])
+  let Xh  = X[:,:n64]
+  let Xth = Xt[:n64,:]
+  let Yh  = images[:,:n64]
 
   ----------------------------------
   -- 2. mat-mat multiplication    --
@@ -193,9 +192,7 @@ entry main [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
     mainFun trend k n freq hfrac lam mappingindices images
   in (Nss, breaks, means)
 
--- | implementation is in this entry point
---   the outer map is distributed directly
-entry remove_nans [m][n][p] (nan_value: i16) (images : [m][n][p]i16) =
+entry convertToFloat [m][n][p] (nan_value: i16) (images : [m][n][p]i16) =
   map (\block ->
          map (\row ->
                 map (\el -> if el == nan_value then f32.nan else f32.i16 el) row

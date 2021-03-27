@@ -18,13 +18,14 @@ from bfast.monitor.utils import compute_end_history, compute_lam, map_indices
 
 from .bfastfinal import bfastfinal
 
-#################################################
-# ## Remember to compile with, e.g.,
-# ## $ gpu-pyopencl --library bfastfuth.fut
-#################################################
+############################################################
+# ## Remember to run:
+# ## cd futhark
+# ## make
+# ## cp bfastfinal.py ../
+############################################################
 
 class BFASTMonitorOpenCL(BFASTMonitorBase):
-
     """ Parallel BFASTMonitor implementation optimized for GPUs. The
     interface follows the one of the corresponding R package,
     see: https://cran.r-project.org/web/packages/bfast
@@ -318,7 +319,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
             print("--- runtime for data transfer (host->device):\t{}".format(end - start))
 
         start = time.time()
-        data_cl = self.futobj.remove_nans(nan_value, data_cl)
+        data_cl = self.futobj.convertToFloat(nan_value, data_cl)
         y_cl = self.futobj.reshapeTransp(data_cl)
         end = time.time()
         if self.verbose > 0:
