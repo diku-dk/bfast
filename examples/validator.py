@@ -105,17 +105,19 @@ def compare(name, arr_p, arr_o):
                 exit()
 
 
+# def run_bfast(backend):
+#     @cached(backend)
+#     def fun(backend):
+#         return run_bfast_(backend)
+#     return fun(backend)
 def run_bfast(backend):
-    @cached(backend)
-    def fun(backend):
-        return run_bfast_(backend)
-    return fun(backend)
+    return run_bfast_(backend)
 
 
 
 if __name__ == "__main__":
-    breaks_p, means_p, magnitudes_p, valids_p = run_bfast("python")
-    # breaks_p, means_p, magnitudes_p, valids_p = run_bfast("python-mp")
+    # breaks_p, means_p, magnitudes_p, valids_p = run_bfast("python")
+    breaks_p, means_p, magnitudes_p, valids_p = run_bfast("python-mp")
     breaks_o, means_o, magnitudes_o, valids_o = run_bfast("opencl")
     # compare("breaks", breaks_p, breaks_o)
     # compare("means", means_p, means_o)

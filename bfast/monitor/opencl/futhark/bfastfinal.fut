@@ -52,14 +52,14 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
   ---------------------------------------------
   -- 4. several matrix-vector multiplication --
   ---------------------------------------------
-  let beta0  = map (matvecmul_row_filt Xh) Yh   -- [2k+2]
+  let beta0  = map (matvecmul_row_filt Xh) Yh   -- [m][2k+2]
                |> intrinsics.opaque
 
-  let beta   = map2 matvecmul_row Xinv beta0    -- [2k+2]
+  let beta   = map2 matvecmul_row Xinv beta0    -- [m][2k+2]
                |> intrinsics.opaque -- ^ requires transposition of Xinv
                                     --   unless all parallelism is exploited
 
-  let y_preds= map (matvecmul_row Xt) beta      -- [N]
+  let y_preds= map (matvecmul_row Xt) beta      -- [m][N]
                |> intrinsics.opaque -- ^ requires transposition of Xt (small)
                                     --   can be eliminated by passing
                                     --   (transpose X) instead of Xt
@@ -73,7 +73,7 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
                                                then ye - yep
                                                else f32.nan
                                    ) y y_pred
-            in filterPadWithKeys (\y -> !(f32.isnan y)) (f32.nan) y_error_all
+            in filterPadWithKeys (\y -> !(f32.isnan y)) f32.nan y_error_all
          ) images y_preds
 
   ------------------------------------------------
@@ -83,7 +83,7 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
     map2 (\yh y_error ->
             let ns    = map (\ye -> if !(f32.isnan ye) then 1 else 0) yh
                         |> reduce (+) 0
-            let sigma = map (\i -> if i < ns then #[unsafe] y_error[i] else 0.0) (iota3232 n)
+            let sigma = map (\i -> if i < ns then y_error[i] else 0.0) (iota3232 n)
                         |> map (\a -> a * a) |> reduce (+) 0.0
             let sigma = f32.sqrt (sigma / (r32 (ns - k2p2)))
             let h     = t32 ((r32 ns) * hfrac)
@@ -97,14 +97,13 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
   let MO_fsts = zip3 y_errors nss hs
                 |> map (\(y_error, ns, h) ->
                           map (\i -> if i < h
-                                     then #[unsafe] y_error[i + ns - h + 1]
+                                     then y_error[i + ns - h + 1]
                                      else 0.0
                               ) (iota3232 hmax)
                           |> reduce (+) 0.0
                        ) |> intrinsics.opaque
 
-  let BOUND = map (\q -> let t    = n+1+q
-                         let time = #[unsafe] mappingindices[t - 1]
+  let BOUND = map (\q -> let time = mappingindices[n + q]
                          let tmp  = logplus ((r32 time) / (r32 mappingindices[n - 1]))
                          in  lam * (f32.sqrt tmp)
                   ) (iota32 (N-n64))
@@ -113,7 +112,7 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
   -- 8. error magnitude computation:             --
   ---------------------------------------------
   let magnitudes = zip3 Nss nss y_errors |>
-    map (\ (Ns, ns, y_error) ->
+    map (\(Ns, ns, y_error) ->
             map (\i -> if i < Ns - ns && !(f32.isnan y_error[ns + i])
                        then y_error[ns + i]
                        else f32.inf
@@ -139,7 +138,7 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
     map (\ ( (Ns,ns,sigma, h), (MO_fst,y_error,val_inds) ) ->
             let MO = map (\j -> if j >= Ns - ns then 0.0
                                 else if j == 0 then MO_fst
-                                else #[unsafe] (y_error[ns + j] - y_error[ns - h + j])
+                                else y_error[ns + j] - y_error[ns - h + j]
                          ) (iota32 (N - n64)) |> scan (+) 0.0
 
             let MO' = map (\mo -> mo / (sigma * (f32.sqrt (r32 ns))) ) MO
