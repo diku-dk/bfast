@@ -67,17 +67,14 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
   ---------------------------------------------
   -- 5. filter etc.                          --
   ---------------------------------------------
-  let (Nss, y_errors, val_indss) = ( intrinsics.opaque <| unzip3 <|
+  let (Nss, y_errors, val_indss) = intrinsics.opaque <| unzip3 <|
     map2 (\y y_pred ->
-            let y_error_all = zip y y_pred |>
-                map (\(ye, yep) -> if !(f32.isnan ye)
-                                  then ye - yep
-                                  else f32.nan
-                    )
-            let (tups, Ns) = filterPadWithKeys (\y -> !(f32.isnan y)) (f32.nan) y_error_all
-            let (y_error, val_inds) = unzip tups
-            in  (Ns, y_error, val_inds)
-         ) images y_preds )
+            let y_error_all = map2 (\ye yep -> if !(f32.isnan ye)
+                                               then ye - yep
+                                               else f32.nan
+                                   ) y y_pred
+            in filterPadWithKeys (\y -> !(f32.isnan y)) (f32.nan) y_error_all
+         ) images y_preds
 
   ------------------------------------------------
   -- 6. ns and sigma (can be fused with above)  --
@@ -127,10 +124,11 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
                 |> (\xs -> let i = (Ns - ns) / 2
                            let j = i - 1
                            in
-                           if Ns == ns then 0f32
+                           if Ns == ns
+                           then 0f32
                            else if (Ns - ns) % 2 == 0
-                           then (xs[j] + xs[i]) / 2
-                           else xs[i])
+                                then (xs[j] + xs[i]) / 2
+                                else xs[i])
         ) |> intrinsics.opaque
 
   ---------------------------------------------

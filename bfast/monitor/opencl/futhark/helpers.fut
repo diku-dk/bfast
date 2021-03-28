@@ -14,14 +14,14 @@ let adjustValInds [N] (n : i32) (ns : i32) (Ns : i32) (val_inds : [N]i32) (ind: 
 let filterPadWithKeys [n] 't
            (p : (t -> bool))
            (dummy : t)
-           (arr : [n]t) : ([n](t,i32), i32) =
+           (arr : [n]t) : (i32, [n]t, [n]i32) =
   let tfs = map (\a -> if p a then 1i64 else 0i64) arr
   let isT = scan (+) 0i64 tfs
   let i   = last isT |> i32.i64
   let inds= map2 (\a iT -> if p a then iT-1 else -1i64) arr isT
   let rs  = scatter (replicate n dummy) inds arr
   let ks  = scatter (replicate n 0i32) inds (iota32 n)
-  in (zip rs ks, i)
+  in (i, rs, ks)
 
 -- | builds the X matrices; first result dimensions of size 2*k+2
 let mkX_with_trend [N] (k2p2: i64) (f: f32) (mappingindices: [N]i32): [k2p2][N]f32 =
