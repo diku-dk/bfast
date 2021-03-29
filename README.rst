@@ -21,6 +21,7 @@ The bfast package has been tested under Python 3.*. The required Python dependen
 - pyopencl==2018.2.5
 - scikit-learn==0.20.3
 - scipy==1.2.1
+- statsmodels==0.11.1
 - matplotlib==2.2.2
 - wget==3.2
 - Sphinx==2.2.0
