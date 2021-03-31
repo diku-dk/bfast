@@ -2,14 +2,16 @@ import os
 import wget
 import time
 import copy
+from datetime import datetime
+
 import numpy
 numpy.warnings.filterwarnings('ignore')
 import matplotlib.pyplot as plt
 import matplotlib
-from datetime import datetime
 
 from bfast import BFASTMonitor
 from bfast.monitor.utils import crop_data_dates
+
 
 # parameters
 k = 3

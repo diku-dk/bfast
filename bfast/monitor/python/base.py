@@ -1,8 +1,9 @@
 '''
 Created on Apr 19, 2018
 
-@author: fgieseke
+@author: fgieseke, mortvest
 '''
+
 import multiprocessing as mp
 from functools import partial
 
@@ -74,16 +75,10 @@ class BFASTMonitorPython(BFASTMonitorBase):
     Examples
     --------
 
-      >>> from bfast import BFASTCPU
-      >>> from datetime import datetime
-      >>> start_monitor = datetime(2010, 1, 1)
-      >>> model = BFASTCPU(start_monitor)
-
     Notes
     -----
 
     """
-
     def __init__(self,
                  start_monitor,
                  freq=365,
@@ -95,15 +90,14 @@ class BFASTMonitorPython(BFASTMonitorBase):
                  verbose=0,
                  use_mp=False
                  ):
-
-        super(BFASTMonitorPython, self).__init__(start_monitor,
-                                       freq,
-                                       k=k,
-                                       hfrac=hfrac,
-                                       trend=trend,
-                                       level=level,
-                                       period=period,
-                                       verbose=verbose)
+        super().__init__(start_monitor,
+                         freq,
+                         k=k,
+                         hfrac=hfrac,
+                         trend=trend,
+                         level=level,
+                         period=period,
+                         verbose=verbose)
 
         self._timers = {}
         self.use_mp = use_mp
@@ -302,7 +296,6 @@ class BFASTMonitorPython(BFASTMonitorBase):
         dict : An array containing the runtimes
             for the different phases.
         """
-
         return self._timers
 
     def _create_data_matrix(self, mapped_indices):

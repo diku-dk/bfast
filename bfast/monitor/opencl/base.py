@@ -69,7 +69,6 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
     -----
 
     """
-
     def __init__(self,
                  start_monitor,
                  freq=365,
@@ -84,20 +83,19 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
                  platform_id=0,
                  device_id=0
                  ):
-
         k_valid = list(range(3, 11))
 
         if k not in k_valid:
             raise Exception("Current implementation can only handle the following values for k: {}".format(k_valid))
 
-        super(BFASTMonitorOpenCL, self).__init__(start_monitor,
-                                       freq,
-                                       k=k,
-                                       hfrac=hfrac,
-                                       trend=trend,
-                                       level=level,
-                                       period=period,
-                                       verbose=verbose)
+        super().__init__(start_monitor,
+                         freq,
+                         k=k,
+                         hfrac=hfrac,
+                         trend=trend,
+                         level=level,
+                         period=period,
+                         verbose=verbose)
 
         self.detailed_results = detailed_results
         self.find_magnitudes = find_magnitudes
@@ -114,9 +112,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
                                  sizes=self._get_futhark_params())
 
     def _init_device(self, platform_id, device_id):
-        """ Initializes the device.
-        """
-
+        """ Initializes the device."""
         try:
             platforms = pyopencl.get_platforms()
             devices = platforms[platform_id].get_devices()
@@ -128,9 +124,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         self.queue = pyopencl.CommandQueue(self.ctx)
 
     def _print_device_info(self):
-        """ Prints information about the current device.
-        """
-
+        """ Prints information about the current device. """
         if self.verbose > 0:
             print("=================================================================================")
             print("Device id: " + str(self.device_id))
@@ -245,16 +239,13 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         dict : An array containing the runtimes
             for the different phases.
         """
-
         return self._timers
 
     def _fit_chunks(self, data, dates, n_chunks=10, nan_value=0):
         data_chunks = numpy.array_split(data, n_chunks, axis=1)
-
         results = []
 
         for chunk_idx in range(n_chunks):
-
             start_chunk = time.time()
             if self.verbose > 0:
                 print("Processing chunk index {}/{}".format(chunk_idx + 1, n_chunks))
@@ -451,7 +442,6 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
                 results['magnitudes'] = res['magnitudes']
 
         if self.detailed_results:
-
             if not 'bounds' in results.keys():
                 results['bounds'] = res['bounds']
 
