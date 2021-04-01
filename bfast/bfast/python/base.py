@@ -4,8 +4,6 @@ Created on Nov 17, 2020
 
 @author: mortvest
 '''
-import logging
-
 import numpy as np
 import statsmodels.api as sm
 
@@ -15,15 +13,11 @@ from datasets import *
 from stl import STL
 from efp import EFP
 from breakpoints import Breakpoints
-from setup import logging_setup
-
-
-logger = logging.getLogger(__name__)
 
 
 class BFASTPython(BFASTBase):
     """
-    Python implementation of the BFAST Approach:
+    Python implementation of the BFAST algorithm:
     https://www.rdocumentation.org/packages/bfast/versions/1.5.7/topics/bfast
 
     Iterative break detection in seasonal and trend component of a time
@@ -98,12 +92,16 @@ class BFASTPython(BFASTBase):
         -------
         self : The BFAST object.
         """
-        ts = Yt[:,0,0]
-        self.trend, \
-            self.season,\
-            self.remainder, \
-            self.trend_breakpoints, \
-            self.season_breakpoints = self.fit_singe(ts, ti)
+        # FIXME: for testing only
+        y = Yt[:,0,0]
+        rettpl = self.fit_single(y, ti)
+
+        self.trend = rettpl[0]
+        self.season = rettpl[1]
+        self.remainder = rettpl[2]
+        self.trend_breakpoints = rettpl[3]
+        self.season_breakpoints = rettpl[4]
+
         return self
 
     def fit_single(self, Yt, ti):

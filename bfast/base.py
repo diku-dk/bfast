@@ -7,7 +7,26 @@ Created on Oct 15, 2019
 from abc import ABC
 from abc import abstractmethod
 
-class BFASTMonitorBase(ABC):
+
+class LoggingBase(ABC):
+    @abstractmethod
+    def __init__():
+        pass
+
+    def setup_logger(self):
+        if self.verbosity == 2:
+            log_level = "DEBUG"
+        elif self.verbosity == 1:
+            log_level = "INFO"
+        elif self.verbosity == 0:
+            log_level = "WARNING"
+        else:
+            raise ValueError("Invalid verbosity level: {}. Must be between 0 and 2")
+        logging.basicConfig(level=log_level)
+        return logging.getLogger(self.__class__.__name__)
+
+
+class BFASTMonitorBase(LoggingBase):
     def __init__(
             self,
             start_monitor,
@@ -33,7 +52,7 @@ class BFASTMonitorBase(ABC):
         raise Exception("Function 'fit' not implemented!")
 
 
-class BFASTBase(ABC):
+class BFASTBase(LoggingBase):
     def __init__(
             self,
             frequency,

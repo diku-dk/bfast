@@ -1,6 +1,5 @@
 import numpy as np
 
-
 def nan_map(x):
     iota = np.arange(x.shape[0])
     if x.ndim > 1:
