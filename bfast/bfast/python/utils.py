@@ -1,6 +1,3 @@
-from abc import ABC
-from abc import abstractmethod
-
 import numpy as np
 
 
@@ -11,7 +8,6 @@ def nan_map(x):
     else:
         x_nn = iota[~np.isnan(x)]
     return x_nn
-
 
 def omit_nans(x, y=None, return_map=False):
     if y is None:
@@ -67,7 +63,6 @@ def partition_matrix(part, mat):
     for j in range(n_parts):
         ret_val[(part == j), (j * n_cols):((j + 1) * n_cols)] = mat[part == j, :]
     return ret_val
-
 
 
 """

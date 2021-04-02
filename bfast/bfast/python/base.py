@@ -8,12 +8,11 @@ Created on Nov 17, 2020
 import numpy as np
 import statsmodels.api as sm
 
-import utils
 from bfast.base import BFASTBase
-from datasets import *
-from stl import STL
-from efp import EFP
-from breakpoints import Breakpoints
+from . import utils
+from .stl import STL
+from .efp import EFP
+from .breakpoints import Breakpoints
 
 
 class BFASTPython(BFASTBase):
@@ -37,7 +36,7 @@ class BFASTPython(BFASTBase):
 
     max_iter : int, default=10
 
-    breaks : array, optional
+    max_breaks : int, optional
 
     level : float, default=0.05
 
@@ -64,7 +63,7 @@ class BFASTPython(BFASTBase):
                  h=0.15,
                  season_type="dummy",
                  max_iter=10,
-                 breaks=None,
+                 max_breaks=None,
                  level=0.05,
                  verbose=0,
                 ):
@@ -72,7 +71,7 @@ class BFASTPython(BFASTBase):
                                           h=h,
                                           season_type=season_type,
                                           max_iter=max_iter,
-                                          breaks=breaks,
+                                          max_breaks=max_breaks,
                                           level=level,
                                           verbose=verbose)
 
@@ -95,7 +94,7 @@ class BFASTPython(BFASTBase):
         """
         # FIXME: for testing only
         y = Yt[:,0,0]
-        rettpl = self.fit_single(y, ti)
+        rettpl = self._fit_single(y, ti)
 
         self.trend = rettpl[0]
         self.season = rettpl[1]
@@ -105,7 +104,7 @@ class BFASTPython(BFASTBase):
 
         return self
 
-    def fit_single(self, Yt, ti):
+    def _fit_single(self, Yt, ti):
         """ Fits the BFAST model for the 1D array y.
 
         Parameters
@@ -120,9 +119,9 @@ class BFASTPython(BFASTBase):
         """
         nrow = Yt.shape[0]
         Tt = None
-        f = frequency
+        f = self.frequency
 
-        if season == "harmonic":
+        if self.season_type == "harmonic":
             if self.verbose > 0:
                 print("'harmonic' season is chosen")
             w = 1/f
@@ -141,7 +140,7 @@ class BFASTPython(BFASTBase):
             St = STL(Yt, f, periodic=True).seasonal
             if self.verbose > 1:
                 print("St set to\n{}".format(St))
-        elif season == "dummy":
+        elif self.season_type == "dummy":
             if self.verbose > 0:
                 print("'dummy' season is chosen")
             # Start the iterative procedure and for first iteration St=decompose result
@@ -155,7 +154,7 @@ class BFASTPython(BFASTBase):
             smod = np.tile(eye_box, (n_boxes, 1))
             smod = smod[:nrow]
             smod = sm.add_constant(smod)
-        elif season == "none":
+        elif self.season_type == "none":
             if self.verbose > 0:
                 print("'none' season is chosen")
                 print("No sesonal model will be fitted!")
@@ -172,7 +171,7 @@ class BFASTPython(BFASTBase):
 
         while (Vt_bp != CheckTimeTt).any() or (Wt_bp != CheckTimeSt).any() and i_iter < max_iter:
             if self.verbose > 0:
-                print("BFAST iteration #{}".format(i))
+                print("BFAST iteration #{}".format(i_iter))
             CheckTimeTt = Vt_bp
             CheckTimeSt = Wt_bp
 
@@ -181,14 +180,17 @@ class BFASTPython(BFASTBase):
                 Vt = Yt - St  # Deseasonalized Time series
             if self.verbose > 1:
                 print("Vt:\n{}".format(Vt))
-            p_Vt = EFP(sm.add_constant(ti), Vt, h, verbose=self.verbose).sctest()
-            if p_Vt[1] <= level:
+            p_Vt = EFP(sm.add_constant(ti), Vt, self.h, verbose=self.verbose).sctest()
+            if p_Vt[1] <= self.level:
                 if self.verbose > 0:
                     print("Breakpoints in trend detected")
                 ti1, Vt1 = utils.omit_nans(ti, Vt)
                 if self.verbose > 0:
                     print("Finding breakpoints in trend")
-                bp_Vt = Breakpoints(sm.add_constant(ti1), Vt1, h=h, max_breaks=max_breaks, use_mp=use_mp)
+                bp_Vt = Breakpoints(sm.add_constant(ti1),
+                                    Vt1, h=self.h,
+                                    max_breaks=self.max_breaks,
+                                    verbose=self.verbose)
                 if bp_Vt.breakpoints is not None:
                     bp_Vt.breakpoints_no_nans = np.array([nan_map[i] for i in bp_Vt.breakpoints])
                     nobp_Vt = False
@@ -220,7 +222,7 @@ class BFASTPython(BFASTBase):
                 Tt = np.repeat(np.nan, ti.shape[0])
                 Tt[~np.isnan(Yt)] = fm1.predict()
 
-            if season == "none":
+            if self.season_type == "none":
                 Wt = np.zeros(nrow).astype(float)
                 St = np.zeros(nrow).astype(float)
                 bp_Wt = None
@@ -229,14 +231,18 @@ class BFASTPython(BFASTBase):
                 ### Change in seasonal component
                 with np.errstate(invalid="ignore"):
                     Wt = Yt - Tt
-                p_Wt = EFP(smod, Wt, h, verbose=self.verbose).sctest()  # preliminary test
-                if p_Wt[1] <= level:
+                p_Wt = EFP(smod, Wt, self.h, verbose=self.verbose).sctest()  # preliminary test
+                if p_Wt[1] <= self.level:
                     if self.verbose > 0:
                         print("Breakpoints in season detected")
                     smod1, Wt1 = utils.omit_nans(smod, Wt)
                     if self.verbose > 0:
                         print("Finding breakpoints in season")
-                    bp_Wt = Breakpoints(smod1, Wt1, h=h, max_breaks=max_breaks)
+                    bp_Wt = Breakpoints(smod1,
+                                        Wt1,
+                                        h=self.h,
+                                        max_breaks=self.max_breaks,
+                                        verbose=self.verbose)
                     if bp_Wt.breakpoints is not None:
                         bp_Wt.breakpoints_no_nans = np.array([nan_map[i] for i in bp_Wt.breakpoints])
                         nobp_Wt = False

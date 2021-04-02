@@ -4,8 +4,8 @@ np.set_printoptions(precision=2, linewidth=120)
 import matplotlib.pyplot as plt
 import pandas as pd
 
-import datasets
-from ssr_triang import ssr_triang
+# from . import datasets
+from .ssr_triang import ssr_triang
 
 
 class Breakpoints():
@@ -20,6 +20,8 @@ class Breakpoints():
 
         :returns: instance of Breakpoints
         """
+        self.verbose = verbose
+
         if self.verbose > 0:
             print("multiprocessing is set to {}".format(use_mp))
             print("interpolating y")
@@ -54,7 +56,7 @@ class Breakpoints():
         ## store results together with SSRs in SSR_table
         if self.verbose > 0:
             print("Calculating triangular matrix")
-        self.SSR_triang = ssr_triang(n, h, X, y, k, intercept_only, use_mp=use_mp)
+        self.SSR_triang = ssr_triang(n, h, X, y, k, intercept_only)
 
         index = np.arange((h - 1), (n - h)).astype(int)
 
@@ -73,11 +75,11 @@ class Breakpoints():
         self.X = X
 
         _, BIC_table = self.summary()
-        if self.vervose > 1:
+        if self.verbose > 1:
             print("BIC table:\n{}".format(BIC_table))
         # find the optimal number of breakpoints using Bayesian Information Criterion
         breaks = np.argmin(BIC_table)
-        if self.vervose > 1:
+        if self.verbose > 1:
             print("optimal number of breakpoints is {}".format(breaks))
 
         _, bp = self.breakpoints_for_m(breaks)

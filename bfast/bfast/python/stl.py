@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
 import statsmodels.tsa.seasonal as sm
-import datasets
 import pandas as pd
+
+# import datasets
 
 
 class STL():
@@ -40,10 +40,23 @@ class STL():
 
 
 if __name__ == "__main__":
-    Yt = datasets.ndvi
-    ti = datasets.ndvi_dates
-    f = datasets.ndvi_freqency
+    # Yt = datasets.ndvi
+    # ti = datasets.ndvi_dates
+    # f = datasets.ndvi_freqency
 
-    St = STL(Yt, f, periodic=True)
-    print(St.seasonal[99:150])
+    # St = STL(Yt, f, periodic=True)
+    # print(St.seasonal[99:150])
+    from statsmodels.datasets import co2
+    import matplotlib.pyplot as plt
+    from pandas.plotting import register_matplotlib_converters
+    register_matplotlib_converters()
+    data = co2.load(True).data
 
+    print(data[:50])
+    data = data.resample('M').mean().ffill()
+
+    from statsmodels.tsa.seasonal import STL
+    res = STL(data, trend=19, seasonal=35).fit()
+    print(np.array(res.trend))
+    # res.plot()
+    # plt.show()

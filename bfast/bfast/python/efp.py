@@ -1,13 +1,12 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import statsmodels.api as sm
 
-import datasets
-import utils
+from .utils import omit_nans, sc_me
+# from . import datasets
 
 
 class EFP():
-    def __init__(self, X, y, h, p_type="OLS-MOSUM", verbose=0):
+    def __init__(self, X, y, h, verbose=0):
         """
         Empirical fluctuation process. For now, only the Ordinary Least Squares MOving
         SUM (OLS-MOSUM) is supported
@@ -16,14 +15,12 @@ class EFP():
         :param y: vector of y
         :param h: bandwidth parameter for the MOSUM process
         :param deg: degree of the polynomial to be fit [0,1]
-        :param p_type: process type. Only OLS-MOSUM is supported
         :returns: instance of Empirical Fluctuation Process
         :raises ValueError: wrong type of process
         """
-        if p_type != "OLS-MOSUM":
-            raise ValueError("Process type {} is not supported".format(p_type))
+        self.verbose = verbose
 
-        X, y = utils.omit_nans(X, y)
+        X, y = omit_nans(X, y)
         n, k = X.shape
 
         if self.verbose > 0:
@@ -48,7 +45,7 @@ class EFP():
         process = np.cumsum(e_zero)
         process = process[int(nh):] - process[:(n - int(nh) + 1)]
         process = process / (sigma * np.sqrt(n))
-        if self.vervose > 1:
+        if self.verbose > 1:
             print("process2:\n{}".format(process))
             print("process1:\n{}".format(process))
             print("process3:\n{}".format(process))
@@ -67,12 +64,12 @@ class EFP():
         :param k: number of rows of matrix X
         :returns: p value for the process
         """
-        if self.vervose > 0:
+        if self.verbose > 0:
             print("Calculating p-value")
 
         k = min(k, max_k)
 
-        crit_table = utils.sc_me[((k - 1) * table_dim):(k * table_dim),:]
+        crit_table = sc_me[((k - 1) * table_dim):(k * table_dim),:]
         tablen = crit_table.shape[1]
         tableh = np.arange(1, table_dim + 1) * 0.05
         tablep = np.array((0.1, 0.05, 0.025, 0.01))
@@ -81,7 +78,7 @@ class EFP():
         for i in range(tablen):
             tableipl[i] = np.interp(h, tableh, crit_table[:, i])
 
-        if self.vervose > 1:
+        if self.verbose > 1:
             print("Interpolated row of p-values:\n{}".format(tableipl))
         tableipl = np.insert(tableipl, 0, 0)
         tablep = np.insert(tablep, 0, 1)
@@ -113,12 +110,12 @@ class EFP():
         if self.verbose > 0:
             print("Calculating statistic")
         stat = np.max(np.abs(x))
-        if self.vervose > 1:
+        if self.verbose > 1:
             print("stat: {}".format(stat))
 
         p_value = self.p_value(stat, h, k)
 
-        if self.vervose > 1:
+        if self.verbose > 1:
             print("p_value: {}".format(stat))
 
         return (stat, p_value)

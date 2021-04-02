@@ -8,25 +8,7 @@ from abc import ABC
 from abc import abstractmethod
 
 
-class LoggingBase(ABC):
-    @abstractmethod
-    def __init__():
-        pass
-
-    def setup_logger(self):
-        if self.verbosity == 2:
-            log_level = "DEBUG"
-        elif self.verbosity == 1:
-            log_level = "INFO"
-        elif self.verbosity == 0:
-            log_level = "WARNING"
-        else:
-            raise ValueError("Invalid verbosity level: {}. Must be between 0 and 2")
-        logging.basicConfig(level=log_level)
-        return logging.getLogger(self.__class__.__name__)
-
-
-class BFASTMonitorBase(LoggingBase):
+class BFASTMonitorBase(ABC):
     def __init__(
             self,
             start_monitor,
@@ -52,14 +34,14 @@ class BFASTMonitorBase(LoggingBase):
         raise Exception("Function 'fit' not implemented!")
 
 
-class BFASTBase(LoggingBase):
+class BFASTBase(ABC):
     def __init__(
             self,
             frequency,
             h=0.15,
             season_type="dummy",
             max_iter=10,
-            breaks=None,
+            max_breaks=None,
             level=0.05,
             verbose=0,
     ):
@@ -68,7 +50,7 @@ class BFASTBase(LoggingBase):
         self.h = h
         self.season_type = season_type
         self.max_iter = max_iter
-        self.breaks = breaks
+        self.max_breaks = max_breaks
         self.level = level
         self.verbose = verbose
 

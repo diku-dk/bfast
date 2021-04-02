@@ -335,7 +335,7 @@ class BFAST(object):
 
     max_iter : int, default=10
 
-    breaks : array, optional
+    max_breaks : int, optional
 
     level : float, default=0.05
 
@@ -362,7 +362,7 @@ class BFAST(object):
                  h=0.15,
                  season_type="dummy",
                  max_iter=10,
-                 breaks=None,
+                 max_breaks=None,
                  level=0.05,
                  backend="python",
                  verbose=0,
@@ -371,7 +371,7 @@ class BFAST(object):
         self.h = h
         self.season_type = season_type
         self.max_iter = max_iter
-        self.breaks = breaks
+        self.max_breaks = max_breaks
         self.level = level
         self.backend = backend
         self.verbose = verbose
@@ -400,7 +400,7 @@ class BFAST(object):
                 h = self.h,
                 season_type = self.season_type,
                 max_iter = self.max_iter,
-                breaks = self.breaks,
+                max_breaks = self.max_breaks,
                 level = self.level,
                 verbose = self.verbose
             )
@@ -433,7 +433,7 @@ class BFAST(object):
             "h": self.h,
             "season_type": self.season_type,
             "max_iter": self.max_iter,
-            "breaks": self.breaks,
+            "max_breaks": self.max_breaks,
             "level": self.level,
             "backend": self.backend,
             "verbose": self.verbose
