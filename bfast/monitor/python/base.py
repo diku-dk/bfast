@@ -30,7 +30,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
                  level=0.05,
                  detailed_results=False,
                  old_version=False,
-                 verbose=0,
+                 verbosity=0,
                  platform_id=0,
                  device_id=0
                  ):
@@ -65,7 +65,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         Maximum time (relative to the history period)
         that will be monitored.
 
-    verbose : int, optional (default=0)
+    verbosity : int, optional (default=0)
         The verbosity level (0=no output, 1=output)
 
     use_mp : bool, default False
@@ -87,7 +87,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
                  trend=True,
                  level=0.05,
                  period=10,
-                 verbose=0,
+                 verbosity=0,
                  use_mp=False
                  ):
         super().__init__(start_monitor,
@@ -97,7 +97,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
                          trend=trend,
                          level=level,
                          period=period,
-                         verbose=verbose)
+                         verbosity=verbosity)
 
         self._timers = {}
         self.use_mp = use_mp
@@ -141,7 +141,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         self.lam = compute_lam(data.shape[0], self.hfrac, self.level, self.period)
 
         if self.use_mp:
-            print("Python backend is running in parallel using {} threads".format(mp.cpu_count()))
+            self.logger.info("Python backend is running in parallel using {} threads".format(mp.cpu_count()))
             y = np.transpose(data, (1, 2, 0)).reshape(data.shape[1] * data.shape[2], data.shape[0])
             pool = mp.Pool(mp.cpu_count())
             p_map = pool.map(self.fit_single, y)
@@ -158,19 +158,14 @@ class BFASTMonitorPython(BFASTMonitorBase):
             valids_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.int32)
 
             for i in range(data.shape[1]):
-                if self.verbose > 0:
-                    print("Processing row {}".format(i))
-
+                self.logger.debug("Processing row {}".format(i))
                 for j in range(data.shape[2]):
                     y = data[:,i,j]
-                    (pix_break,
-                     pix_mean,
-                     pix_magnitude,
-                     pix_num_valid) = self.fit_single(y)
-                    breaks_global[i,j] = pix_break
-                    means_global[i,j] = pix_mean
-                    magnitudes_global[i,j] = pix_magnitude
-                    valids_global[i,j] = pix_num_valid
+                    retval = self.fit_single(y)
+                    breaks_global[i,j] = retval[0]
+                    means_global[i,j] = retval[1]
+                    magnitudes_global[i,j] = retval[2]
+                    valids_global[i,j] = retval[3]
 
             self.breaks = breaks_global
             self.means = means_global
@@ -209,8 +204,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
             brk = -2
             mean = 0.0
             magnitude = 0.0
-            if self.verbose > 1:
-                print("WARNING: Not enough observations: ns={ns}, Ns={Ns}".format(ns=ns, Ns=Ns))
+            # self.logger.info("Not enough observations: ns={ns}, Ns={Ns}".format(ns=ns, Ns=Ns))
             return brk, mean, magnitude, Ns
 
         val_inds = val_inds[ns:]
@@ -230,7 +224,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         model = linear_model.LinearRegression(fit_intercept=False)
         model.fit(X_nn_h.T, y_nn_h)
 
-        if self.verbose > 1:
+        if self.verbosity > 1:
             column_names = np.array(["Intercept",
                                      "trend",
                                      "harmonsin1",
@@ -243,9 +237,8 @@ class BFASTMonitorPython(BFASTMonitorBase):
                 indxs = np.array([0, 1, 3, 5, 7, 2, 4, 6])
             else:
                 indxs = np.array([0, 2, 4, 6, 1, 3, 5])
-            # print(column_names[indxs])
-            print(column_names[indxs])
-            print(model.coef_[indxs])
+            self.logger.debug(column_names[indxs])
+            self.logger.debug(model.coef_[indxs])
 
         # get predictions for all non-nan points
         y_pred = model.predict(X_nn.T)
@@ -260,8 +253,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
 
         mosum = np.repeat(np.nan, N - self.n)
         mosum[val_inds[:Ns - ns]] = mosum_nn
-        if self.verbose:
-            print("MOSUM process", mosum_nn.shape)
+        # self.logger.debug("MOSUM process: \n {}".format(mosum_nn))
 
         # compute mean
         mean = np.mean(mosum_nn)
@@ -273,9 +265,8 @@ class BFASTMonitorPython(BFASTMonitorBase):
         a = self.mapped_indices[self.n:] / self.mapped_indices[self.n - 1].astype(np.float)
         bounds = self.lam * np.sqrt(self._log_plus(a))
 
-        if self.verbose:
-            print("lambda", self.lam)
-            print("bounds", bounds)
+        self.logger.debug("lambda = {}".format(self.lam))
+        self.logger.debug("bounds = {}".format(bounds))
 
         breaks = np.abs(mosum) > bounds
         first_break = np.where(breaks)[0]

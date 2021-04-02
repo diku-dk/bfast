@@ -1,14 +1,18 @@
 '''
 Created on Oct 15, 2019
 
-@author: fgieseke
+@author: fgieseke, mortvest
 '''
-
 from abc import ABC
 from abc import abstractmethod
+from .utils import Logger
 
+class LoggingBase(ABC):
+    def __init__(self, verbosity):
+        self.verbosity = verbosity
+        self.logger = Logger(self.verbosity, self.__class__.__name__)
 
-class BFASTMonitorBase(ABC):
+class BFASTMonitorBase(LoggingBase):
     def __init__(
             self,
             start_monitor,
@@ -18,8 +22,10 @@ class BFASTMonitorBase(ABC):
             trend=True,
             level=0.05,
             period=10,
-            verbose=0,
+            verbosity=0,
          ):
+
+        super().__init__(verbosity)
         self.start_monitor = start_monitor
         self.freq = freq
         self.k = k
@@ -27,7 +33,6 @@ class BFASTMonitorBase(ABC):
         self.trend = trend
         self.level = level
         self.period = period
-        self.verbose = verbose
 
     @abstractmethod
     def fit(self, y):

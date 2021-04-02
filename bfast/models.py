@@ -38,7 +38,7 @@ class BFASTMonitor():
         if selected) procedure, i.e., probability of
         type I error.
 
-    verbose : int, optional (default=0)
+    verbosity : int, optional (default=0)
         The verbosity level (0=no output, 1=output).
 
     backend : str, default 'opencl"
@@ -95,7 +95,7 @@ class BFASTMonitor():
             trend=True,
             level=0.05,
             period=10,
-            verbose=0,
+            verbosity=0,
             backend="opencl",
             platform_id=0,
             device_id=0,
@@ -109,7 +109,7 @@ class BFASTMonitor():
         self.trend = trend
         self.level = level
         self.period = period
-        self.verbose = verbose
+        self.verbosity = verbosity
         self.backend = backend
         self.platform_id = platform_id
         self.device_id = device_id
@@ -149,7 +149,7 @@ class BFASTMonitor():
                  trend=self.trend,
                  level=self.level,
                  period=self.period,
-                 verbose=self.verbose,
+                 verbosity=self.verbosity,
                 )
 
         elif self.backend == 'python-mp':
@@ -161,7 +161,7 @@ class BFASTMonitor():
                  trend=self.trend,
                  level=self.level,
                  period=self.period,
-                 verbose=self.verbose,
+                 verbosity=self.verbosity,
                  use_mp=True
                 )
 
@@ -176,7 +176,7 @@ class BFASTMonitor():
                  period=self.period,
                  detailed_results=self.detailed_results,
                  find_magnitudes=self.find_magnitudes,
-                 verbose=self.verbose,
+                 verbosity=self.verbosity,
                  platform_id=self.platform_id,
                  device_id=self.device_id
                 )
@@ -212,7 +212,7 @@ class BFASTMonitor():
             "trend": self.trend,
             "level": self.level,
             "period": self.period,
-            "verbose": self.verbose,
+            "verbosity": self.verbosity,
             "backend": self.backend,
             "platform_id": self.platform_id,
             "device_id": self.device_id,

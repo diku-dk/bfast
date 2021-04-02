@@ -56,7 +56,7 @@ model = BFASTMonitor(
             trend=trend,
             level=level,
             backend='opencl',
-            verbose=1,
+            verbosity=1,
             device_id=0,
         )
 
