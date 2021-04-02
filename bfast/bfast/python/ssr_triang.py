@@ -1,4 +1,3 @@
-import logging
 import multiprocessing as mp
 from functools import partial
 
@@ -7,16 +6,12 @@ import numpy as np
 from recresid import recresid
 
 
-logger = logging.getLogger(__name__)
-
-
-def ssr_triang(n, h, X, y, k, intercept_only, use_mp=True):
+def ssr_triang(n, h, X, y, k, intercept_only, use_mp=False):
     """
     Calculates the upper triangular matrix of squared residuals
     """
     fun = ssr_triang_par if use_mp else ssr_triang_seq
     return fun(n, h, X, y, k, intercept_only)
-
 
 def SSRi(i, n, h, X, y, k, intercept_only):
     """
@@ -29,23 +24,20 @@ def SSRi(i, n, h, X, y, k, intercept_only):
         ssr = (y[i:] - np.cumsum(y[i:]) / arr1)[1:] * np.sqrt(1 + 1 / arr2)
     else:
         ssr = recresid(X[i:], y[i:])
-        return np.concatenate((np.repeat(np.nan, k), np.cumsum(ssr**2)))
-
+        rval = np.concatenate((np.repeat(np.nan, k), np.cumsum(ssr**2)))
+        return rval
 
 def ssr_triang_seq(n, h, X, y, k, intercept_only):
     """
     sequential version
     """
-    logger.info("sequential version of ssr_triang chosen")
     my_SSRi = partial(SSRi, n=n, h=h, X=X, y=y, k=k, intercept_only=intercept_only)
-    return np.array([my_SSRi(i) for i in np.arange(n-h+1).astype(int)], dtype=object)
-
+    return np.array([my_SSRi(i) for i in range(n-h+1)], dtype=object)
 
 def ssr_triang_par(n, h, X, y, k, intercept_only):
     """
     parallel version
     """
-    logger.info("mp-enabled version of ssr_triang chosen")
     my_SSRi = partial(SSRi, n=n, h=h, X=X, y=y, k=k, intercept_only=intercept_only)
     pool = mp.Pool(mp.cpu_count())
     indexes = np.arange(n - h + 1).astype(int)

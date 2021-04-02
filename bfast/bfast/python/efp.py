@@ -1,19 +1,13 @@
-import logging
-
 import numpy as np
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 
 import datasets
 import utils
-from setup import logging_setup
-
-
-logger = logging.getLogger(__name__)
 
 
 class EFP():
-    def __init__(self, X, y, h, p_type="OLS-MOSUM"):
+    def __init__(self, X, y, h, p_type="OLS-MOSUM", verbose=0):
         """
         Empirical fluctuation process. For now, only the Ordinary Least Squares MOving
         SUM (OLS-MOSUM) is supported
@@ -32,34 +26,39 @@ class EFP():
         X, y = utils.omit_nans(X, y)
         n, k = X.shape
 
-        logger.info("Performing linear regression")
+        if self.verbose > 0:
+            print("Performing linear regression")
         # fit linear model
         fm = sm.OLS(y, X, missing='drop').fit()
 
         e = y - fm.predict(exog=X)
-        logger.debug("Residuals:\n{}".format(e))
+        if self.verbose > 1:
+            print("Residuals:\n{}".format(e))
 
         sigma = np.sqrt(np.sum(e**2) / (n - k))
-        logger.debug("sigma: {}".format(sigma))
+        if self.verbose > 1:
+            print("sigma: {}".format(sigma))
 
         nh = np.floor(n * h)
-        logger.debug("nh: {}".format(nh))
+        if self.verbose > 1:
+            print("nh: {}".format(nh))
 
         e_zero = np.insert(e, 0, 0)
 
         process = np.cumsum(e_zero)
-        logger.debug("process1:\n{}".format(process))
         process = process[int(nh):] - process[:(n - int(nh) + 1)]
-        logger.debug("process2:\n{}".format(process))
         process = process / (sigma * np.sqrt(n))
-        logger.debug("process3:\n{}".format(process))
+        if self.vervose > 1:
+            print("process2:\n{}".format(process))
+            print("process1:\n{}".format(process))
+            print("process3:\n{}".format(process))
 
         self.coefficients = fm
         self.sigma = sigma
         self.process = process
         self.par = h
 
-    def p_value(x, h, k, max_k=6, table_dim=10):
+    def p_value(self, x, h, k, max_k=6, table_dim=10):
         """
         Returns the p value for the process.
 
@@ -68,7 +67,8 @@ class EFP():
         :param k: number of rows of matrix X
         :returns: p value for the process
         """
-        logger.info("Calculating p-value")
+        if self.vervose > 0:
+            print("Calculating p-value")
 
         k = min(k, max_k)
 
@@ -81,13 +81,14 @@ class EFP():
         for i in range(tablen):
             tableipl[i] = np.interp(h, tableh, crit_table[:, i])
 
-        logger.debug("Interpolated row of p-values:\n{}".format(tableipl))
+        if self.vervose > 1:
+            print("Interpolated row of p-values:\n{}".format(tableipl))
         tableipl = np.insert(tableipl, 0, 0)
         tablep = np.insert(tablep, 0, 1)
 
         p = np.interp(x, tableipl, tablep)
 
-        return(p)
+        return p
 
     def sctest(self, functional="max"):
         """
@@ -97,7 +98,8 @@ class EFP():
         :raises ValueError: wrong type of functional
         :returns: a tuple of applied functional and p value
         """
-        logger.info("Performing statistical test")
+        if self.verbose > 0:
+            print("Performing statistical test")
         if functional != "max":
             raise ValueError("Functional {} is not supported".format(functional))
 
@@ -108,18 +110,21 @@ class EFP():
         else:
             k = np.shape[0]
 
-        logger.info("Calculating statistic")
+        if self.verbose > 0:
+            print("Calculating statistic")
         stat = np.max(np.abs(x))
-        logger.debug("stat: {}".format(stat))
+        if self.vervose > 1:
+            print("stat: {}".format(stat))
 
-        p_value = EFP.p_value(stat, h, k)
-        logger.debug("p_value: {}".format(stat))
+        p_value = self.p_value(stat, h, k)
 
-        return(stat, p_value)
+        if self.vervose > 1:
+            print("p_value: {}".format(stat))
+
+        return (stat, p_value)
 
 
 def test_dataset(y, name, h=0.15, level=0.15):
-    # x = np.arange(1, y.shape[0] + 1).reshape(y.shape[0], 1)
     x = np.ones(y.shape[0]).reshape(y.shape[0], 1)
     efp = EFP(x, y, h)
     stat, p_value = efp.sctest()
@@ -136,8 +141,6 @@ def test_dataset(y, name, h=0.15, level=0.15):
 
 
 if __name__ == "__main__":
-    logging_setup()
-
     # test_dataset(datasets.nhtemp, "nhtemp")
     test_dataset(datasets.nile, "nile")
 

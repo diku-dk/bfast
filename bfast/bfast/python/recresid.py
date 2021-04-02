@@ -5,7 +5,6 @@ import statsmodels.api as sm
 def _no_nans(arr):
     return not np.isnan(arr).any()
 
-
 def _Xinv0(x, coeffs):
     """
     Approximate (X'X)^-1 using QR decomposition
@@ -20,13 +19,6 @@ def _Xinv0(x, coeffs):
     rval = np.zeros((k, k))
     rval[:qr_rank, :qr_rank] = np.linalg.inv(r.T @ r)
     return rval
-
-# def _Xinv0(x, coeffs):
-#     """
-#     Approximate (X'X)^-1 using QR decomposition
-#     """
-#     return np.linalg.inv(x.T @ x)
-
 
 def recresid(x, y, start=None, end=None, tol=None):
     """
@@ -111,16 +103,6 @@ def recresid(x, y, start=None, end=None, tol=None):
         v = (y[r] - np.sum(val)) / np.sqrt(fr)
         rval[r-q] = v
 
-        # print("r", r)
-        # print("X1", X1.flatten())
-        # print("fr", fr)
-        # print("betar", np.around(betar, 8))
-        # print("sum(val)", np.sum(val))
-        # print("y[r]", y[r])
-        # print("v", v)
-        # print("\n")
-        # exit()
-
     # exit()
     rval = np.around(rval, 8)
     return rval
@@ -129,6 +111,7 @@ def recresid(x, y, start=None, end=None, tol=None):
 if __name__ == "__main__":
     x = np.arange(1,21)
     y = x * 2
+    print(y)
     y[9:] = y[9:] + 10
     X = sm.add_constant(x)
 
