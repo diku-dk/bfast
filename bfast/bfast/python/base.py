@@ -93,18 +93,54 @@ class BFASTPython(BFASTBase):
         self : The BFAST object.
         """
         # FIXME: for testing only
-        y = Yt[:,0,0]
-        rettpl = self._fit_single(y, ti)
+        # y = Yt[:,0,0]
+        # rettpl = self.fit_single(y, ti)
 
-        self.trend = rettpl[0]
-        self.season = rettpl[1]
-        self.remainder = rettpl[2]
-        self.trend_breakpoints = rettpl[3]
-        self.season_breakpoints = rettpl[4]
+        # self.trend = rettpl[0]
+        # self.season = rettpl[1]
+        # self.remainder = rettpl[2]
+        # self.trend_breakpoints = rettpl[3]
+        # self.season_breakpoints = rettpl[4]
 
+        trend_global = np.zeros(Yt.shape, dtype=np.float32)
+        season_global = np.zeros(Yt.shape, dtype=np.float32)
+        remainder_global = np.zeros(Yt.shape, dtype=np.float32)
+        trend_breakpoints_global = np.zeros(Yt.shape, dtype=int)
+        season_breakpoints_global = np.zeros(Yt.shape, dtype=int)
+        n_trend_breakpoints_global = np.zeros((Yt.shape[1], Yt.shape[2]), dtype=int)
+        n_season_breakpoints_global = np.zeros((Yt.shape[1], Yt.shape[2]), dtype=int)
+
+        for i in range(Yt.shape[1]):
+            if self.verbose > 0:
+                print("Processing row {}".format(i))
+            for j in range(Yt.shape[2]):
+                y = Yt[:,i,j]
+                pix_trend, \
+                    pix_season, \
+                    pix_remainder, \
+                    pix_trend_br, \
+                    pix_season_br, \
+                    pix_n_trend_br, \
+                    pix_n_season_br = self.fit_single(y, ti)
+
+                trend_global[:, i, j] = pix_trend
+                season_global[:, i, j] = pix_season
+                remainder_global[:, i, j] = pix_remainder
+                trend_breakpoints_global[:, i, j] = pix_trend_br
+                season_breakpoints_global[:, i, j] = pix_season_br
+                n_trend_breakpoints_global[i, j] = pix_n_trend_br
+                n_season_breakpoints_global[i, j] = pix_n_season_br
+
+        self.trend = trend_global
+        self.season = season_global
+        self.remainder = remainder_global
+        self.trend_breakpoints = trend_breakpoints_global
+        self.season_breakpoints = season_breakpoints_global
+        self.n_trend_breakpoints = n_trend_breakpoints_global
+        self.n_season_breakpoints = n_season_breakpoints_global
         return self
 
-    def _fit_single(self, Yt, ti):
+    def fit_single(self, Yt, ti):
         """ Fits the BFAST model for the 1D array y.
 
         Parameters
@@ -280,4 +316,9 @@ class BFASTPython(BFASTBase):
 
             i_iter += 1
 
-        return Tt, St, Nt, Vt_bp, Wt_bp
+        Vt_bp_arr = np.zeros(nrow)
+        Vt_bp_arr[:len(Vt_bp)] = np.array(Vt_bp)
+        Wt_bp_arr = np.zeros(nrow)
+        Wt_bp_arr[:len(Wt_bp)] = np.array(Wt_bp)
+
+        return Tt, St, Nt, Vt_bp_arr, Wt_bp_arr, len(Vt_bp), len(Wt_bp)

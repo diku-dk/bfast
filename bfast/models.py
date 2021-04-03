@@ -524,6 +524,35 @@ class BFAST(object):
 
         raise Exception("Model not yet fitted!")
 
+    @property
+    def n_trend_breakpoints(self):
+        """ Returns the number of breakpoints of the trend component
+
+        Returns
+        -------
+        season_breakpoints: array-like
+        """
+
+        if self._is_fitted():
+            return self._model.n_trend_breakpoints
+
+        raise Exception("Model not yet fitted!")
+
+    @property
+    def n_season_breakpoints(self):
+        """ Returns the number of breakpoints of the season component
+
+        Returns
+        -------
+        season_breakpoints: array-like
+        """
+
+        if self._is_fitted():
+            return self._model.n_season_breakpoints
+
+        raise Exception("Model not yet fitted!")
+
+
     def _is_fitted(self):
         if hasattr(self, '_model_fitted'):
             return self._model_fitted

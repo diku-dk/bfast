@@ -35,11 +35,15 @@ def plot(name, y, x, f, season, level=0.05, h=0.15, max_iter=10, nan_clr="crimso
 
     x_n = x[np.isnan(y[:,0,0])]
     y, y_n = interp_nans(y[:,0,0])
-    Tt, Tt_n = interp_nans(vo.trend)
-    St, St_n = interp_nans(vo.season)
-    Rt, Rt_n = interp_nans(vo.remainder)
-    Tt_bp = vo.trend_breakpoints
-    St_bp = vo.season_breakpoints
+    Tt, Tt_n = interp_nans(vo.trend[:,0,0])
+    St, St_n = interp_nans(vo.season[:,0,0])
+    Rt, Rt_n = interp_nans(vo.remainder[:,0,0])
+
+    n_Tt_bp = vo.n_trend_breakpoints[0,0]
+    n_St_bp = vo.n_season_breakpoints[0,0]
+
+    Tt_bp = vo.trend_breakpoints[:n_Tt_bp,0,0]
+    St_bp = vo.season_breakpoints[:n_St_bp,0,0]
 
     figsz = (16, 10) if season != "none" else (16, 6)
 
