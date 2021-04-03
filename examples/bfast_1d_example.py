@@ -105,6 +105,6 @@ def plot(name, y, x, f, season, level=0.05, h=0.15, max_iter=10, nan_clr="crimso
 
 if __name__ == "__main__":
     plot("harvest", harvest, harvest_dates, harvest_freq, "harmonic")
-    # plot("nile", nile, nile_dates, None, "none")
-    # plot("SIMTS", simts_sum, simts_dates, simts_freq, "harmonic", level=0.35, h=0.3, max_iter=2)
-    # plot("NDVI", ndvi, ndvi_dates, ndvi_freq, "dummy")
+    plot("nile", nile, nile_dates, None, "none")
+    plot("SIMTS", simts_sum, simts_dates, simts_freq, "harmonic", level=0.35, h=0.3, max_iter=2)
+    plot("NDVI", ndvi, ndvi_dates, ndvi_freq, "dummy")

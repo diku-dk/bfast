@@ -96,13 +96,15 @@ class BFASTPython(BFASTBase):
         -------
         self : The BFAST object.
         """
+        smod = self.build_seasonal_model(ti)
+
         trend_global = np.zeros(Yt.shape, dtype=np.float32)
         season_global = np.zeros(Yt.shape, dtype=np.float32)
         remainder_global = np.zeros(Yt.shape, dtype=np.float32)
-        trend_breakpoints_global = np.zeros(Yt.shape, dtype=int)
-        season_breakpoints_global = np.zeros(Yt.shape, dtype=int)
-        n_trend_breakpoints_global = np.zeros((Yt.shape[1], Yt.shape[2]), dtype=int)
-        n_season_breakpoints_global = np.zeros((Yt.shape[1], Yt.shape[2]), dtype=int)
+        trend_breakpoints_global = np.zeros(Yt.shape, dtype=np.int32)
+        season_breakpoints_global = np.zeros(Yt.shape, dtype=np.int32)
+        n_trend_breakpoints_global = np.zeros((Yt.shape[1], Yt.shape[2]), dtype=np.int32)
+        n_season_breakpoints_global = np.zeros((Yt.shape[1], Yt.shape[2]), dtype=np.int32)
 
         for i in range(Yt.shape[1]):
             if self.verbose > 0:
@@ -115,7 +117,7 @@ class BFASTPython(BFASTBase):
                     pix_trend_br, \
                     pix_season_br, \
                     pix_n_trend_br, \
-                    pix_n_season_br = self.fit_single(y, ti)
+                    pix_n_season_br = self.fit_single(y, ti, smod)
 
                 trend_global[:, i, j] = pix_trend
                 season_global[:, i, j] = pix_season
@@ -135,63 +137,34 @@ class BFASTPython(BFASTBase):
 
         return self
 
-    def fit_single(self, Yt, ti):
+    def fit_single(self, Yt, ti, smod):
         """ Fits the BFAST model for the 1D array y.
 
         Parameters
         ----------
-        Yt : array
+        Yt   : array
             1d array of length N
-        ti : array
+        ti   : array
+        smod : ndarray
+            seasonal model matrix
 
         Returns
         -------
         None
         """
         nrow = Yt.shape[0]
-        Tt = None
         f = self.frequency
 
-        if self.season_type == "harmonic":
-            if self.verbose > 0:
-                print("'harmonic' season is chosen")
-            w = 1/f
-            tl = np.arange(1, Yt.shape[0] + 1)
-            co = np.cos(2 * np.pi * tl * w)
-            si = np.sin(2 * np.pi * tl * w)
-            co2 = np.cos(2 * np.pi * tl * w * 2)
-            si2 = np.sin(2 * np.pi * tl * w * 2)
-            co3 = np.cos(2 * np.pi * tl * w * 3)
-            si3 = np.sin(2 * np.pi * tl * w * 3)
-            smod = np.column_stack((co, si, co2, si2, co3, si3))
-
-            # Start the iterative procedure and for first iteration St=decompose result
+        # Start the iterative procedure and for first iteration St=decompose result
+        if self.season_type == 'harmonic' or self.season_type == 'dummy':
             if self.verbose > 0:
                 print("Applying STL")
             St = STL(Yt, f, periodic=True).seasonal
             if self.verbose > 1:
                 print("St set to\n{}".format(St))
-        elif self.season_type == "dummy":
-            if self.verbose > 0:
-                print("'dummy' season is chosen")
-            # Start the iterative procedure and for first iteration St=decompose result
-            if self.verbose > 0:
-                print("Applying STL")
-            St = STL(Yt, f, periodic=True).seasonal
-
-            eye_box = np.row_stack((np.eye(f - 1), np.repeat(-1, f - 1)))
-            n_boxes = int(np.ceil(nrow / f))
-
-            smod = np.tile(eye_box, (n_boxes, 1))
-            smod = smod[:nrow]
-            smod = sm.add_constant(smod)
-        elif self.season_type == "none":
-            if self.verbose > 0:
-                print("'none' season is chosen")
-                print("No sesonal model will be fitted!")
-            St = np.zeros(nrow)
+        # no seasonal model
         else:
-            raise ValueError("Seasonal model is unknown, use 'harmonic', 'dummy' or 'none'")
+            St = np.zeros(nrow)
 
         Vt_bp = np.array([0])
         Wt_bp = np.array([0])
@@ -200,15 +173,14 @@ class BFASTPython(BFASTBase):
         i_iter = 1
         nan_map = utils.nan_map(Yt)
 
-        while (Vt_bp != CheckTimeTt).any() or (Wt_bp != CheckTimeSt).any() and i_iter < max_iter:
+        while ((Vt_bp != CheckTimeTt).any() or (Wt_bp != CheckTimeSt).any()) and i_iter < self.max_iter:
             if self.verbose > 0:
                 print("BFAST iteration #{}".format(i_iter))
             CheckTimeTt = Vt_bp
             CheckTimeSt = Wt_bp
 
             ### Change in trend component
-            with np.errstate(invalid="ignore"):
-                Vt = Yt - St  # Deseasonalized Time series
+            Vt = Yt - St  # Deseasonalized Time series
             if self.verbose > 1:
                 print("Vt:\n{}".format(Vt))
             p_Vt = EFP(sm.add_constant(ti), Vt, self.h, verbose=self.verbose).sctest()
@@ -219,7 +191,8 @@ class BFASTPython(BFASTBase):
                 if self.verbose > 0:
                     print("Finding breakpoints in trend")
                 bp_Vt = Breakpoints(sm.add_constant(ti1),
-                                    Vt1, h=self.h,
+                                    Vt1,
+                                    h=self.h,
                                     max_breaks=self.max_breaks,
                                     verbose=self.verbose)
                 if bp_Vt.breakpoints is not None:
@@ -295,20 +268,17 @@ class BFASTPython(BFASTBase):
                     Wt_bp = np.array([0])
                 else:
                     part = bp_Wt.breakfactor()
-                    if season in ["dummy", "harmonic"]:
+                    if self.season_type in ["dummy", "harmonic"]:
                         X_sm1 = utils.partition_matrix(part, smod1)
 
                     sm1 = sm.OLS(Wt1, X_sm1, missing='drop').fit()
-                    # Wt_bp = bp_Wt.breakpoints_no_nans
                     Wt_bp = bp_Wt.breakpoints
 
                     # Define empty copy of original time series
                     St = np.repeat(np.nan, nrow)
                     St[~np.isnan(Yt)] = sm1.predict()  # Overwrite non-missing with fitted values
 
-            with np.errstate(invalid="ignore"):
-                Nt = Yt - Tt - St
-
+            Nt = Yt - Tt - St
             i_iter += 1
 
         Vt_bp_arr = np.zeros(nrow)
@@ -317,3 +287,39 @@ class BFASTPython(BFASTBase):
         Wt_bp_arr[:len(Wt_bp)] = np.array(Wt_bp)
 
         return Tt, St, Nt, Vt_bp_arr, Wt_bp_arr, len(Vt_bp), len(Wt_bp)
+
+    def build_seasonal_model(self, ti):
+        f = self.frequency
+        nrow = ti.shape[0]
+        smod = None
+        if self.season_type == "harmonic":
+            if self.verbose > 0:
+                print("'harmonic' season is chosen")
+            w = 1/f
+            tl = np.arange(1, nrow + 1)
+            co = np.cos(2 * np.pi * tl * w)
+            si = np.sin(2 * np.pi * tl * w)
+            co2 = np.cos(2 * np.pi * tl * w * 2)
+            si2 = np.sin(2 * np.pi * tl * w * 2)
+            co3 = np.cos(2 * np.pi * tl * w * 3)
+            si3 = np.sin(2 * np.pi * tl * w * 3)
+            smod = np.column_stack((co, si, co2, si2, co3, si3))
+
+        elif self.season_type == "dummy":
+            if self.verbose > 0:
+                print("'dummy' season is chosen")
+
+            eye_box = np.row_stack((np.eye(f - 1), np.repeat(-1, f - 1)))
+            n_boxes = int(np.ceil(nrow / f))
+
+            smod = np.tile(eye_box, (n_boxes, 1))
+            smod = smod[:nrow]
+            smod = sm.add_constant(smod)
+        elif self.season_type == "none":
+            if self.verbose > 0:
+                print("'none' season is chosen")
+                print("No sesonal model will be fitted!")
+        else:
+            raise ValueError("Seasonal model is unknown, use 'harmonic', 'dummy' or 'none'")
+
+        return smod
