@@ -46,15 +46,19 @@ class BFASTPython(BFASTBase):
 
     Attributes
     ----------
-    trend : array
+    trend : ndarray
 
-    season : array
+    season : ndarray
 
-    remainder : array
+    remainder : ndarray
 
-    trend_breakpoints : array
+    trend_breakpoints : ndarray
 
-    season_breakpoints : array
+    season_breakpoints : ndarray
+
+    n_trend_breakpoints : ndarray
+
+    n_season_breakpoints : ndarray
 
     """
 
@@ -92,16 +96,6 @@ class BFASTPython(BFASTBase):
         -------
         self : The BFAST object.
         """
-        # FIXME: for testing only
-        # y = Yt[:,0,0]
-        # rettpl = self.fit_single(y, ti)
-
-        # self.trend = rettpl[0]
-        # self.season = rettpl[1]
-        # self.remainder = rettpl[2]
-        # self.trend_breakpoints = rettpl[3]
-        # self.season_breakpoints = rettpl[4]
-
         trend_global = np.zeros(Yt.shape, dtype=np.float32)
         season_global = np.zeros(Yt.shape, dtype=np.float32)
         remainder_global = np.zeros(Yt.shape, dtype=np.float32)
@@ -138,6 +132,7 @@ class BFASTPython(BFASTBase):
         self.season_breakpoints = season_breakpoints_global
         self.n_trend_breakpoints = n_trend_breakpoints_global
         self.n_season_breakpoints = n_season_breakpoints_global
+
         return self
 
     def fit_single(self, Yt, ti):
