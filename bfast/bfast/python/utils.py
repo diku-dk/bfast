@@ -9,11 +9,8 @@ def create_nan_map(x):
         x_nn = iota[~np.isnan(x)]
     return x_nn
 
-def arr_diff(x, y):
-    if x.shape != y.shape:
-        return True
-    return (x != y).any()
-
+def different(x, y):
+    return x.shape != y.shape or (x != y).any()
 
 def omit_nans(x, y=None, return_map=False):
     if y is None:

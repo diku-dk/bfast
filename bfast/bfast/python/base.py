@@ -9,7 +9,7 @@ import numpy as np
 import statsmodels.api as sm
 
 from bfast.base import BFASTBase
-from .utils import arr_diff, omit_nans, partition_matrix, create_nan_map
+from .utils import different, omit_nans, partition_matrix, create_nan_map
 from .stl import STL
 from .efp import EFP
 from .breakpoints import Breakpoints
@@ -186,7 +186,7 @@ class BFASTPython(BFASTBase):
         CheckTimeSt = np.array([0], dtype=np.int32)
         i_iter = 1
 
-        while (arr_diff(Vt_bp, CheckTimeTt) or arr_diff(Vt_bp, CheckTimeTt)) and i_iter < self.max_iter:
+        while (different(Vt_bp, CheckTimeTt) or different(Vt_bp, CheckTimeTt)) and i_iter < self.max_iter:
             if self.verbose > 0:
                 print("BFAST iteration #{}".format(i_iter))
             CheckTimeTt = Vt_bp
@@ -229,7 +229,8 @@ class BFASTPython(BFASTBase):
                 y1 = Vt[~np.isnan(Yt)]
 
                 fm1 = sm.OLS(y1, X1, missing='drop').fit()
-                Vt_bp = bp_Vt.breakpoints
+                # Vt_bp = bp_Vt.breakpoints
+                Vt_bp = nan_map[bp_Vt.breakpoints]
 
                 Tt = np.repeat(np.nan, ti.shape[0])
                 Tt[~np.isnan(Yt)] = fm1.predict()
@@ -272,7 +273,7 @@ class BFASTPython(BFASTBase):
                         X_sm1 = partition_matrix(part, smod1)
 
                     sm1 = sm.OLS(Wt1, X_sm1, missing='drop').fit()
-                    Wt_bp = bp_Wt.breakpoints
+                    Wt_bp = nan_map[bp_Wt.breakpoints]
 
                     # Define empty copy of original time series
                     St = np.repeat(np.nan, nrow)
