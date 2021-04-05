@@ -192,7 +192,7 @@ class BFASTPython(BFASTBase):
             CheckTimeTt = Vt_bp
             CheckTimeSt = Wt_bp
 
-            ### Change in trend component
+            ### Trend component
             Vt = Yt - St  # Deseasonalized Time series
             if self.verbose > 1:
                 print("Vt:\n{}".format(Vt))
@@ -201,8 +201,6 @@ class BFASTPython(BFASTBase):
             if p_Vt <= self.level:
                 if self.verbose > 0:
                     print("Breakpoints in trend detected")
-                ti1, Vt1 = omit_nans(ti, Vt)
-                if self.verbose > 0:
                     print("Finding breakpoints in trend")
                 bp_Vt = Breakpoints(sm.add_constant(ti1),
                                     Vt1,
@@ -236,7 +234,7 @@ class BFASTPython(BFASTBase):
                 Tt = np.repeat(np.nan, ti.shape[0])
                 Tt[~np.isnan(Yt)] = fm1.predict()
 
-            ### Change in seasonal component
+            ### Seasonal component
             if self.season_type == "none":
                 # there is no season
                 St = np.zeros(nrow).astype(float)
