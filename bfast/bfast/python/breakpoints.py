@@ -26,7 +26,7 @@ class Breakpoints():
             print("multiprocessing is set to {}".format(use_mp))
             print("interpolating y")
 
-        y = np.array(pd.DataFrame(y).interpolate().values.ravel().tolist())
+        # y = np.array(pd.DataFrame(y).interpolate().values.ravel().tolist())
         n, k = X.shape
         self.nobs = n
         if self.verbose > 1:
@@ -83,13 +83,7 @@ class Breakpoints():
             print("optimal number of breakpoints is {}".format(breaks))
 
         _, bp = self.breakpoints_for_m(breaks)
-
-        if bp is None:
-            self.breakpoints_no_nans = bp
-            self.breakpoints = bp
-        else:
-            self.breakpoints_no_nans = bp.astype(int)
-            self.breakpoints = bp.astype(int)
+        self.breakpoints = bp
 
     def SSR(self, i, j):
         # table lookup
@@ -157,7 +151,7 @@ class Breakpoints():
             print("running breakpoints for m = {}".format(m))
         if m < 1:
             SSR = self.SSR(0, self.nobs - 1)
-            return SSR, None
+            return SSR, []
         else:
             breakpoints = self.extract_breaks(self.SSR_table, m)
             # map reduce

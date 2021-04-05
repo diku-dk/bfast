@@ -1,13 +1,19 @@
 import numpy as np
 
 
-def nan_map(x):
+def create_nan_map(x):
     iota = np.arange(x.shape[0])
     if x.ndim > 1:
         x_nn = x[~np.isnan(x).any(axis=1)]
     else:
         x_nn = iota[~np.isnan(x)]
     return x_nn
+
+def arr_diff(x, y):
+    if x.shape != y.shape:
+        return True
+    return (x != y).any()
+
 
 def omit_nans(x, y=None, return_map=False):
     if y is None:
@@ -29,24 +35,6 @@ def omit_nans(x, y=None, return_map=False):
         y_index = ~np.isnan(y)
         return x[y_index], y[y_index]
 
-def partition(part, arr):
-    """
-    Create a partition matrix, given a partition vector and a vector
-    """
-    if part.shape[0] != arr.shape[0]:
-        raise ValueError("Partition and Array must have the same length")
-    # number of partitions
-    n_parts = part[-1] + 1
-    n_rows = arr.shape[0]
-    ret_val = np.zeros((n_rows, n_parts * 2)).astype(float)
-    ret_val[:, 0] = np.ones(n_rows)
-    # fill 0/1 columns
-    for i in range(1, n_parts):
-        ret_val[part == i, i] = 1
-    for i in range(n_parts):
-        ret_val[(part == i), i + n_parts] = arr[part == i]
-    return ret_val
-
 def partition_matrix(part, mat):
     """
     Create a partition matrix, given a partition vector and a matrix
@@ -54,7 +42,7 @@ def partition_matrix(part, mat):
     if part.shape[0] != mat.shape[0]:
         raise ValueError("Partition length must equal Matrix nrows")
     if mat.ndim != 2:
-        raise TypeError("mat must be a 2D matrix")
+        raise TypeError("Must be a 2D matrix")
 
     n_rows, n_cols = mat.shape
     # number of partitions
@@ -66,10 +54,9 @@ def partition_matrix(part, mat):
 
 
 """
-Table of simulated asymptotic critical values of the
-ME tests with the maximum norm.
-from: "The Moving-Estimates Test for Parameter Stability" by
-       Chia-Shang James Chu, Kurt Hornik and Chung-Ming Kuan
+Table of simulated asymptotic critical values of the ME tests with the maximum
+norm from: "The Moving-Estimates Test for Parameter Stability" by Chia-Shang
+James Chu, Kurt Hornik and Chung-Ming Kuan
 """
 sc_me = np.array([0.7552, 0.9809, 1.1211, 1.217, 1.2811, 1.3258, 1.3514, 1.3628,
          1.361, 1.3751, 0.7997, 1.0448, 1.203, 1.3112, 1.387, 1.4422, 1.4707, 1.4892,

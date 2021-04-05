@@ -2,7 +2,6 @@ import numpy as np
 import statsmodels.api as sm
 
 from .utils import omit_nans, sc_me
-# from . import datasets
 
 
 class EFP():
@@ -55,15 +54,28 @@ class EFP():
         self.process = process
         self.par = h
 
-    def p_value(self, x, h, k, max_k=6, table_dim=10):
+    def sctest(self, max_k=6, table_dim=10):
         """
-        Returns the p value for the process.
+        Performs a generalized fluctuation test.
 
-        :param x: result of application of the functional
-        :param h: bandwidth parameter
-        :param k: number of rows of matrix X
-        :returns: p value for the process
+        :returns: p value
         """
+        if self.verbose > 0:
+            print("Performing statistical test")
+
+        h = self.par
+        x = self.process
+        if (nd := np.ndim(x)) == 1:
+            k = nd
+        else:
+            k = np.shape[0]
+
+        if self.verbose > 0:
+            print("Calculating statistic")
+        stat = np.max(np.abs(x))
+        if self.verbose > 1:
+            print("stat: {}".format(stat))
+
         if self.verbose > 0:
             print("Calculating p-value")
 
@@ -83,43 +95,11 @@ class EFP():
         tableipl = np.insert(tableipl, 0, 0)
         tablep = np.insert(tablep, 0, 1)
 
-        p = np.interp(x, tableipl, tablep)
-
-        return p
-
-    def sctest(self, functional="max"):
-        """
-        Performs a generalized fluctuation test.
-
-        :param functional: functional type. Only max is supported
-        :raises ValueError: wrong type of functional
-        :returns: a tuple of applied functional and p value
-        """
-        if self.verbose > 0:
-            print("Performing statistical test")
-        if functional != "max":
-            raise ValueError("Functional {} is not supported".format(functional))
-
-        h = self.par
-        x = self.process
-        if (nd := np.ndim(x)) == 1:
-            k = nd
-        else:
-            k = np.shape[0]
-
-        if self.verbose > 0:
-            print("Calculating statistic")
-        stat = np.max(np.abs(x))
-        if self.verbose > 1:
-            print("stat: {}".format(stat))
-
-        p_value = self.p_value(stat, h, k)
-
+        p_value = np.interp(stat, tableipl, tablep)
         if self.verbose > 1:
             print("p_value: {}".format(stat))
 
-        return (stat, p_value)
-
+        return p_value
 
 def test_dataset(y, name, h=0.15, level=0.15):
     x = np.ones(y.shape[0]).reshape(y.shape[0], 1)
@@ -138,6 +118,7 @@ def test_dataset(y, name, h=0.15, level=0.15):
 
 
 if __name__ == "__main__":
+    from . import datasets
     # test_dataset(datasets.nhtemp, "nhtemp")
     test_dataset(datasets.nile, "nile")
 

@@ -7,7 +7,7 @@ import pandas as pd
 
 
 class STL():
-    def __init__(self, y, period, periodic=True):
+    def __init__(self, y, period):
         y = np.array(pd.DataFrame(y).interpolate().values.ravel().tolist())
         # stl = sm.STL(y, period=period)
         stl = sm.STL(y, period=period)
@@ -15,8 +15,8 @@ class STL():
         seasonal = res.seasonal
         trend = res.trend
         residual = res.resid
-        if periodic:
-            seasonal = self.seasonal_average(seasonal, period)
+
+        seasonal = self.seasonal_average(seasonal, period)
 
         self.seasonal = seasonal
         self.trend = trend
