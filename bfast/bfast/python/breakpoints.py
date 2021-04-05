@@ -1,8 +1,6 @@
 import numpy as np
 np.set_printoptions(precision=2, linewidth=120)
-
 import matplotlib.pyplot as plt
-import pandas as pd
 
 # from . import datasets
 from .ssr_triang import ssr_triang
@@ -26,7 +24,6 @@ class Breakpoints():
             print("multiprocessing is set to {}".format(use_mp))
             print("interpolating y")
 
-        # y = np.array(pd.DataFrame(y).interpolate().values.ravel().tolist())
         n, k = X.shape
         self.nobs = n
         if self.verbose > 1:
