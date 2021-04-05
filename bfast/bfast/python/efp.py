@@ -18,8 +18,6 @@ class EFP():
         :raises ValueError: wrong type of process
         """
         self.verbose = verbose
-
-        X, y = omit_nans(X, y)
         n, k = X.shape
 
         if self.verbose > 0:
