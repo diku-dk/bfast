@@ -45,19 +45,19 @@ class BFASTPython(BFASTBase):
 
     Attributes
     ----------
-    trend : ndarray
+    trend : ndarray of shape (N, W, H) (same as imput)
 
-    season : ndarray
+    season : ndarray of shape (N, W, H) (same as imput)
 
-    remainder : ndarray
+    remainder : ndarray of shape (N, W, H) (same as imput)
 
-    trend_breakpoints : ndarray
+    trend_breakpoints : ndarray of shape (N, W, H) (same as imput)
 
-    season_breakpoints : ndarray
+    season_breakpoints : ndarray of shape (N, W, H) (same as imput)
 
-    n_trend_breakpoints : ndarray
+    n_trend_breakpoints : ndarray of shape (W, H)
 
-    n_season_breakpoints : ndarray
+    n_season_breakpoints : ndarray of shape (W, H)
 
     """
 
@@ -80,7 +80,7 @@ class BFASTPython(BFASTBase):
 
 
     def fit(self, Yt, ti):
-        """ Fits the models for the ndarray 'data'
+        """ Fits the model
 
         Parameters
         ----------
@@ -89,7 +89,9 @@ class BFASTPython(BFASTBase):
             series points per pixel and W
             and H the width and the height
             of the image, respectively.
-        ti : array
+        ti : array of float32
+            dates (as floats) s.t. 1 January 2020 becomes 2020.00
+            31 December 2020 becomes 2020.99
 
         Returns
         -------
@@ -168,7 +170,7 @@ class BFASTPython(BFASTBase):
         """
         nrow = Yt.shape[0]
 
-        # Decompose time series, if required
+        ### Decompose time series, if required
         if self.season_type in ["dummy", "harmonic"]:
             if self.verbose > 0:
                 print("Applying STL")
@@ -176,7 +178,7 @@ class BFASTPython(BFASTBase):
             if self.verbose > 1:
                 print("St set to\n{}".format(St))
         else:
-            # no seasonal model
+            ## No seasonal model
             St = np.zeros(nrow)
 
         nan_map = create_nan_map(Yt)
@@ -193,10 +195,14 @@ class BFASTPython(BFASTBase):
             CheckTimeSt = Wt_bp
 
             ### Trend component
-            Vt = Yt - St  # Deseasonalized Time series
+            ## Deseasonalized Time series
+            Vt = Yt - St
             if self.verbose > 1:
                 print("Vt:\n{}".format(Vt))
-            ti1, Vt1 = omit_nans(ti, Vt)
+            ## Remove nans
+            ti1 = ti[nan_map]
+            Vt1 = Vt[nan_map]
+            ## Preliminary test
             p_Vt = EFP(sm.add_constant(ti1), Vt1, self.h, verbose=self.verbose).sctest()
             if p_Vt <= self.level:
                 if self.verbose > 0:
@@ -216,19 +222,17 @@ class BFASTPython(BFASTBase):
             if self.verbose > 0:
                 print("Fitting linear model for trend")
             if nobp_Vt:
-                ## No Change detected
                 fm0 = sm.OLS(Vt, ti, missing='drop').fit()
-                Vt_bp = np.array([], dtype=np.int32)  # no breaks times
-
-                Tt = fm0.predict(exog=ti)  # Overwrite non-missing with fitted values
+                Vt_bp = np.array([], dtype=np.int32)
+                ## Overwrite non-missing with fitted values
+                Tt = fm0.predict(exog=ti)
                 Tt[np.isnan(Yt)] = np.nan
             else:
                 part = bp_Vt.breakfactor()
                 X1 = partition_matrix(part, sm.add_constant(ti[~np.isnan(Yt)]))
                 y1 = Vt[~np.isnan(Yt)]
-
                 fm1 = sm.OLS(y1, X1, missing='drop').fit()
-                # Vt_bp = bp_Vt.breakpoints
+                ## Modify breakpoint indexes (with nans)
                 Vt_bp = nan_map[bp_Vt.breakpoints]
 
                 Tt = np.repeat(np.nan, ti.shape[0])
@@ -236,12 +240,15 @@ class BFASTPython(BFASTBase):
 
             ### Seasonal component
             if self.season_type == "none":
-                # there is no season
+                ## There is no season
                 St = np.zeros(nrow).astype(float)
             else:
                 Wt = Yt - Tt
-                smod1, Wt1 = omit_nans(smod, Wt)
-                p_Wt = EFP(smod1, Wt1, self.h, verbose=self.verbose).sctest()  # preliminary test
+                ## Remove nans
+                smod1 = smod[nan_map]
+                Wt1 = Wt[nan_map]
+                ## Preliminary test
+                p_Wt = EFP(smod1, Wt1, self.h, verbose=self.verbose).sctest()
                 if p_Wt <= self.level:
                     if self.verbose > 0:
                         print("Breakpoints in season detected")
@@ -264,7 +271,8 @@ class BFASTPython(BFASTBase):
                     ## No seasonal change detected
                     sm0 = sm.OLS(Wt, smod, missing='drop').fit()
                     St = np.repeat(np.nan, nrow)
-                    St[~np.isnan(Yt)] = sm0.predict()  # Overwrite non-missing with fitted values
+                    St[~np.isnan(Yt)] = sm0.predict()
+                    ## Overwrite non-missing with fitted values
                     Wt_bp = np.array([], dtype=np.int32)
                 else:
                     part = bp_Wt.breakfactor()
@@ -272,17 +280,19 @@ class BFASTPython(BFASTBase):
                         X_sm1 = partition_matrix(part, smod1)
 
                     sm1 = sm.OLS(Wt1, X_sm1, missing='drop').fit()
+                    ## Modify breakpoint indexes (with nans)
                     Wt_bp = nan_map[bp_Wt.breakpoints]
 
-                    # Define empty copy of original time series
+                    ## Define empty copy of original time series
                     St = np.repeat(np.nan, nrow)
-                    St[~np.isnan(Yt)] = sm1.predict()  # Overwrite non-missing with fitted values
+                    ## Overwrite non-missing with fitted values
+                    St[~np.isnan(Yt)] = sm1.predict()
 
-            # remainder
+            ## Remainder
             Nt = Yt - Tt - St
             i_iter += 1
 
-        # Pad breakpoint arrays with 0s
+        ## Pad breakpoint arrays with 0s
         Vt_bp_arr = np.zeros(nrow, dtype=np.int32)
         Vt_bp_arr[:len(Vt_bp)] = np.array(Vt_bp)
         Wt_bp_arr = np.zeros(nrow, dtype=np.int32)

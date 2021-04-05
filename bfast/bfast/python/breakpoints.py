@@ -1,5 +1,4 @@
 import numpy as np
-np.set_printoptions(precision=2, linewidth=120)
 import matplotlib.pyplot as plt
 
 # from . import datasets
@@ -12,7 +11,7 @@ class Breakpoints():
         Computation of optimal breakpoints in regression relationships.
 
         :param X: matrix of x-values
-        :param y: vector of y
+        :param y: vector of y (no NaNs allowed)
         :param h: minimum segment width (0<h<1) as fraction of input length
         :param breaks: maximum number of breakpoints (optional)
 
@@ -211,6 +210,7 @@ class Breakpoints():
 
 
 if __name__ == "__main__":
+    np.set_printoptions(precision=2, linewidth=120)
     # print("Testing synthetic")
     # Synthetic dataset with two breakpoints x = 15 and 35
     n = 50

@@ -1,4 +1,6 @@
 import numpy as np
+np.set_printoptions(precision=2, linewidth=120)
+
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.ticker import MaxNLocator

@@ -1,7 +1,7 @@
 import numpy as np
 import statsmodels.api as sm
 
-from .utils import omit_nans, sc_me
+from .utils import sc_me
 
 
 class EFP():
@@ -11,7 +11,7 @@ class EFP():
         SUM (OLS-MOSUM) is supported
 
         :param X: matrix of x-values
-        :param y: vector of y
+        :param y: vector of y (no NaNs allowed)
         :param h: bandwidth parameter for the MOSUM process
         :param deg: degree of the polynomial to be fit [0,1]
         :returns: instance of Empirical Fluctuation Process
@@ -22,7 +22,7 @@ class EFP():
 
         if self.verbose > 0:
             print("Performing linear regression")
-        # fit linear model
+        ## fit linear model
         fm = sm.OLS(y, X, missing='drop').fit()
 
         e = y - fm.predict(exog=X)
