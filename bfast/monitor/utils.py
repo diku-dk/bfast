@@ -548,8 +548,8 @@ def _pval_brownian_motion_max(x):
 def rcusum(X, y):
     k, n = X.shape
     w = recresid(X.T, y)
-    sigma = np.std(w, ddof=1) # ddof=1 for sample sd
-    process = np.nancumsum(np.append([0],w))/(sigma*np.sqrt(n-k))
+    s = np.std(w, ddof=1) # ddof=1 for sample sd
+    process = np.nancumsum(np.append([0],w))/(s*np.sqrt(n-k))
     return process
 
 # Used in boundary, but hoisted outside because it is the same for all pixels.
