@@ -105,6 +105,36 @@ let loess [N] [n_m] (y: [N]f32)        -- observations
   if jump > 1
   then interp (map (i32.i64) m) result slopes N
   else result :> [N]f32
+-- let loess [N] [n_m] (y: [N]f32)        -- observations
+--                     (span: i64)        -- should be odd
+--                     (m: [n_m]i64)      -- indexes at which to apply the loess
+--                     (y_idx: [N]i64)    -- indexes of non-nan vals in y
+--                     (jump: i64)        -- how many values to skip
+--                     (n: i64)
+--                     : [N]f32 =
+--   let noNaNs = n == N
+--   let x = iota N
+--   -- let _ = (N, n, span, m) |> trace
+--   let (l_idx, r_idx) = rl_indexes N n span m
+--   let (result, slopes) =
+--       let aa = tabulate n_m (\i -> i64.abs (m[i] - x[l_idx[i]]))
+--       let bb = tabulate n_m (\i -> i64.abs (x[r_idx[i]] - m[i]))
+--       let md = map2 i64.max aa bb
+--       let max_dist =
+--         if span >= n
+--         then map (\x -> (w64 x) + ((w64 span) - (w64 n)) / 2f32) md
+--         else map w64 md
+--       in
+--       loess_proc (map w64 x)
+--                  y
+--                  span
+--                  m
+--                  l_idx
+--                  max_dist
+--   in
+--   if jump > 1
+--   then interp (map (i32.i64) m) result slopes N
+--   else result :> [N]f32
 
 
 let main =

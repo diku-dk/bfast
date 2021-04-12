@@ -38,7 +38,7 @@ let stl [n] (Y: [n]f32)   -- input data
   let (seasonal, trend) =
     -- Inner loop
     -- initialize trend to 0s
-    loop (_seasonal, trend) = replicate n (0f32, 0f32) |> unzip for _i_inner < 2 do
+    loop (_, trend) = replicate n (0f32, 0f32) |> unzip for _i_inner < 2 do
       -- Step 1: Detrending
       let Y_detrended = map2 (-) Y trend
 
@@ -70,7 +70,7 @@ let stl [n] (Y: [n]f32)   -- input data
 
       -- Step 3: Low-pass filtering of collection of all the cycle-subseries
       -- apply 3 moving averages
-      let ma3 = moving_averages C n_p :> [n]f32
+      let ma3 = moving_averages C n_p |> trace :> [n]f32
       -- then apply LOESS
       let L = loess ma3 l_window l_ev y_idx l_jump n_nn :> [n]f32
 

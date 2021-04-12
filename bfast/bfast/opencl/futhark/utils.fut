@@ -16,6 +16,21 @@ let fl_op (x: i64) (op: f32 -> f32): i64 =
 let pad_gather [n] 'a (vs: [n]a) (idxs: [n]i64) (zero: a): [n]a =
   map (\i -> if i >= 0 then vs[i] else zero) idxs
 
+-- returns n-length padded arrays of values and indexes; and number of matching values
+let filterPadWithKeys [n] 't
+           (p : (t -> bool))
+           (dummy : t)
+           (arr : [n]t) : ([n]t, [n]i64, i64) =
+  let tfs = map (\a -> if p a then 1i64 else 0i64) arr
+  let isT = scan (+) 0i64 tfs
+  let i   = last isT
+  let inds= map2 (\a iT -> if p a then iT - 1 else -1i64) arr isT
+  let rs  = scatter (replicate n dummy) inds arr
+  let ks  = scatter (replicate n 0i64) inds (iota n)
+  in (rs, ks, i)
+
+let filterPadNans = filterPadWithKeys (\i -> !(f32.isnan i)) 0f32
+
 let argmin [n] 'a (xs: [n]a) (leq_op: a -> a -> bool) (max_val: a): i64 =
   let tpl_arr = zip xs (indices xs)
   let (_, min_idx) =
