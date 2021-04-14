@@ -1,7 +1,7 @@
 import "utils"
 
--- simple linear interpolation
-let simple_interp [n] (xs: [n]f32) (ys: [n]f32) (x: f32) : f32 =
+-- simple linear interpolation for critical value tables
+let table_interp [n] (xs: [n]f32) (ys: [n]f32) (x: f32) : f32 =
   -- first, find the segment
   let seg =
     let (idx, _) =
@@ -68,7 +68,7 @@ let mosum_test [n] [k] [n_t] (X: [k][n]f32)
 
   -- calculate the test statistic and p_value
   let stat = f32.maximum <| map f32.abs mosum
-  let p_value = simple_interp tableipl tablep stat
+  let p_value = table_interp tableipl tablep stat
   in p_value
 
 let main =
