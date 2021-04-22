@@ -3,6 +3,7 @@ from datetime import datetime
 import numpy as np
 import pandas
 
+
 __critvals = np.array([1.22762665817831, 1.68732328328598, 2.22408818231127,
 1.33623105388957, 1.88633090100410, 2.70443676308234, 1.34108685187662,
 1.89958445059510, 2.73714807589866, 1.34165681503561, 1.90129850983572,
@@ -386,7 +387,6 @@ __critval_level = np.arange(0.95, 0.999, 0.001)
 __critval_mr = np.array(["max", "range"])
 
 def check(h, period, level, mr):
-
     if not h in __critval_h:
         raise ValueError("h can only be one of", __critval_h)
 
@@ -400,7 +400,6 @@ def check(h, period, level, mr):
         raise ValueError("mr can only be one of", __critval_mr)
 
 def get_critval(h, period, level, mr):
-
     # Sanity check
     check(h, period, level, mr)
 
@@ -417,7 +416,6 @@ def get_critval(h, period, level, mr):
     return __critvals[tuple(index)] * np.sqrt(2)
 
 def _find_index_date(dates, t):
-
     for i in range(len(dates)):
         if t < dates[i]:
             return i

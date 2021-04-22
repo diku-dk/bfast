@@ -30,15 +30,14 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
            else mkX_no_trend (i64.i32 k2p2') freq mappingindices)
           |> intrinsics.opaque
 
-
   -- PERFORMANCE BUG: instead of `let Xt = copy (transpose X)`
   --   we need to write the following ugly thing to force manifestation:
   let zero = r32 <| i32.i64 <| (N * N + 2 * N + 1) / (N + 1) - N - 1
   let Xt  = intrinsics.opaque <| map (map (+zero)) (copy (transpose X))
 
-  let Xh  =  (X[:,:n64])
-  let Xth =  (Xt[:n64,:])
-  let Yh  =  (images[:,:n64])
+  let Xh  = X[:,:n64]
+  let Xth = Xt[:n64,:]
+  let Yh  = images[:,:n64]
 
   ----------------------------------
   -- 2. mat-mat multiplication    --
@@ -53,14 +52,14 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
   ---------------------------------------------
   -- 4. several matrix-vector multiplication --
   ---------------------------------------------
-  let beta0  = map (matvecmul_row_filt Xh) Yh   -- [2k+2]
+  let beta0  = map (matvecmul_row_filt Xh) Yh   -- [m][2k+2]
                |> intrinsics.opaque
 
-  let beta   = map2 matvecmul_row Xinv beta0    -- [2k+2]
+  let beta   = map2 matvecmul_row Xinv beta0    -- [m][2k+2]
                |> intrinsics.opaque -- ^ requires transposition of Xinv
                                     --   unless all parallelism is exploited
 
-  let y_preds= map (matvecmul_row Xt) beta      -- [N]
+  let y_preds= map (matvecmul_row Xt) beta      -- [m][N]
                |> intrinsics.opaque -- ^ requires transposition of Xt (small)
                                     --   can be eliminated by passing
                                     --   (transpose X) instead of Xt
@@ -68,17 +67,14 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
   ---------------------------------------------
   -- 5. filter etc.                          --
   ---------------------------------------------
-  let (Nss, y_errors, val_indss) = ( intrinsics.opaque <| unzip3 <|
+  let (Nss, y_errors, val_indss) = intrinsics.opaque <| unzip3 <|
     map2 (\y y_pred ->
-            let y_error_all = zip y y_pred |>
-                map (\(ye, yep) -> if !(f32.isnan ye)
-                                  then ye - yep
-                                  else f32.nan
-                    )
-            let (tups, Ns) = filterPadWithKeys (\y -> !(f32.isnan y)) (f32.nan) y_error_all
-            let (y_error, val_inds) = unzip tups
-            in  (Ns, y_error, val_inds)
-         ) images y_preds )
+            let y_error_all = map2 (\ye yep -> if !(f32.isnan ye)
+                                               then ye - yep
+                                               else f32.nan
+                                   ) y y_pred
+            in filterPadWithKeys (\y -> !(f32.isnan y)) f32.nan y_error_all
+         ) images y_preds
 
   ------------------------------------------------
   -- 6. ns and sigma (can be fused with above)  --
@@ -87,7 +83,7 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
     map2 (\yh y_error ->
             let ns    = map (\ye -> if !(f32.isnan ye) then 1 else 0) yh
                         |> reduce (+) 0
-            let sigma = map (\i -> if i < ns then #[unsafe] y_error[i] else 0.0) (iota3232 n)
+            let sigma = map (\i -> if i < ns then y_error[i] else 0.0) (iota3232 n)
                         |> map (\a -> a * a) |> reduce (+) 0.0
             let sigma = f32.sqrt (sigma / (r32 (ns - k2p2)))
             let h     = t32 ((r32 ns) * hfrac)
@@ -101,14 +97,13 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
   let MO_fsts = zip3 y_errors nss hs
                 |> map (\(y_error, ns, h) ->
                           map (\i -> if i < h
-                                     then #[unsafe] y_error[i + ns - h + 1]
+                                     then y_error[i + ns - h + 1]
                                      else 0.0
                               ) (iota3232 hmax)
                           |> reduce (+) 0.0
                        ) |> intrinsics.opaque
 
-  let BOUND = map (\q -> let t    = n+1+q
-                         let time = #[unsafe] mappingindices[t - 1]
+  let BOUND = map (\q -> let time = mappingindices[n + q]
                          let tmp  = logplus ((r32 time) / (r32 mappingindices[n - 1]))
                          in  lam * (f32.sqrt tmp)
                   ) (iota32 (N-n64))
@@ -117,7 +112,7 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
   -- 8. error magnitude computation:             --
   ---------------------------------------------
   let magnitudes = zip3 Nss nss y_errors |>
-    map (\ (Ns, ns, y_error) ->
+    map (\(Ns, ns, y_error) ->
             map (\i -> if i < Ns - ns && !(f32.isnan y_error[ns + i])
                        then y_error[ns + i]
                        else f32.inf
@@ -128,10 +123,11 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
                 |> (\xs -> let i = (Ns - ns) / 2
                            let j = i - 1
                            in
-                           if Ns == ns then 0f32
+                           if Ns == ns
+                           then 0f32
                            else if (Ns - ns) % 2 == 0
-                           then (xs[j] + xs[i]) / 2
-                           else xs[i])
+                                then (xs[j] + xs[i]) / 2
+                                else xs[i])
         ) |> intrinsics.opaque
 
   ---------------------------------------------
@@ -142,7 +138,7 @@ let mainFun [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
     map (\ ( (Ns,ns,sigma, h), (MO_fst,y_error,val_inds) ) ->
             let MO = map (\j -> if j >= Ns - ns then 0.0
                                 else if j == 0 then MO_fst
-                                else #[unsafe] (y_error[ns + j] - y_error[ns - h + j])
+                                else y_error[ns + j] - y_error[ns - h + j]
                          ) (iota32 (N - n64)) |> scan (+) 0.0
 
             let MO' = map (\mo -> mo / (sigma * (f32.sqrt (r32 ns))) ) MO
@@ -181,21 +177,19 @@ entry mainMagnitude [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
                            (hfrac: f32) (lam: f32)
                            (mappingindices : [N]i32)
                            (images : [m][N]f32) =
-  let (_, _, _, _, _, _, _, breaks, means, magnitudes, _, _) =
+  let (_, Nss, _, _, _, _, _, breaks, means, magnitudes, _, _) =
     mainFun trend k n freq hfrac lam mappingindices images
-  in (breaks, means, magnitudes)
+  in (Nss, breaks, means, magnitudes)
 
 entry main [m][N] (trend: i32) (k: i32) (n: i32) (freq: f32)
                   (hfrac: f32) (lam: f32)
                   (mappingindices : [N]i32)
                   (images : [m][N]f32) =
-  let (_, _, _, _, _, _, _, breaks, means, _, _, _) =
+  let (_, Nss, _, _, _, _, _, breaks, means, _, _, _) =
     mainFun trend k n freq hfrac lam mappingindices images
-  in (breaks, means)
+  in (Nss, breaks, means)
 
--- | implementation is in this entry point
---   the outer map is distributed directly
-entry remove_nans [m][n][p] (nan_value: i16) (images : [m][n][p]i16) =
+entry convertToFloat [m][n][p] (nan_value: i16) (images : [m][n][p]i16) =
   map (\block ->
          map (\row ->
                 map (\el -> if el == nan_value then f32.nan else f32.i16 el) row

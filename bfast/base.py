@@ -7,8 +7,8 @@ Created on Oct 15, 2019
 from abc import ABC
 from abc import abstractmethod
 
-class BFASTMonitorBase(ABC):
 
+class BFASTMonitorBase(ABC):
     def __init__(
             self,
             start_monitor,
@@ -20,7 +20,6 @@ class BFASTMonitorBase(ABC):
             period=10,
             verbose=0,
          ):
-
         self.start_monitor = start_monitor
         self.freq = freq
         self.k = k
@@ -32,5 +31,4 @@ class BFASTMonitorBase(ABC):
 
     @abstractmethod
     def fit(self, y):
-
         raise Exception("Function 'fit' not implemented!")

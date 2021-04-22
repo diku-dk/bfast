@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 
 from bfast import BFASTMonitor
-from bfast.utils import crop_data_dates
+from bfast.monitor.utils import crop_data_dates
 
 
 def cached(file_name):
@@ -71,7 +71,7 @@ def run_bfast_(backend,
             trend=trend,
             level=level,
             backend=backend,
-            verbose=1,
+            verbose=0,
             device_id=0,
     )
 
@@ -88,7 +88,8 @@ def run_bfast_(backend,
     breaks = model.breaks
     means = model.means
     magnitudes = model.magnitudes
-    return breaks, means, magnitudes
+    valids = model.valids
+    return breaks, means, magnitudes, valids
 
 
 def compare(name, arr_p, arr_o):
@@ -104,24 +105,27 @@ def compare(name, arr_p, arr_o):
                 exit()
 
 
+# def run_bfast(backend):
+#     @cached(backend)
+#     def fun(backend):
+#         return run_bfast_(backend)
+#     return fun(backend)
 def run_bfast(backend):
-    @cached(backend)
-    def fun(backend):
-        return run_bfast_(backend)
-    return fun(backend)
+    return run_bfast_(backend)
 
 
 
 if __name__ == "__main__":
-    breaks_p, means_p, magnitudes_p = run_bfast("python")
-    # breaks_p, means_p, magnitudes_p = run_bfast("python-mp")
-    breaks_o, means_o, magnitudes_o = run_bfast("opencl")
+    # breaks_p, means_p, magnitudes_p, valids_p = run_bfast("python")
+    breaks_p, means_p, magnitudes_p, valids_p = run_bfast("python-mp")
+    breaks_o, means_o, magnitudes_o, valids_o = run_bfast("opencl")
     # compare("breaks", breaks_p, breaks_o)
     # compare("means", means_p, means_o)
 
     breaks_diff = np.abs(breaks_p - breaks_o)
     means_diff = np.abs(means_p - means_o)
     magnitudes_diff = np.abs(magnitudes_p - magnitudes_o)
+    valids_diff = np.abs(valids_p - valids_o)
 
     plt.imshow(breaks_p, cmap="Greys")
     plt.savefig("breaks_py.png")
@@ -152,9 +156,13 @@ if __name__ == "__main__":
     print("opencl_magnitudes", np.min(magnitudes_o), np.max(magnitudes_o))
     print("python_magnitudes", np.min(magnitudes_p), np.max(magnitudes_p))
 
+    print("opencl_valids", np.min(valids_o), np.max(valids_o))
+    print("python_valids", np.min(valids_p), np.max(valids_p))
+
     print("diff_means", np.min(means_diff), np.max(means_diff))
     print("diff_breaks", np.min(breaks_diff), np.max(breaks_diff))
     print("diff_magnitudes", np.min(magnitudes_diff), np.max(magnitudes_diff))
+    print("diff_valids", np.min(valids_diff), np.max(valids_diff))
 
     plt.imshow(breaks_diff, cmap="Greys")
     plt.savefig("breaks_diff.png")
@@ -166,3 +174,7 @@ if __name__ == "__main__":
 
     plt.imshow(magnitudes_diff, cmap="Greys")
     plt.savefig("magnitudes_diff.png")
+
+    plt.clf()
+    plt.imshow(valids_diff, cmap="Greys")
+    plt.savefig("valids_diff.png")

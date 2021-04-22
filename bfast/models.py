@@ -1,7 +1,8 @@
 from bfast.monitor import BFASTMonitorPython
 from bfast.monitor import BFASTMonitorOpenCL
 
-class BFASTMonitor(object):
+
+class BFASTMonitor():
     """
     BFASTMonitor implements the BFASTMonitor approach and
     provides two backends/implementations:
@@ -85,7 +86,6 @@ class BFASTMonitor(object):
         different phases.
 
     """
-
     def __init__(
             self,
             start_monitor,
@@ -102,7 +102,6 @@ class BFASTMonitor(object):
             detailed_results=False,
             find_magnitudes=True,
         ):
-
         self.start_monitor = start_monitor
         self.freq = freq
         self.k = k
@@ -139,7 +138,6 @@ class BFASTMonitor(object):
         -------
         self : The BFASTMonitor object.
         """
-
         self._model = None
 
         if self.backend == 'python':
@@ -184,11 +182,9 @@ class BFASTMonitor(object):
                 )
 
         elif self.backend == "C":
-
             raise Exception("Multi-core C implementation will be added soon!")
 
         else:
-
             raise Exception("Unknown backend '{}".format(self.backend))
 
         # fit BFASTMonitor models
@@ -208,7 +204,6 @@ class BFASTMonitor(object):
         dict: Mapping of string to any
             parameter names mapped to their values.
         """
-
         params = {
             "start_monitor": self.start_monitor,
             "freq": self.freq,
@@ -236,7 +231,6 @@ class BFASTMonitor(object):
             Dictionary containing the
             parameters to be used.
         """
-
         for parameter, value in params.items():
             self.setattr(parameter, value)
 
@@ -250,7 +244,6 @@ class BFASTMonitor(object):
         dict : An dictionary containing the runtimes
             for the different phases.
         """
-
         if self._is_fitted():
             return self._model.get_timers()
 
@@ -269,7 +262,6 @@ class BFASTMonitor(object):
             entries correspond to the first break that was
             detected in the monitor period (i.e., its index).
         """
-
         if self._is_fitted():
             return self._model.breaks
 
@@ -286,7 +278,6 @@ class BFASTMonitor(object):
             mean for a pixel corresponds to an increase of the
             vegetation in case indices such as NDMI are considered)
         """
-
         if self._is_fitted():
             return self._model.means
 
@@ -302,16 +293,28 @@ class BFASTMonitor(object):
             values median of the difference between the data
             and the model prediction in the monitoring period
         """
-
         if self._is_fitted():
             return self._model.magnitudes
 
         raise Exception("Model not yet fitted!")
 
-
     def _is_fitted(self):
-
         if hasattr(self, '_model_fitted'):
             return self._model_fitted
 
         return False
+
+    @property
+    def valids(self):
+        """ Returns the number of valid values for each pixel
+
+        Returns
+        -------
+         array-like : An array containing the number
+             of valid values for each pixel in the
+             aray data
+        """
+        if self._is_fitted():
+            return self._model.valids
+
+        raise Exception("Model not yet fitted!")

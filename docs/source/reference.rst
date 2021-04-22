@@ -14,5 +14,5 @@ BFASTMonitor Implementation
 Helper Functions
 ----------------
 
-.. automodule:: bfast.utils
+.. automodule:: bfast.monitor.utils
     :members: crop_data_dates
