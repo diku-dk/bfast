@@ -7,11 +7,11 @@ from distutils.command.clean import clean as Clean
 DISTNAME = 'bfast'
 DESCRIPTION = 'A Python library for Breaks For Additive Season and Trend (BFAST) that resorts to parallel computing for accelerating the computations.'
 LONG_DESCRIPTION = open('README.rst').read()
-MAINTAINER = 'Fabian Gieseke'
-MAINTAINER_EMAIL = 'fabian.gieseke@di.ku.dk'
-URL = 'http://www.bfast.pydata.org'
+MAINTAINER = 'Dmitry Serykh'
+MAINTAINER_EMAIL = 'dmitry.serykh@gmail.com'
+URL = 'http://bfast.readthedocs.io'
 LICENSE = 'GNU GENERAL PUBLIC LICENSE'
-DOWNLOAD_URL = 'https://github.com/gieseke/bfast'
+DOWNLOAD_URL = 'https://github.com/diku-dk/bfast'
 
 import bfast
 VERSION = bfast.__version__
@@ -32,7 +32,6 @@ else:
 
 # define new clean command
 class CleanCommand(Clean):
-
     description = "Removes build directories and compiled files in the source tree."
 
     def run(self):
@@ -59,7 +58,6 @@ class CleanCommand(Clean):
 
 
 def configuration(parent_package='', top_path=None):
-
     if os.path.exists('MANIFEST'):
         os.remove('MANIFEST')
 
