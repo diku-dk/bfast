@@ -3,6 +3,12 @@
 Release Notes
 =============
 
+Release 0.7 (April 2021)
+-------------------------
+* Various bug fixes 
+* Small refactor and cleanup
+* Added option to return number of valid observations (per pixel)
+
 Release 0.6 (January 2021)
 -------------------------
 * Performance improvements
