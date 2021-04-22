@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# from . import datasets
-from .ssr_triang import ssr_triang
+if __name__ != "__main__":
+    from .ssr_triang import ssr_triang
 
 
 class Breakpoints():
@@ -18,6 +18,8 @@ class Breakpoints():
         :returns: instance of Breakpoints
         """
         self.verbose = verbose
+        self.X = X
+        self.y = y
 
         if self.verbose > 0:
             print("multiprocessing is set to {}".format(use_mp))
@@ -25,13 +27,9 @@ class Breakpoints():
 
         n, k = X.shape
         self.nobs = n
+        self.nreg = k
         if self.verbose > 1:
             print("n = {}, k = {}".format(n, k))
-
-        intercept_only = np.allclose(X, 1)
-
-        if self.verbose > 1:
-            print("intercept_only = {}".format(intercept_only))
 
         h = int(np.floor(n * h))
         self.h = h
@@ -52,7 +50,10 @@ class Breakpoints():
         ## store results together with SSRs in SSR_table
         if self.verbose > 0:
             print("Calculating triangular matrix")
-        self.SSR_triang = ssr_triang(n, h, X, y, k, intercept_only)
+        self.SSR_triang = ssr_triang(n, h, X, y, k)
+        for row in self.SSR_triang:
+            print(row)
+            print()
 
         index = np.arange((h - 1), (n - h)).astype(int)
 
@@ -66,9 +67,6 @@ class Breakpoints():
         opt = self.extract_breaks(SSR_table, self.max_breaks).astype(int)
 
         self.SSR_table = SSR_table
-        self.nreg = k
-        self.y = y
-        self.X = X
 
         _, BIC_table = self.summary()
         if self.verbose > 1:
@@ -83,7 +81,8 @@ class Breakpoints():
 
     def SSR(self, i, j):
         # table lookup
-        return self.SSR_triang[int(i)][int(j - i)]
+        # return self.SSR_triang[int(i)][int(j - i)]
+        return self.SSR_triang[int(i)][int(j - i) - self.nreg]
 
     def extend_SSR_table(self, SSR_table, breaks):
         _, ncol = SSR_table.shape
@@ -210,22 +209,24 @@ class Breakpoints():
 
 
 if __name__ == "__main__":
+    from ssr_triang import ssr_triang
+    import datasets
     np.set_printoptions(precision=2, linewidth=120)
     # print("Testing synthetic")
     # Synthetic dataset with two breakpoints x = 15 and 35
     n = 50
     ones = np.ones(n).reshape((n, 1)).astype("float64")
     y = np.arange(1, n+1).astype("float64")
-    X = np.copy(y).reshape((n, 1))
+    X = np.column_stack((ones, np.copy(y)))
     # X = np.column_stack((ones, X))
     # X = ones
     # X[5] = np.nan
     y[14:] = y[14:] * 0.03
-    y[5] = np.nan
+    # y[5] = np.nan
     y[34:] = y[34:] + 10
 
 
-    bp = Breakpoints(X, y, use_mp=False, verbosity=0).breakpoints
+    bp = Breakpoints(X, y, use_mp=False, verbose=0).breakpoints
     print("Breakpoints:", bp)
 
     # # Nile dataset with a single breakpoint. Ashwan dam was built in 1898

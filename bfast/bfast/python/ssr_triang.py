@@ -1,30 +1,25 @@
-import multiprocessing as mp
 from functools import partial
 
 import numpy as np
 import statsmodels.api as sm
 
 
-def ssr_triang(n, h, X, y, k, intercept_only):
+def ssr_triang(n, h, X, y, k):
     """
     Calculates the upper triangular matrix of squared residuals
     """
-    my_SSRi = partial(SSRi, n=n, h=h, X=X, y=y, k=k, intercept_only=intercept_only)
-    return np.array([my_SSRi(i) for i in range(n-h+1)], dtype=object)
+    my_SSRi = partial(SSRi, X=X, y=y)
+    return np.array([my_SSRi(i) for i in range(n - h + 1)], dtype=object)
 
-def SSRi(i, n, h, X, y, k, intercept_only):
+def SSRi(i, X, y):
     """
     Compute i'th row of the SSR diagonal matrix, i.e,
     the recursive residuals for segments starting at i = 1:(n-h+1)
     """
-    if intercept_only:
-        arr1 = np.arange(1, (n-i+1))
-        arr2 = arr1[:-1]
-        ssr = (y[i:] - np.cumsum(y[i:]) / arr1)[1:] * np.sqrt(1 + 1 / arr2)
-    else:
-        ssr = recresid(X[i:], y[i:])
-        rval = np.concatenate((np.repeat(np.nan, k), np.cumsum(ssr**2)))
-        return rval
+    ssr = recresid(X[i:], y[i:])
+    # rval = np.concatenate((np.repeat(np.nan, k), np.cumsum(ssr**2)))
+    rval = np.cumsum(ssr**2)
+    return rval
 
 def _no_nans(arr):
     return not np.isnan(arr).any()
@@ -125,7 +120,64 @@ def recresid(x, y, start=None, end=None, tol=None):
         fr = 1 + xr @ X1 @ xr
         val = np.nan_to_num(xr * betar)
         v = (y[r] - np.sum(val)) / np.sqrt(fr)
+        print("Writing to ", r - q)
         rval[r-q] = v
 
     rval = np.around(rval, 8)
     return rval
+
+def _nonans(xs):
+  return not np.any(np.isnan(xs))
+
+def recresid_n(X, y, tol=None):
+    n, k = X.shape
+    assert(n == y.shape[0])
+
+    if tol is None:
+        tol = np.sqrt(np.finfo(np.float64).eps) / k
+
+    y = y.reshape(n, 1)
+    ret = np.zeros(n - k)
+
+    # initialize recursion
+    yh = y[:k] # k x 1
+    Xh = X[:k] # k x k
+    model = sm.OLS(yh, Xh, missing="drop").fit(method="qr")
+
+    X1 = model.normalized_cov_params   # (X'X)^(-1), k x k
+    bhat = np.nan_to_num(model.params) # k x 1
+
+    check = True
+    for r in range(k, n):
+        # Compute recursive residual
+        x = X[r]
+        d = X1 @ x
+        fr = 1 + (x @ d)
+        resid = y[r] - np.nansum(x * bhat) # dotprod ignoring nans
+        ret[r-k] = resid / np.sqrt(fr)
+
+        # Update formulas
+        X1 = X1 - (np.outer(d, d))/fr
+        bhat += X1 @ x * resid
+
+        # Check numerical stability (rectify if unstable).
+        if check:
+            # We check update formula value against full OLS fit
+            Xh = X[:r+1]
+            model = sm.OLS(y[:r+1], Xh, missing="drop").fit(method="qr")
+
+            nona = _nonans(bhat) and _nonans(model.params)
+            check = not (nona and np.allclose(model.params, bhat, atol=tol))
+            X1 = model.normalized_cov_params
+            bhat = np.nan_to_num(model.params, 0.0)
+
+    return ret
+
+if __name__ == "__main__":
+    X = np.column_stack((np.ones(10), np.arange(1,11)))
+    y = np.arange(1,11) * 2 + np.random.normal(0,1,10)
+    res = recresid(X, y, start=None, end=None)
+    print(res)
+
+    res_n = recresid_n(X, y)
+    print(res_n)

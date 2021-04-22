@@ -2,24 +2,23 @@ import "utils"
 
 -- simple linear interpolation for critical value tables
 let table_interp [n] (xs: [n]f32) (ys: [n]f32) (x: f32) : f32 =
-  -- first, find the segment
+  -- first, find the segment, i.e. the greatest element of xs < x
   let seg =
     let (idx, _) =
-      -- tables are typically small, hence sequential
+      -- tables are typically small (n = 5), hence sequential and linear in time
       loop (curr, cont) = (0, true) while (curr < n && cont) do
-      let cont = x >= xs[curr]
-      let curr = if cont then curr + 1 else curr
-      in
-      (curr, cont)
+        let cont = x >= xs[curr]
+        let curr = if cont then curr + 1 else curr
+        in
+        (curr, cont)
     in idx - 1
   in
-  -- is it the last segment?
   if seg >= n - 1
   then
-    -- use the last value of y
+    -- if last segment, return the last element of ys. We don't care about such small values
     ys[n - 1]
   else
-    -- do linear interpolation between two points
+    -- otherwise perform linear interpolation in the found segment
     let x_0 = xs[seg]
     let x_1 = xs[seg + 1]
     let y_0 = ys[seg]
@@ -28,14 +27,14 @@ let table_interp [n] (xs: [n]f32) (ys: [n]f32) (x: f32) : f32 =
     in
     y_0 * (1 - frac) + y_1 * frac
 
--- find p-value by performing a statistical test for a OLS-MOSUM process
-let mosum_test [n] [k] [n_t] (X: [k][n]f32)
-                        (y: [n]f32)
-                        (nn_idx: [n]i64)
-                        (n_nn: i64)
-                        (h: f32)
-                        (tableipl: [n_t]f32)
-                        (tablep: [n_t]f32) =
+-- find the p-value by performing a statistical test for a OLS-MOSUM process
+let mosum_test [k] [n] [n_t] (X: [k][n]f32)
+                             (y: [n]f32)
+                             (nn_idx: [n]i64)
+                             (n_nn: i64)
+                             (h: f32)
+                             (tableipl: [n_t]f32)
+                             (tablep: [n_t]f32) =
   -- fit linear model
   let Xt   = transpose X
   let Xsqr = matmul_filt X Xt y
@@ -43,7 +42,7 @@ let mosum_test [n] [k] [n_t] (X: [k][n]f32)
   let beta0 = matvecmul_row_filt X y
   let beta  = matvecmul_row Xinv beta0
 
-  -- calculate errors of the fitted model
+  -- calculate the OLS residuals of the linear model
   let y_preds = matvecmul_row Xt beta
   let y_error_all = map2 (\ye yep -> if !(f32.isnan ye)
                                      then ye - yep
@@ -51,15 +50,14 @@ let mosum_test [n] [k] [n_t] (X: [k][n]f32)
                          ) y y_preds
   let y_error = pad_gather y_error_all nn_idx 0f32
 
-  -- parameters for the MOSUM process
+  -- parameters for the OLS-MOSUM process
   let sigma = f32.sqrt <| f32.sum <| map (\i -> i**2 / w64 (n_nn - k)) y_error
   let nh_nn = i64.f32 <| f32.floor ((w64 n_nn) * h)
+  -- length of the mosum process
+  let n_mosum = n_nn - nh_nn
 
   -- We don't add 0, since we only need the statistic
   let cusum = scan (+) 0f32 y_error
-
-  -- length of the mosum process
-  let n_mosum = n_nn - nh_nn
   -- calculate the MOSUM process from the cumulative sum of the errors
   let mosum1 = cusum[nh_nn:n_nn] :> [n_mosum]f32
   let mosum2 = cusum[:n_mosum] :> [n_mosum]f32
@@ -70,6 +68,7 @@ let mosum_test [n] [k] [n_t] (X: [k][n]f32)
   let stat = f32.maximum <| map f32.abs mosum
   let p_value = table_interp tableipl tablep stat
   in p_value
+
 
 let main =
   let get_x [n] (_: [n]f32) : [2][n]f32 =

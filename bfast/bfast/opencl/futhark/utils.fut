@@ -13,10 +13,14 @@ let w64 (x: i64) : f32 =
 let fl_op (x: i64) (op: f32 -> f32): i64 =
   x |> w64 |> op |> i64.f32
 
+-- gather for the padded (with -1) indexes
 let pad_gather [n] 'a (vs: [n]a) (idxs: [n]i64) (zero: a): [n]a =
   map (\i -> if i > 0 then vs[i] else zero) idxs
 
--- returns n-length padded arrays of values and indexes; and number of matching values
+-- returns:
+--- rs: array of matching values, padded with 0 of that type
+--- ks: array of indexes of matching values, padded with -1
+--- n : number of matching values
 let filterPadWithKeys [n] 't
            (p : (t -> bool))
            (dummy : t)
@@ -26,7 +30,6 @@ let filterPadWithKeys [n] 't
   let i   = last isT
   let inds= map2 (\a iT -> if p a then iT - 1 else -1i64) arr isT
   let rs  = scatter (replicate n dummy) inds arr
-  -- let ks  = scatter (replicate n 0i64) inds (iota n)
   let ks  = scatter (replicate n (-1i64)) inds (iota n)
   in (rs, ks, i)
 
@@ -48,14 +51,8 @@ let nanargmin [n] (xs: [n]f32) : i64 =
     if !(f32.isnan a) && !(f32.isnan b)
     then v_n
     else true
-
-  let tpl_arr = zip xs (indices xs)
-  let (_, min_idx) =
-    reduce_comm (
-      \(v_1, i_1) (v_2, i_2) -> if op v_1 v_2 then (v_1, i_1) else (v_2, i_2)
-    ) (f32.highest, 0i64) tpl_arr
   in
-  min_idx
+  argmin xs op f32.highest
 
 let gauss_jordan [nm] (n: i64) (m: i64) (A: *[nm]f32): [nm]f32 =
   loop A for i < n do
@@ -111,7 +108,7 @@ let dotprod_filt [n] (vct: [n]f32) (xs: [n]f32) (ys: [n]f32) : f32 =
   f32.sum (map3 (\v x y -> x * y * if (f32.isnan v) then 0.0 else 1.0) vct xs ys)
 
 let matvecmul_row_filt [n][m] (xss: [n][m]f32) (ys: [m]f32) =
-    map (\xs -> map2 (\x y -> if (f32.isnan y) then 0 else x*y) xs ys |> f32.sum) xss
+  map (\xs -> map2 (\x y -> if (f32.isnan y) then 0 else x*y) xs ys |> f32.sum) xss
 
 let matmul_filt [n][p][m] (xss: [n][p]f32) (yss: [p][m]f32) (vct: [p]f32) : [n][m]f32 =
   map (\xs -> map (dotprod_filt vct xs) (transpose yss)) xss
