@@ -15,7 +15,7 @@ let fl_op (x: i64) (op: f32 -> f32): i64 =
 
 -- gather for the padded (with -1) indexes
 let pad_gather [n] 'a (vs: [n]a) (idxs: [n]i64) (zero: a): [n]a =
-  map (\i -> if i > 0 then vs[i] else zero) idxs
+  map (\i -> if i >= 0 then vs[i] else zero) idxs
 
 -- returns:
 --- rs: array of matching values, padded with 0 of that type

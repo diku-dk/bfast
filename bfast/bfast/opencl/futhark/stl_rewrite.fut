@@ -82,7 +82,7 @@ let stl [m][n] (Y_l: [m][n]f32) (n_p: i64): ([m][n]f32, [m][n]f32, [m][n]f32) =
       in
       map5 (\Y nn_idx n_nn C ma3 ->
           -- then apply LOESS
-          let L = loess ma3 l_window l_ev nn_idx l_jump n_nn :> [n]f32
+          let L = loess ma3 l_window l_ev nn_idx n_nn :> [n]f32
 
           -- Step 4: Detrend smoothed cycle-subseries
           -- start and end indices for after adding in extra n.p before and after
@@ -95,7 +95,7 @@ let stl [m][n] (Y_l: [m][n]f32) (n_p: i64): ([m][n]f32, [m][n]f32, [m][n]f32) =
           let D = map2 (-) Y seasonal
 
           -- Step 6: Trend Smoothing
-          let trend = loess D t_window t_ev nn_idx t_jump n_nn :> [n]f32
+          let trend = loess D t_window t_ev nn_idx n_nn :> [n]f32
           in (seasonal, trend)
       ) Y_l nn_idx_l n_nn_l C_l ma3_l |> unzip2
 

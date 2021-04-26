@@ -70,9 +70,9 @@ let stl [n] (Y: [n]f32)   -- input data
 
       -- Step 3: Low-pass filtering of collection of all the cycle-subseries
       -- apply 3 moving averages
-      let ma3 = moving_averages C n_p |> trace :> [n]f32
+      let ma3 = moving_averages C n_p :> [n]f32
       -- then apply LOESS
-      let L = loess ma3 l_window l_ev y_idx l_jump n_nn :> [n]f32
+      let L = loess ma3 l_window l_ev y_idx n_nn :> [n]f32
 
       -- Step 4: Detrend smoothed cycle-subseries
       -- start and end indices for after adding in extra n.p before and after
@@ -86,7 +86,7 @@ let stl [n] (Y: [n]f32)   -- input data
       let D = map2 (-) Y seasonal
 
       -- Step 6: Trend Smoothing
-      let trend = loess D t_window t_ev y_idx t_jump n_nn :> [n]f32
+      let trend = loess D t_window t_ev y_idx n_nn :> [n]f32
 
       in (seasonal, trend)
 

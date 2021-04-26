@@ -1,7 +1,8 @@
-import "stl"
--- import "stl_exchange"
+-- import "stl"
+import "stl_rewrite"
 
-let arr = [[315.42f32, 316.31f32, 316.5f32, 317.56f32, 318.13f32, 318.0f32, 316.39f32,
+let main =
+  let arr = [[315.42f32, 316.31f32, 316.5f32, 317.56f32, 318.13f32, 318.0f32, 316.39f32,
   314.65f32, 313.68f32, 313.18f32, 314.66f32, 315.43f32, 316.27f32, 316.81f32,
   317.42f32, 318.87f32, 319.87f32, 319.43f32, 318.01f32, 315.74f32, 314.0f32,
   313.68f32, 314.84f32, 316.03f32, 316.73f32, 317.54f32, 318.38f32, 319.31f32,
@@ -69,9 +70,24 @@ let arr = [[315.42f32, 316.31f32, 316.5f32, 317.56f32, 318.13f32, 318.0f32, 316.
   362.38f32, 363.23f32, 364.06f32, 364.61f32, 366.4f32, 366.84f32, 365.68f32,
   364.52f32, 362.57f32, 360.24f32, 360.83f32, 362.49f32, 364.34f32]]
 
-let main =
-  let (a, b, c) = (map (\i -> stl i 12) arr |> unzip3)
-  in (a[0, 0:10], b[0, 0:10], c[0, 0:10])
--- let main =
---   let (a, b, c) = stl arr 12
---   in (a[0, 0:10], b[0, 0:10], c[0, 0:10])
+  -- add nans
+  let arr =
+    arr with [0, 10] = f32.nan
+
+  let arr =
+    arr with [0, 20] = f32.nan
+
+  let arr =
+    arr with [0, 30] = f32.nan
+
+  let arr =
+    arr with [0, 40] = f32.nan
+
+  -- let (a, b, _) = (map (\i -> stl i 12) arr |> unzip3)
+  -- let _ = a[0, 9:31] |> trace
+  -- let _ = b[0, 9:31] |> trace
+  -- in a
+  let (a, b, _) = stl arr 12
+  let _ = a[0, 9:31] |> trace
+  let _ = b[0, 9:31] |> trace
+  in a

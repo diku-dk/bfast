@@ -39,130 +39,59 @@ let loess_proc [n] [n_m] (xx: [n]f32)          -- time values - should be 1:n un
          in (result, slopes)
        ) l_idx m max_dist |> unzip
 
-
-let rl_indexes [n_m] (N: i64) (n: i64) (span: i64) (m: [n_m]i64) : ([n_m]i64, [n_m]i64) =
+let l_indexes [n_m] (N: i64) (n: i64) (span: i64) (m: [n_m]i64) : [n_m]i64 =
   let s2 = (span + 1) / 2
   in
   if N - 1 < span
   then
-    replicate n_m (0, n - 1) |> unzip
+    replicate n_m 0
   else
     map ( \i ->
-            -- this is how stlplus does it
-            let l = if i < s2 - 1 then 0
-                    else if i >= s2 - 1 && i <= n - 1 - s2 then i - s2 + 1
-                    else n - span
-            let r = l + span - 1
-            in (l, r)
-        ) m |> unzip
+            if i < s2 - 1 then 0
+            else if i >= s2 - 1 && i <= n - 1 - s2 then i - s2 + 1
+            else n - span
+        ) m
 
 let loess [N] [n_m] (y: [N]f32)        -- observations
                     (span: i64)        -- should be odd
                     (m: [n_m]i64)      -- indexes at which to apply the loess
                     (y_idx: [N]i64)    -- indexes of non-nan vals in y
-                    (jump: i64)        -- how many values to skip
-                    (n: i64)
+                    (n: i64)           -- n non-nan vals
                     : [N]f32 =
-  let noNaNs = n == N
-  let x = iota N
-  let (l_idx, r_idx) = rl_indexes N n span m
-  let (result, slopes) =
-    if noNaNs
-    then
-      let aa = tabulate n_m (\i -> i64.abs (m[i] - x[l_idx[i]]))
-      let bb = tabulate n_m (\i -> i64.abs (x[r_idx[i]] - m[i]))
-      let md = map2 i64.max aa bb
-      let max_dist =
-        if span >= n
-        then map (\x -> (w64 x) + ((w64 span) - (w64 n)) / 2f32) md
-        else map w64 md
-      in
-      loess_proc (map w64 x)
-                 y
-                 span
-                 m
-                 l_idx
-                 max_dist
-    else
-      let x2 = pad_gather x y_idx 0i64
-      -- this is NOT how stlplus does it
-      let nan_flags = map (\a -> if f32.isnan a then 1i64 else 0) y
-      let nan_cusum = scan (+) 0 nan_flags
-      let l_idx_nn = map (\i -> i64.max (i - nan_cusum[i]) 0) l_idx
-      let r_idx_nn = map (+(span - 1)) l_idx_nn
-
-      let max_dist = map3 (\l mv r ->
-                             i64.max (i64.abs (x2[l] - mv)) (i64.abs (x2[r] - mv))
-                          ) l_idx_nn m r_idx_nn |> map w64
-      in
-      loess_proc (map w64 x2)
-                 (pad_gather y y_idx 0f32)
-                 span
-                 m
-                 l_idx_nn
-                 max_dist
+  let l_idx = l_indexes N n span m
+  let nan_cusum = map (\mi -> if f32.isnan y[mi] then 1i64 else 0) m |> scan (+) 0
+  let l_idx_nn = map2 (\i j -> i64.min (i64.max (i - j) 0) (n - span)) l_idx nan_cusum
+  let r_idx_nn = map (+(span - 1)) l_idx_nn
+  let md = map3 (\l mv r ->
+                   i64.max (i64.abs (y_idx[l] - mv)) (i64.abs (y_idx[r] - mv))
+                ) l_idx_nn m r_idx_nn |> map w64
+  let max_dist = if span >= n
+                 then
+                   map (\x -> x + ((w64 span) - (w64 n)) / 2f32) md
+                 else
+                   md
+  let (results, slopes) = loess_proc (map w64 y_idx)
+                                     (pad_gather y y_idx 0f32)
+                                     span
+                                     m
+                                     l_idx_nn
+                                     max_dist
   in
-  if jump > 1
-  then interp (map (i32.i64) m) result slopes N
-  else result :> [N]f32
--- let loess [N] [n_m] (y: [N]f32)        -- observations
---                     (span: i64)        -- should be odd
---                     (m: [n_m]i64)      -- indexes at which to apply the loess
---                     (y_idx: [N]i64)    -- indexes of non-nan vals in y
---                     (jump: i64)        -- how many values to skip
---                     (n: i64)
---                     : [N]f32 =
---   let noNaNs = n == N
---   let x = iota N
---   -- let _ = (N, n, span, m) |> trace
---   let (l_idx, r_idx) = rl_indexes N n span m
---   let (result, slopes) =
---       let aa = tabulate n_m (\i -> i64.abs (m[i] - x[l_idx[i]]))
---       let bb = tabulate n_m (\i -> i64.abs (x[r_idx[i]] - m[i]))
---       let md = map2 i64.max aa bb
---       let max_dist =
---         if span >= n
---         then map (\x -> (w64 x) + ((w64 span) - (w64 n)) / 2f32) md
---         else map w64 md
---       in
---       loess_proc (map w64 x)
---                  y
---                  span
---                  m
---                  l_idx
---                  max_dist
---   in
---   if jump > 1
---   then interp (map (i32.i64) m) result slopes N
---   else result :> [N]f32
+  interp m results slopes N
 
-
-let main =
-  -- let y = [f32.nan, 2.3, 3.2, f32.nan, 5.3, f32.nan, f32.nan, 8.3, 9.1, 10.3]
-  let y = [1.2, 2.3, 3.2, 4.1, 5.3, 6.3, 7.1, 8.3, 9.1, 10.3]
-  let span = 5
-  let m = iota 10
-  -- let m = [0, 2, 4, 6, 8]
-  let y_idx = tabulate 10 (\i -> if (f32.isnan y[i]) then -1 else i) |> filter (>=0)
-  let n_nn = length y_idx
-  let y_idx = y_idx ++ (replicate (10 - n_nn) 0i64) :> [10]i64
-
-  let jump = 1
-  -- let jump = 2
-  in
-  loess y span m y_idx jump n_nn
 
 -- let main =
---   let xx = [1, 2, 3, 4, 5]
---   let yy = [1.2, 2.3, 3.2, 4.1, 5.3]
---   let degree = 1
---   let span = 2
---   let ww = [1, 1, 1, 1, 1]
---   -- let m = [5, 7]
---   let m = [2, 3, 4]
---   -- let l_idx = [1, 2]
---   let l_idx = [0, 1, 2]
---   -- let max_dist = [3.43, 5.32]
---   let max_dist = [3.43, 5.32, 6.1]
+--   let y = [1.2, 2.3, 3.2, 4.1, 5.3, 6.3, 7.1, 8.3, 9.1, 10.3, 11.1, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+--   -- let y = [1.2, f32.nan, 3.2, 4.1, 5.3, 6.3, f32.nan, 8.3, 9.1, 10.3, 11.1, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+--   -- let y = [1.2, f32.nan, 3.2, 4.1, 5.3, 6.3, f32.nan, 8.3, 9.1, 10.3, 11.1, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+--   -- let y = [f32.nan, f32.nan, 3.2, f32.nan, 5.3, 6.3, f32.nan, 8.3, 9.1, 10.3, 11.1, 12, 13, 14, 15, 16, 17, f32.nan, 19, 20]
+
+--   let span = 7
+--   -- let m = iota 20
+--   let m = (0..2...19) |> trace
+--   let (_, y_idx, n_nn) = filterPadNans y
+--   -- let y_idx = tabulate 10 (\i -> if (f32.isnan y[i]) then -1 else i) |> filter (>=0)
+--   -- let n_nn = length y_idx
+--   -- let y_idx = y_idx ++ (replicate (10 - n_nn) 0i64) :> [10]i64
 --   in
---   loess_proc xx yy degree span ww m l_idx max_dist
+--   loess y span m y_idx n_nn |> trace
