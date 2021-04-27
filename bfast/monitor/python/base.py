@@ -54,7 +54,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         the MOSUM/ME monitoring processes.
 
     trend : bool, default True
-        Whether a tend offset term shall be used or not
+        Whether a trend offset term shall be used or not
 
     level : float, default 0.05
         Significance level of the monitoring (and ROC,
