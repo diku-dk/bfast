@@ -65,6 +65,7 @@ def run_bfast_(backend,
     # fit BFASTMontiro model
     model = BFASTMonitor(
             start_monitor,
+            history="ROC",
             freq=freq,
             k=k,
             hfrac=hfrac,
@@ -73,9 +74,9 @@ def run_bfast_(backend,
             backend=backend,
             verbose=0,
             device_id=0,
+            detailed_results=True,
     )
 
-    #data = data[:,:50,:50]
     start_time = time.time()
     if backend == "opencl":
         model.fit(data, dates, n_chunks=5, nan_value=-32768)
@@ -89,7 +90,8 @@ def run_bfast_(backend,
     means = model.means
     magnitudes = model.magnitudes
     valids = model.valids
-    return breaks, means, magnitudes, valids
+    history_starts = model.history_starts
+    return breaks, means, magnitudes, valids, history_starts
 
 
 def compare(name, arr_p, arr_o):
@@ -113,12 +115,41 @@ def compare(name, arr_p, arr_o):
 def run_bfast(backend):
     return run_bfast_(backend)
 
+def run_bfast_cached(backend):
+    @cached(backend)
+    def fun(backend):
+        return run_bfast_(backend)
+    return fun(backend)
+
+
+def test(quantifier, pred, actual, expect, rel_err=False):
+    stmt = pred(actual, expect)
+    check = quantifier(stmt)
+    if check:
+      print("\033[92m PASSED \033[0m")
+    else:
+      print("\033[91m FAILED \033[0m")
+      inds = np.where(~stmt)
+      print("| Num. differences", np.sum(~stmt))
+      print("| Expected", expect[inds])
+      print("| Actual  ", actual[inds])
+      if rel_err:
+        print("| Relative absolute error")
+        rel_err = np.abs((expect - actual)/expect)
+        rel_err = rel_err[~np.isnan(rel_err)]
+        per_err = rel_err * 100
+        print("| Max error  {:10.5e} ({:.4f}%)".format(np.max(rel_err),
+                                                       np.max(per_err)))
+        print("| Min error  {:10.5e} ({:.4f}%)".format(np.min(rel_err),
+                                                       np.min(per_err)))
+        print("| Mean error {:10.5e} ({:.4f}%)".format(np.mean(rel_err),
+                                                       np.mean(per_err)))
 
 
 if __name__ == "__main__":
     # breaks_p, means_p, magnitudes_p, valids_p = run_bfast("python")
-    breaks_p, means_p, magnitudes_p, valids_p = run_bfast("python-mp")
-    breaks_o, means_o, magnitudes_o, valids_o = run_bfast("opencl")
+    breaks_p, means_p, magnitudes_p, valids_p, hist_p = run_bfast_cached("python-mp")
+    breaks_o, means_o, magnitudes_o, valids_o, hist_o = run_bfast("opencl")
     # compare("breaks", breaks_p, breaks_o)
     # compare("means", means_p, means_o)
 
@@ -178,3 +209,14 @@ if __name__ == "__main__":
     plt.clf()
     plt.imshow(valids_diff, cmap="Greys")
     plt.savefig("valids_diff.png")
+
+    print("np.all(breaks_o == breaks_p):", end="")
+    test(np.all, np.equal, breaks_o, breaks_p)
+    print("np.all(hist_o == hist_p):", end="")
+    test(np.all, np.equal, hist_o, hist_p)
+    print("np.all(np.isclose(means_o, means_p)):", end="")
+    test(np.all, np.isclose, means_o, means_p, rel_err=True)
+    print("np.all(np.isclose(magnitudes_o, magnitudes_p)):", end="")
+    test(np.all, np.isclose, magnitudes_o, magnitudes_p, rel_err=True)
+    print("np.all(valids_o == valids_p):", end="")
+    test(np.all, np.equal, valids_o, valids_p)

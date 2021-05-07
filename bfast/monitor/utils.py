@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from scipy import stats, optimize
 import numpy as np
 import pandas
 
@@ -486,3 +487,12 @@ def map_indices(dates):
     indices = np.argwhere(~np.isnan(ts).to_numpy()).T[0]
 
     return indices
+
+# From Brown, Durbin, Evans, 1975.
+def pval_brownian_motion_max(x):
+    Q = lambda x: 1 - stats.norm.cdf(x, loc=0, scale=1)
+    p = 2 * (Q(3*x) + np.exp(-4*x**2) - np.exp(-4*x**2)*Q(x))
+    return p
+
+def compute_lam_brownian(alpha):
+  return optimize.brentq(lambda x: pval_brownian_motion_max(x) - alpha, 0, 20)
