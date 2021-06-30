@@ -1,5 +1,6 @@
 from bfast.monitor import BFASTMonitorPython
 from bfast.monitor import BFASTMonitorOpenCL
+from bfast.monitor import BFASTMonitorCuPy
 
 
 class BFASTMonitor():
@@ -142,6 +143,18 @@ class BFASTMonitor():
 
         if self.backend == 'python':
             self._model = BFASTMonitorPython(
+                 start_monitor=self.start_monitor,
+                 freq=self.freq,
+                 k=self.k,
+                 hfrac=self.hfrac,
+                 trend=self.trend,
+                 level=self.level,
+                 period=self.period,
+                 verbose=self.verbose,
+                )
+            
+        elif self.backend == 'cupy':
+            self._model = BFASTMonitorCuPy(
                  start_monitor=self.start_monitor,
                  freq=self.freq,
                  k=self.k,
