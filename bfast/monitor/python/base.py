@@ -10,7 +10,6 @@ from functools import partial
 import numpy as np
 np.warnings.filterwarnings('ignore')
 np.set_printoptions(suppress=True)
-from sklearn import linear_model
 
 from bfast.base import BFASTMonitorBase
 from bfast.monitor.utils import compute_end_history, compute_lam, map_indices
@@ -225,14 +224,14 @@ class BFASTMonitorPython(BFASTMonitorBase):
         X_nn_m = X_nn[:, ns:]
         y_nn_h = y_nn[:ns]
         y_nn_m = y_nn[ns:]
-
+        
         # (1) fit linear regression model for history period
-        model = linear_model.LinearRegression(fit_intercept=False)
-        model.fit(X_nn_h.T, y_nn_h)
+        coef = np.linalg.pinv(X_nn_h@X_nn_h.T)@X_nn_h@y_nn_h
+
+        
 
         if self.verbose > 1:
-            column_names = np.array(["Intercept",
-                                     "trend",
+            column_names = np.array(["trend",
                                      "harmonsin1",
                                      "harmoncos1",
                                      "harmonsin2",
@@ -245,10 +244,10 @@ class BFASTMonitorPython(BFASTMonitorBase):
                 indxs = np.array([0, 2, 4, 6, 1, 3, 5])
             # print(column_names[indxs])
             print(column_names[indxs])
-            print(model.coef_[indxs])
+            print(coef[indxs])
 
         # get predictions for all non-nan points
-        y_pred = model.predict(X_nn.T)
+        y_pred = X_nn.T@coef
         y_error = y_nn - y_pred
 
         # (2) evaluate model on monitoring period mosum_nn process
