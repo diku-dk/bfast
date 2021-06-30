@@ -384,14 +384,11 @@ __critvals = np.array([1.22762665817831, 1.68732328328598, 2.22408818231127,
 __critval_h = np.array([0.25, 0.5, 1])
 __critval_period = np.arange(2, 12, 2)
 __critval_level = np.arange(0.95, 0.999, 0.001)
-__critval_mr = np.array(["max", "range"])
+__critval_mr = ["max", "range"]
 
 def check(h, period, level, mr):
     if not h in __critval_h:
         raise ValueError("h can only be one of", __critval_h)
-
-    # if not period in __critval_period:
-    #    raise ValueError("period can only be one of", __critval_period)
 
     if not level in __critval_level:
         raise ValueError("level can only be one of", __critval_level)
@@ -406,13 +403,12 @@ def get_critval(h, period, level, mr):
     index = np.zeros(4, dtype=np.int)
 
     # Get index into table from arguments
-    index[0] = np.where(mr == __critval_mr)[0][0]
+    index[0] = next(i for i, v in enumerate(__critval_mr) if v == mr)
     index[1] = np.where(level == __critval_level)[0][0]
-    # index[2] = np.where(period == __critval_period)[0][0]
-    # print((np.abs(__critval_period - period)).argmin())
     index[2] = (np.abs(__critval_period - period)).argmin()
     index[3] = np.where(h == __critval_h)[0][0]
-    # For historical reasons, the critvals are scaled by sqrt(2)
+    
+    # For legacy reasons, the critvals are scaled by sqrt(2)
     return __critvals[tuple(index)] * np.sqrt(2)
 
 def _find_index_date(dates, t):
