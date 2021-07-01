@@ -61,3 +61,6 @@ target/
 .pydevproject
 
 examples/data
+
+# Jupyter Notebook
+.ipynb_checkpoints
