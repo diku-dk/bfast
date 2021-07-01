@@ -88,7 +88,7 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
                  level=0.05,
                  period=10,
                  verbose=0,
-                 use_mp=False
+                 device_id=0
                  ):
         
         super().__init__(start_monitor,
@@ -101,7 +101,9 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
                          verbose=verbose)
 
         self._timers = {}
-        self.use_mp = use_mp
+        
+        # use the specified cuda device (default to 0)
+        cp.cuda.device.Device(device_id).use()
 
     def fit(self, data, dates, n_chunks=None, nan_value=0):
         """ Fits the models for the ndarray 'data'
@@ -126,6 +128,7 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
         self : instance of BFASTMonitor
             The object itself.
         """
+            
         data_ints = cp.copy(data)
         data = cp.copy(data_ints).astype(cp.float32)
 
@@ -140,7 +143,7 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
 
         # period = data.shape[0] / cp.float(self.n)
         self.lam = compute_lam(data.shape[0], self.hfrac, self.level, self.period)
-        
+
         means_global = cp.zeros((data.shape[1], data.shape[2]), dtype=cp.float32)
         magnitudes_global = cp.zeros((data.shape[1], data.shape[2]), dtype=cp.float32)
         breaks_global = cp.zeros((data.shape[1], data.shape[2]), dtype=cp.int32)
