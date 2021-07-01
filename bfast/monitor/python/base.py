@@ -101,7 +101,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         self._timers = {}
         self.use_mp = use_mp
 
-    def fit(self, data, dates, n_chunks=None, nan_value=0):
+    def fit(self, data, dates, nan_value=0, **kwargs):
         """ Fits the models for the ndarray 'data'
 
         Parameters
@@ -114,7 +114,6 @@ class BFASTMonitorPython(BFASTMonitorBase):
         dates : list of datetime objects
             Specifies the dates of the elements
             in data indexed by the first axis
-            n_chunks : int or None, default None
         nan_value : int, default 0
             Specified the NaN value used in
             the array data
