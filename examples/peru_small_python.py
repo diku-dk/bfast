@@ -55,9 +55,7 @@ model = BFASTMonitor(
             hfrac=hfrac,
             trend=trend,
             level=level,
-            backend='python',
-            verbose=1,
-            device_id=0,
+            backend='python'
         )
 
 #data = data[:,:50,:50]
