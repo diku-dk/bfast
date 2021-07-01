@@ -105,7 +105,7 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
         # use the specified cuda device (default to 0)
         cp.cuda.device.Device(device_id).use()
 
-    def fit(self, data, dates, nan_value=0):
+    def fit(self, data, dates, nan_value=0, **kwargs):
         """ Fits the models for the ndarray 'data'
 
         Parameters
@@ -129,7 +129,7 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
         """
             
         data_ints = cp.copy(data)
-        data = cp.copy(data_ints).astype(cp.float32)
+        data = cp.array(cp.copy(data_ints)).astype(cp.float32)
 
         # set NaN values
         data[data_ints==nan_value] = cp.nan
@@ -143,30 +143,40 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
         # period = data.shape[0] / cp.float(self.n)
         self.lam = compute_lam(data.shape[0], self.hfrac, self.level, self.period)
 
-        means_global = cp.zeros((data.shape[1], data.shape[2]), dtype=cp.float32)
-        magnitudes_global = cp.zeros((data.shape[1], data.shape[2]), dtype=cp.float32)
-        breaks_global = cp.zeros((data.shape[1], data.shape[2]), dtype=cp.int32)
-        valids_global = cp.zeros((data.shape[1], data.shape[2]), dtype=cp.int32)
+        #means_global = cp.zeros((data.shape[1], data.shape[2]), dtype=cp.float32)
+        #magnitudes_global = cp.zeros((data.shape[1], data.shape[2]), dtype=cp.float32)
+        #breaks_global = cp.zeros((data.shape[1], data.shape[2]), dtype=cp.int32)
+        #valids_global = cp.zeros((data.shape[1], data.shape[2]), dtype=cp.int32)
+        print(data.shape)
+        
+        results = cp.apply_along_axis(self.fit_single, axis=0, arr=data)
+        print(results)
+        print(results.shape)
+        
+        self.breaks = results[:,:,0].get()
+        self.means = results[:,:,1].get()
+        self.magnitudes = results[:,:,2].get()
+        self.valids = results[:,:,3].get()
 
-        for i in range(data.shape[1]):
-            if self.verbose > 0:
-                print("Processing row {}".format(i))
-
-            for j in range(data.shape[2]):
-                y = cp.array(data[:,i,j])
-                (pix_break,
-                 pix_mean,
-                 pix_magnitude,
-                 pix_num_valid) = self.fit_single(y)
-                breaks_global[i,j] = pix_break
-                means_global[i,j] = pix_mean
-                magnitudes_global[i,j] = pix_magnitude
-                valids_global[i,j] = pix_num_valid
-
-        self.breaks = breaks_global.get()
-        self.means = means_global.get()
-        self.magnitudes = magnitudes_global.get()
-        self.valids = valids_global.get()
+        #for i in range(data.shape[1]):
+        #    if self.verbose > 0:
+        #        print("Processing row {}".format(i))
+#
+        #    for j in range(data.shape[2]):
+        #        y = cp.array(data[:,i,j])
+        #        (pix_break,
+        #         pix_mean,
+        #         pix_magnitude,
+        #         pix_num_valid) = self.fit_single(y)
+        #        breaks_global[i,j] = pix_break
+        #        means_global[i,j] = pix_mean
+        #        magnitudes_global[i,j] = pix_magnitude
+        #        valids_global[i,j] = pix_num_valid
+#
+        #self.breaks = breaks_global.get()
+        #self.means = means_global.get()
+        #self.magnitudes = magnitudes_global.get()
+        #self.valids = valids_global.get()
 
         return self
 
@@ -183,6 +193,8 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
         self : instance of BFASTCPU
             The object itself
         """
+        print(y)
+        print('toto')
         N = y.shape[0]
 
         # compute nan mappings
@@ -255,11 +267,13 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
         first_break = cp.where(breaks)[0]
 
         if first_break.shape[0] > 0:
-            first_break = first_break[0]
+            first_break = first_break[0].item()
         else:
             first_break = -1
-
-        return first_break, mean.get(), magnitude.get(), Ns
+        
+        res = cp.array([first_break, mean.item(), magnitude.item(), Ns.item()])
+        
+        print(res)
 
     def get_timers(self):
         """ Returns runtime measurements for the

@@ -163,15 +163,22 @@ class BFASTMonitorPython(BFASTMonitorBase):
 
                 for j in range(data.shape[2]):
                     y = data[:,i,j]
+                    
+                    print(y.shape)
+                    
                     (pix_break,
                      pix_mean,
                      pix_magnitude,
                      pix_num_valid) = self.fit_single(y)
+                    print(self.fit_single(y))
+                    
                     breaks_global[i,j] = pix_break
                     means_global[i,j] = pix_mean
                     magnitudes_global[i,j] = pix_magnitude
                     valids_global[i,j] = pix_num_valid
-
+                    
+                    raise Exception('stop')
+                    
             self.breaks = breaks_global
             self.means = means_global
             self.magnitudes = magnitudes_global
