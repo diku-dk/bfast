@@ -105,7 +105,7 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
         # use the specified cuda device (default to 0)
         cp.cuda.device.Device(device_id).use()
 
-    def fit(self, data, dates, n_chunks=None, nan_value=0):
+    def fit(self, data, dates, nan_value=0):
         """ Fits the models for the ndarray 'data'
 
         Parameters
@@ -118,7 +118,6 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
         dates : list of datetime objects
             Specifies the dates of the elements
             in data indexed by the first axis
-            n_chunks : int or None, default None
         nan_value : int, default 0
             Specified the NaN value used in
             the array data
