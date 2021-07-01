@@ -277,7 +277,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
             print("bounds", bounds)
 
         breaks = np.abs(mosum) > bounds
-        first_break = np.where(breaks)[0]
+        first_break = np.nonzero(breaks)[0]
 
         if first_break.shape[0] > 0:
             first_break = first_break[0]

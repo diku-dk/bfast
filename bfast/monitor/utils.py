@@ -404,9 +404,9 @@ def get_critval(h, period, level, mr):
 
     # Get index into table from arguments
     index[0] = next(i for i, v in enumerate(__critval_mr) if v == mr)
-    index[1] = np.where(level == __critval_level)[0][0]
+    index[1] = np.nonzero(level == __critval_level)[0][0]
     index[2] = (np.abs(__critval_period - period)).argmin()
-    index[3] = np.where(h == __critval_h)[0][0]
+    index[3] = np.nonzero(h == __critval_h)[0][0]
     
     # For legacy reasons, the critvals are scaled by sqrt(2)
     return __critvals[tuple(index)] * np.sqrt(2)
