@@ -5,7 +5,7 @@ import copy
 from datetime import datetime
 
 import numpy
-# numpy.warnings.filterwarnings('ignore')
+numpy.warnings.filterwarnings('ignore')
 import matplotlib.pyplot as plt
 import matplotlib
 
@@ -56,15 +56,13 @@ model = BFASTMonitor(
             trend=trend,
             level=level,
             backend='python',
-            # backend='python-mp',
-            verbose=0,
+            verbose=1,
             device_id=0,
         )
 
-
+#data = data[:,:50,:50]
 start_time = time.time()
 model.fit(data, dates, n_chunks=5, nan_value=-32768)
-
 end_time = time.time()
 print("All computations have taken {} seconds.".format(end_time - start_time))
 
@@ -119,5 +117,3 @@ fig.colorbar(im, cax=cbar_ax, ticks=[0, 1, 2, 3, 4, 5, 6])
 labels = cbar_ax.set_yticklabels(['2010', '2011', '2012', '2013', '2014', '2015', '2016'])
 
 plt.show()
-
-# plt.savefig("peru_python1.png")
