@@ -116,28 +116,6 @@ class BFASTMonitor():
         self.detailed_results = detailed_results
         self.find_magnitudes = find_magnitudes
 
-    def fit(self, data, dates, n_chunks=None, nan_value=0):
-        """ Fits the models for the ndarray 'data'
-
-        Parameters
-        ----------
-        data: ndarray of shape (N, W, H),
-            where N is the number of time
-            series points per pixel and W
-            and H the width and the height
-            of the image, respectively.
-        dates : list of datetime objects
-            Specifies the dates of the elements
-            in data indexed by the first axis
-            n_chunks : int or None, default None
-        nan_value : int, default 0
-            Specified the NaN value used in
-            the array data
-
-        Returns
-        -------
-        self : The BFASTMonitor object.
-        """
         self._model = None
 
         if self.backend == 'python':
@@ -187,13 +165,40 @@ class BFASTMonitor():
         else:
             raise Exception("Unknown backend '{}".format(self.backend))
 
-        # fit BFASTMonitor models
-        self._model.fit(data=data,
-                        dates=dates,
-                        n_chunks=n_chunks,
-                        nan_value=nan_value)
-        self._model_fitted = True
 
+    def fit(self, data, dates, n_chunks=None, nan_value=0):
+        """ Fits the models for the ndarray 'data'
+
+        Parameters
+        ----------
+        data: ndarray of shape (N, W, H),
+            where N is the number of time
+            series points per pixel and W
+            and H the width and the height
+            of the image, respectively.
+        dates : list of datetime objects
+            Specifies the dates of the elements
+            in data indexed by the first axis
+            n_chunks : int or None, default None
+        nan_value : int, default 0
+            Specified the NaN value used in
+            the array data
+
+        Returns
+        -------
+        self : The BFASTMonitor object.
+        """
+        if self.backend == 'python' or self.backend == 'python-mp':
+            self._model.fit(data=data,
+                            dates=dates,
+                            nan_value=nan_value)
+        else:
+            self._model.fit(data=data,
+                            dates=dates,
+                            n_chunks=n_chunks,
+                            nan_value=nan_value)
+
+        self._model_fitted = True
         return self
 
     def get_params(self):
