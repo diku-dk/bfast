@@ -142,12 +142,8 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
 
         # period = data.shape[0] / cp.float(self.n)
         self.lam = compute_lam(data.shape[0], self.hfrac, self.level, self.period)
-
-        print(data.shape)
         
         results = cp.apply_along_axis(self.fit_single, axis=0, arr=data)
-        print(results)
-        print(results.shape)
         
         self.breaks = results[0].get()
         self.means = results[1].get()
@@ -189,7 +185,8 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
             magnitude = 0.0
             if self.verbose > 1:
                 print("WARNING: Not enough observations: ns={ns}, Ns={Ns}".format(ns=ns, Ns=Ns))
-            return brk, mean, magnitude, Ns
+            
+            return cp.array([brk, mean, magnitude, Ns], dtype=cp.float)
 
         val_inds = val_inds[ns:]
         val_inds -= self.n
@@ -246,9 +243,7 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
         else:
             first_break = -1
         
-        res = cp.array([first_break, mean.item(), magnitude.item(), Ns.item()])
-        
-        return res
+        return cp.array([first_break, mean.item(), magnitude.item(), Ns.item()], dtype=cp.float)
 
     def get_timers(self):
         """ Returns runtime measurements for the
