@@ -193,7 +193,10 @@ class BFASTMonitorPython(BFASTMonitorBase):
             magnitude = 0.0
             if self.verbose > 1:
                 print("WARNING: Not enough observations: ns={ns}, Ns={Ns}".format(ns=ns, Ns=Ns))
-            return brk, mean, magnitude, Ns
+            
+            rval = np.array([brk, mean, magnitude, Ns])
+            
+            return rval
 
         val_inds = val_inds[ns:]
         val_inds -= self.n
