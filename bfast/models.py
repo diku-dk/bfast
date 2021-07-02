@@ -1,7 +1,4 @@
-from bfast.monitor import BFASTMonitorPython
-from bfast.monitor import BFASTMonitorOpenCL
-from bfast.monitor import BFASTMonitorCuPy
-
+from bfast.monitor import *
 
 class BFASTMonitor():
     """
@@ -153,7 +150,7 @@ class BFASTMonitor():
                  verbose=self.verbose,
                 )
             
-        elif self.backend == 'cupy':
+        elif self.backend == 'cupy' and gpu_available:
             self._model = BFASTMonitorCuPy(
                  start_monitor=self.start_monitor,
                  freq=self.freq,
