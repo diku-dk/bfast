@@ -163,7 +163,7 @@ class BFASTMonitor():
             raise Exception("Multi-core C implementation will be added soon!")
 
         else:
-            raise Exception("Unknown backend '{}".format(self.backend))
+            raise Exception("Unknown backend '{}'".format(self.backend))
 
 
     def fit(self, data, dates, n_chunks=None, nan_value=0):
