@@ -5,7 +5,8 @@ class BFASTMonitor():
     BFASTMonitor implements the BFASTMonitor approach and
     provides two backends/implementations:
 
-    - A pure Python implementation (based on the Numpy package).
+    - A pure Numpy implementation (based on the Numpy package)
+    - A pure Cupy implementation suited for GPU devices 
     - An optimized OpenCL implementation suited for massively-parallel devices.
 
     The interface follows the one of the corresponding R package,
@@ -50,8 +51,8 @@ class BFASTMonitor():
         Specifies the OpenCL platform id.
 
     device_id int, default 0
-        Only relevant if backend='opencl'.
-        Specified the OpenCL device id.
+        Only relevant if backend='opencl' or 'cupy'.
+        Specified the GPU device id.
 
     detailed_results : bool, default False
         Only relevant if backend='opencl'.

@@ -8,8 +8,6 @@ import multiprocessing as mp
 from functools import partial
 
 import cupy as cp
-#cp.warnings.filterwarnings('ignore')
-#cp.set_printoptions(suppress=True)
 from sklearn import linear_model
 
 from bfast.base import BFASTMonitorBase
@@ -28,10 +26,7 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
                  hfrac=0.25,
                  trend=True,
                  level=0.05,
-                 detailed_results=False,
-                 old_version=False,
                  verbose=0,
-                 platform_id=0,
                  device_id=0
                  ):
 
@@ -67,17 +62,9 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
 
     verbose : int, optional (default=0)
         The verbosity level (0=no output, 1=output)
-
-    use_mp : bool, default False
-        Determines whether to use the (very primitive) Python
-        multiprocessing or not. Enable for a speedup
-
-    Examples
-    --------
-
-    Notes
-    -----
-
+        
+    device_id : int, optional (default=1)
+        The GPU device id number
     """
     def __init__(self,
                  start_monitor,
