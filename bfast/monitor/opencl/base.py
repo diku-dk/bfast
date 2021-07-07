@@ -102,14 +102,23 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         self.platform_id = platform_id
         self.device_id = device_id
 
+
+        start = time.time()
         # initialize device
         self._init_device(platform_id, device_id)
+        end = time.time()
+        if self.verbose > 0:
+            print("Runtime for device initialization:\t\t\t{}".format(end - start))
 
+        start = time.time()
         self.futobj = bfastfinal(command_queue=self.queue,
                                  interactive=False,
                                  default_tile_size=8,
                                  default_reg_tile_size=3,
                                  sizes=self._get_futhark_params())
+        end = time.time()
+        if self.verbose > 0:
+            print("Runtime for object creation:\t\t\t\t{}".format(end - start))
 
     def _init_device(self, platform_id, device_id):
         """ Initializes the device."""

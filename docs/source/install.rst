@@ -27,7 +27,7 @@ Installation From Sources
 
 To install the package from the sources, first get the current stable release via::
 
-  $ git clone https://github.com/gieseke/bfast.git
+  $ git clone https://github.com/diku-dk/bfast.git
 
 Subsequently, install the package locally via::
 

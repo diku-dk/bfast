@@ -54,7 +54,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         the MOSUM/ME monitoring processes.
 
     trend : bool, default True
-        Whether a tend offset term shall be used or not
+        Whether a trend offset term shall be used or not
 
     level : float, default 0.05
         Significance level of the monitoring (and ROC,
@@ -102,7 +102,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         self._timers = {}
         self.use_mp = use_mp
 
-    def fit(self, data, dates, n_chunks=None, nan_value=0):
+    def fit(self, data, dates, nan_value=0):
         """ Fits the models for the ndarray 'data'
 
         Parameters
@@ -115,7 +115,6 @@ class BFASTMonitorPython(BFASTMonitorBase):
         dates : list of datetime objects
             Specifies the dates of the elements
             in data indexed by the first axis
-            n_chunks : int or None, default None
         nan_value : int, default 0
             Specified the NaN value used in
             the array data

@@ -16,15 +16,15 @@ Dependencies
 
 The bfast package has been tested under Python 3.*. The required Python dependencies are:
 
-- numpy==1.16.3
-- pandas==0.24.2
-- pyopencl==2018.2.5
-- scikit-learn==0.20.3
-- scipy==1.2.1
-- matplotlib==2.2.2
-- wget==3.2
-- Sphinx==2.2.0
-- sphinx-bootstrap-theme==0.7.1
+- numpy>=1.16.3
+- pandas>=0.24.2
+- pyopencl>=2018.2.5
+- scikit-learn>=0.20.3
+- scipy>=1.2.1
+- matplotlib>=2.2.2
+- wget>=3.2
+- Sphinx>=2.2.0
+- sphinx-bootstrap-theme>=0.7.1
 
 Further, `OpenCL <https://www.khronos.org/opencl>`_ needs to be available.
 
@@ -32,13 +32,29 @@ Further, `OpenCL <https://www.khronos.org/opencl>`_ needs to be available.
 Quickstart
 ==========
 
-The package can easily be installed via pip via::
+You may want to run the program in a Python virtual environment. Create it via::
+
+  python -m venv env
+
+Then, activate the virtual environment via::
+
+  . env/bin/activate
+
+Upgrade pip via::
+
+  pip install --upgrade pip
+
+The package can then be easily installed via::
 
   pip install bfast
 
 To install the package from the sources, first get the current stable release via::
 
-  git clone https://github.com/gieseke/bfast.git
+  git clone https://github.com/diku-dk/bfast.git
+
+Install the bfast dependencies via::
+
+  pip install -r requirements.txt
 
 Afterwards, on Linux systems, you can install the package locally for the current user via::
 

@@ -386,18 +386,15 @@ __critval_period = np.arange(2, 12, 2)
 __critval_level = np.arange(0.95, 0.999, 0.001)
 __critval_mr = np.array(["max", "range"])
 
+def _check_par(val, name, arr, fun=lambda x: x):
+    if not val in arr:
+        lst = [str(np.round(i, 5)) for i in fun(arr)]
+        raise ValueError("{} can only be one of [{}]".format(name, ", ".join(lst)))
+
 def check(h, period, level, mr):
-    if not h in __critval_h:
-        raise ValueError("h can only be one of", __critval_h)
-
-    # if not period in __critval_period:
-    #    raise ValueError("period can only be one of", __critval_period)
-
-    if not level in __critval_level:
-        raise ValueError("level can only be one of", __critval_level)
-
-    if not mr in __critval_mr:
-        raise ValueError("mr can only be one of", __critval_mr)
+    _check_par(h, "h", __critval_h)
+    _check_par(level, "level", __critval_level, lambda x: 1 - x)
+    _check_par(mr, "mr", __critval_mr)
 
 def get_critval(h, period, level, mr):
     # Sanity check
