@@ -13,7 +13,7 @@ import cupy as cp
 from sklearn import linear_model
 
 from bfast.base import BFASTMonitorBase
-from bfast.monitor.cupy_utils import compute_end_history, compute_lam, map_indices
+from bfast.monitor.utils import compute_end_history, compute_lam, map_indices
 
 
 class BFASTMonitorCuPy(BFASTMonitorBase):
@@ -137,11 +137,11 @@ class BFASTMonitorCuPy(BFASTMonitorBase):
         self.n = compute_end_history(dates, self.start_monitor)
 
         # create (complete) seasonal matrix ("patterns" as columns here!)
-        self.mapped_indices = map_indices(dates).astype(cp.int32)
+        self.mapped_indices = np.array(map_indices(dates)).astype(cp.int32)
         self.X = self._create_data_matrix(self.mapped_indices)
 
         # period = data.shape[0] / cp.float(self.n)
-        self.lam = compute_lam(data.shape[0], self.hfrac, self.level, self.period)
+        self.lam = cp.array(compute_lam(data.shape[0], self.hfrac, self.level, self.period))
         
         results = cp.apply_along_axis(self.fit_single, axis=0, arr=data)
         
