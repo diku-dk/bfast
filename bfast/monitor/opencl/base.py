@@ -4,12 +4,13 @@ Created on Apr 19, 2018
 @author: fgieseke
 '''
 
-import gc
-import time
 from datetime import datetime
+import gc
+import os
+import time
 
-import pandas
 import numpy
+import pandas
 import pyopencl
 import pyopencl.array as pycl_array
 
@@ -53,7 +54,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
         type I error.
     detailed_results : bool, default False
         If detailed results should be returned or not
-    find_magnitudes : bool, default True
+    find_magnitudes : bool, default False
         If magnitudes should be calculated or not
     verbose : int, optional (default=0)
         The verbosity level (0=no output, 1=output)
@@ -78,7 +79,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
                  level=0.05,
                  period=10,
                  detailed_results=False,
-                 find_magnitudes=True,
+                 find_magnitudes=False,
                  verbose=0,
                  platform_id=0,
                  device_id=0
@@ -115,6 +116,7 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
                                  interactive=False,
                                  default_tile_size=8,
                                  default_reg_tile_size=3,
+                                 default_group_size=64,
                                  sizes=self._get_futhark_params())
         end = time.time()
         if self.verbose > 0:
@@ -148,41 +150,71 @@ class BFASTMonitorOpenCL(BFASTMonitorBase):
 
     def _get_futhark_params(self):
         sizes = {
-            "main.suff_intra_par_11":128,
-            "main.suff_intra_par_13":128,
-            "main.suff_intra_par_24":235,
-            "main.suff_intra_par_29":113,
-            "main.suff_intra_par_34":122,
-            "main.suff_outer_par_16":2000000000,
-            "main.suff_outer_par_17":892448,
-            "main.suff_outer_par_18":2000000000,
-            "main.suff_outer_par_19":892448,
-            "main.suff_outer_par_20":2000000000,
-            "main.suff_outer_par_21":26215660,
-            "main.suff_outer_par_28":2000000000,
-            "main.suff_outer_par_31":111556,
-            "main.suff_outer_par_6":2000000000,
+            "main.suff_intra_par_11":32,
+            "main.suff_intra_par_13":32,
+            "main.suff_intra_par_15":32,
+            "main.suff_intra_par_3":32,
+            "main.suff_intra_par_4":2000000000,
+            "main.suff_outer_par_0":2000000000,
+            "main.suff_outer_par_1":2000000000,
+            "main.suff_outer_par_10":24096096,
+            "main.suff_outer_par_12":2000000000,
+            "main.suff_outer_par_14":111556,
+            "main.suff_outer_par_2":5466244,
+            "main.suff_outer_par_5":2000000000,
+            "main.suff_outer_par_6":780892,
             "main.suff_outer_par_7":2000000000,
-            "main.suff_outer_par_8":7139584,
-            "mainMagnitude.suff_intra_par_11":128,
-            "mainMagnitude.suff_intra_par_13":2000000000,
-            "mainMagnitude.suff_intra_par_24":235,
-            "mainMagnitude.suff_intra_par_29":113,
-            "mainMagnitude.suff_intra_par_37":122,
-            "mainMagnitude.suff_outer_par_16":2000000000,
-            "mainMagnitude.suff_outer_par_17":892448,
-            "mainMagnitude.suff_outer_par_18":111556,
-            "mainMagnitude.suff_outer_par_19":2000000000,
-            "mainMagnitude.suff_outer_par_20":2000000000,
-            "mainMagnitude.suff_outer_par_21":26215660,
-            "mainMagnitude.suff_outer_par_28":2000000000,
-            "mainMagnitude.suff_outer_par_31":111556,
-            "mainMagnitude.suff_outer_par_6":2000000000,
+            "main.suff_outer_par_8":780892,
+            "main.suff_outer_par_9":2000000000,
+            "mainDetailed.suff_intra_par_11":32,
+            "mainDetailed.suff_intra_par_13":32,
+            "mainDetailed.suff_intra_par_16":32,
+            "mainDetailed.suff_intra_par_3":32,
+            "mainDetailed.suff_intra_par_4":2000000000,
+            "mainDetailed.suff_outer_par_0":2000000000,
+            "mainDetailed.suff_outer_par_1":2000000000,
+            "mainDetailed.suff_outer_par_10":24096096,
+            "mainDetailed.suff_outer_par_12":2000000000,
+            "mainDetailed.suff_outer_par_14":111556,
+            "mainDetailed.suff_outer_par_15":2000000000,
+            "mainDetailed.suff_outer_par_2":5466244,
+            "mainDetailed.suff_outer_par_5":2000000000,
+            "mainDetailed.suff_outer_par_6":780892,
+            "mainDetailed.suff_outer_par_7":2000000000,
+            "mainDetailed.suff_outer_par_8":780892,
+            "mainDetailed.suff_outer_par_9":2000000000,
+            "mainMagnitude.suff_intra_par_11":32,
+            "mainMagnitude.suff_intra_par_13":32,
+            "mainMagnitude.suff_intra_par_15":32,
+            "mainMagnitude.suff_intra_par_3":32,
+            "mainMagnitude.suff_intra_par_4":2000000000,
+            "mainMagnitude.suff_outer_par_0":2000000000,
+            "mainMagnitude.suff_outer_par_1":2000000000,
+            "mainMagnitude.suff_outer_par_10":24096096,
+            "mainMagnitude.suff_outer_par_12":2000000000,
+            "mainMagnitude.suff_outer_par_14":111556,
+            "mainMagnitude.suff_outer_par_2":5466244,
+            "mainMagnitude.suff_outer_par_5":2000000000,
+            "mainMagnitude.suff_outer_par_6":780892,
             "mainMagnitude.suff_outer_par_7":2000000000,
-            "mainMagnitude.suff_outer_par_8":7139584
+            "mainMagnitude.suff_outer_par_8":780892,
+            "mainMagnitude.suff_outer_par_9":2000000000
         }
         return sizes
 
+    # def _read_tuning_file(self):
+    #     tuning_file = __file__ + ".fut.tuning"
+    #     # print(a_module.__file__)
+    #     try:
+    #         tuning_dict = {}
+    #         tuning_lines = open(tuning_file).read().split("\n")
+    #         for line in tuning_lines:
+    #             m = re.match(r"(.+)=(.*)", line)
+    #             tuning_dict[m.group(1)] = int(m.group(2))
+    #         return tuning_dict
+    #     except:
+    #         print ("Failed parsing the tuning file: {}".format(tuning_file))
+    #         raise
 
     def fit(self, data, dates, n_chunks=None, nan_value=0):
         """ Fits the BFAST model for the ndarray 'data'

@@ -59,7 +59,7 @@ class BFASTMonitor():
         Only relevant if backend='opencl'.
         If detailed results should be returned or not.
 
-    find_magnitudes : bool, default True
+    find_magnitudes : bool, default False
         Only relevant if backend='opencl'.
         If magnitudes should be returned or not.
         Disabling this would improve the performance greatly
@@ -100,7 +100,7 @@ class BFASTMonitor():
             platform_id=0,
             device_id=0,
             detailed_results=False,
-            find_magnitudes=True,
+            find_magnitudes=False,
         ):
         self.start_monitor = start_monitor
         self.freq = freq

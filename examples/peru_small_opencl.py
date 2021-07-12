@@ -62,7 +62,7 @@ model = BFASTMonitor(
 
 #data = data[:,:50,:50]
 start_time = time.time()
-model.fit(data, dates, n_chunks=5, nan_value=-32768)
+model.fit(data, dates, nan_value=-32768)
 end_time = time.time()
 print("All computations have taken {} seconds.".format(end_time - start_time))
 
