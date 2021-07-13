@@ -13,7 +13,10 @@ np.set_printoptions(suppress=True)
 from sklearn import linear_model
 
 from bfast.base import BFASTMonitorBase
-from bfast.monitor.utils import compute_end_history, compute_lam, map_indices
+from bfast.monitor.utils import (
+    compute_end_history, compute_lam, map_indices, compute_lam_brownian
+)
+from .roc import history_roc
 
 
 class BFASTMonitorPython(BFASTMonitorBase):
@@ -23,6 +26,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
 
     def __init__(self,
                  start_monitor,
+                 history="all",
                  freq=365,
                  k=3,
                  hfrac=0.25,
@@ -41,6 +45,14 @@ class BFASTMonitorPython(BFASTMonitorBase):
     start_monitor : datetime object
         A datetime object specifying the start of
         the monitoring phase.
+
+    history : str, default "all"
+        Specification of the start of a stable history period.
+        Can be one of "ROC" and "all". If set to "ROC", a
+        reverse-ordered CUSUM test will be employed to
+        automatically detect the start of a stable history
+        period. If set to "all", the start of the stable
+        history period is the beginning of the time series.
 
     freq : int, default 365
         The frequency for the seasonal model.
@@ -81,6 +93,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
     """
     def __init__(self,
                  start_monitor,
+                 history="all",
                  freq=365,
                  k=3,
                  hfrac=0.25,
@@ -91,6 +104,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
                  use_mp=False
                  ):
         super().__init__(start_monitor,
+                         history,
                          freq,
                          k=k,
                          hfrac=hfrac,
@@ -139,23 +153,26 @@ class BFASTMonitorPython(BFASTMonitorBase):
 
         # period = data.shape[0] / np.float(self.n)
         self.lam = compute_lam(data.shape[0], self.hfrac, self.level, self.period)
+        self.conf_ROC = compute_lam_brownian(self.level)
 
         if self.use_mp:
             print("Python backend is running in parallel using {} threads".format(mp.cpu_count()))
             y = np.transpose(data, (1, 2, 0)).reshape(data.shape[1] * data.shape[2], data.shape[0])
             pool = mp.Pool(mp.cpu_count())
             p_map = pool.map(self.fit_single, y)
-            rval = np.array(p_map, dtype=object).reshape(data.shape[1], data.shape[2], 4)
+            rval = np.array(p_map, dtype=object).reshape(data.shape[1], data.shape[2], 5)
 
             self.breaks = rval[:,:,0].astype(np.int32)
             self.means = rval[:,:,1].astype(np.float32)
             self.magnitudes = rval[:,:,2].astype(np.float32)
             self.valids = rval[:,:,3].astype(np.int32)
+            self.history_starts = rval[:,:,4].astype(np.int32)
         else:
             means_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.float32)
             magnitudes_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.float32)
             breaks_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.int32)
             valids_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.int32)
+            hists_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.int32)
 
             for i in range(data.shape[1]):
                 if self.verbose > 0:
@@ -166,16 +183,20 @@ class BFASTMonitorPython(BFASTMonitorBase):
                     (pix_break,
                      pix_mean,
                      pix_magnitude,
-                     pix_num_valid) = self.fit_single(y)
+                     pix_num_valid,
+                     pix_hist_start) = self.fit_single(y)
                     breaks_global[i,j] = pix_break
                     means_global[i,j] = pix_mean
                     magnitudes_global[i,j] = pix_magnitude
                     valids_global[i,j] = pix_num_valid
+                    hists_global[i,j] = pix_hist_start
 
             self.breaks = breaks_global
             self.means = means_global
             self.magnitudes = magnitudes_global
             self.valids = valids_global
+            self.history_starts = hists_global
+
 
         return self
 
@@ -194,6 +215,21 @@ class BFASTMonitorPython(BFASTMonitorBase):
         """
         N = y.shape[0]
 
+        # stable history period
+        hist = 0
+        if self.history == "ROC":
+          Xh = self.X[:, :self.n]
+          yh = y[:self.n]
+          nans = np.isnan(yh)
+          Xh_nn = Xh[:,~nans]
+          yh_nn = yh[~nans]
+          hist = history_roc(Xh_nn.astype(np.float64),
+                             yh_nn.astype(np.float64),
+                             self.level,
+                             self.conf_ROC)
+          # TODO handle ns - hist < num regressors; R sets output to nan.
+          y[:hist] = np.nan
+
         # compute nan mappings
         nans = np.isnan(y)
         num_nans = np.cumsum(nans)
@@ -211,7 +247,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
             magnitude = 0.0
             if self.verbose > 1:
                 print("WARNING: Not enough observations: ns={ns}, Ns={Ns}".format(ns=ns, Ns=Ns))
-            return brk, mean, magnitude, Ns
+            return brk, mean, magnitude, Ns, hist
 
         val_inds = val_inds[ns:]
         val_inds -= self.n
@@ -285,7 +321,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         else:
             first_break = -1
 
-        return first_break, mean, magnitude, Ns
+        return first_break, mean, magnitude, Ns, hist
 
     def get_timers(self):
         """ Returns runtime measurements for the

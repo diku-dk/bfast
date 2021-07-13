@@ -1,0 +1,5 @@
+require {
+  github.com/diku-dk/sorts 0.4.2 #3b2cfcc0d0256df7cd1f2548f68d85f2453007a0
+  github.com/diku-dk/statistics 0.2.1 #ad49c009c7fb5d3059d4edca65d0e0f6b145da05
+  github.com/nhey/lm 0.0.3 #b0a4b4e2b21aa7d93adc0ce66bda43bd986dfe32
+}

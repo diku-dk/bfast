@@ -12,6 +12,7 @@ class BFASTMonitorBase(ABC):
     def __init__(
             self,
             start_monitor,
+            history="all",
             freq=365,
             k=3,
             hfrac=0.25,
@@ -21,6 +22,7 @@ class BFASTMonitorBase(ABC):
             verbose=0,
          ):
         self.start_monitor = start_monitor
+        self.history = history
         self.freq = freq
         self.k = k
         self.hfrac = hfrac

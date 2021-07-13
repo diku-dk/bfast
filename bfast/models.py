@@ -19,6 +19,14 @@ class BFASTMonitor():
         A datetime object specifying the start of
         the monitoring phase.
 
+    history : str, default "all"
+        Specification of the start of a stable history period.
+        Can be one of "ROC" and "all". If set to "ROC", a
+        reverse-ordered CUSUM test will be employed to
+        automatically detect the start of a stable history
+        period. If set to "all", the start of the stable
+        history period is the beginning of the time series.
+
     freq : int, default 365
         The frequency for the seasonal model.
 
@@ -89,6 +97,7 @@ class BFASTMonitor():
     def __init__(
             self,
             start_monitor,
+            history="all",
             freq=365,
             k=3,
             hfrac=0.25,
@@ -102,7 +111,11 @@ class BFASTMonitor():
             detailed_results=False,
             find_magnitudes=True,
         ):
+        history_enum = ("all", "ROC")
+        if history not in history_enum:
+            raise Exception("Current implementation can only handle the following values for history: {}".format(history_enum))
         self.start_monitor = start_monitor
+        self.history = history
         self.freq = freq
         self.k = k
         self.hfrac = hfrac
@@ -143,6 +156,7 @@ class BFASTMonitor():
         if self.backend == 'python':
             self._model = BFASTMonitorPython(
                  start_monitor=self.start_monitor,
+                 history=self.history,
                  freq=self.freq,
                  k=self.k,
                  hfrac=self.hfrac,
@@ -155,6 +169,7 @@ class BFASTMonitor():
         elif self.backend == 'python-mp':
             self._model = BFASTMonitorPython(
                  start_monitor=self.start_monitor,
+                 history=self.history,
                  freq=self.freq,
                  k=self.k,
                  hfrac=self.hfrac,
@@ -168,6 +183,7 @@ class BFASTMonitor():
         elif self.backend == 'opencl':
             self._model = BFASTMonitorOpenCL(
                  start_monitor=self.start_monitor,
+                 history=self.history,
                  freq=self.freq,
                  k=self.k,
                  hfrac=self.hfrac,
@@ -312,9 +328,25 @@ class BFASTMonitor():
         -------
          array-like : An array containing the number
              of valid values for each pixel in the
-             aray data
+             array data
         """
         if self._is_fitted():
             return self._model.valids
+
+        raise Exception("Model not yet fitted!")
+
+    @property
+    def history_starts(self):
+        """ Returns index of the start of the stable
+        history period for each pixel
+
+        Returns
+        -------
+         array-like : An array containing indices
+             of starts of stable history periods
+             in the array data
+        """
+        if self._is_fitted():
+            return self._model.history_starts
 
         raise Exception("Model not yet fitted!")
