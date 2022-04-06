@@ -255,7 +255,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         err_cs = np.cumsum(y_error[ns - h:Ns + 1])
         mosum_nn = err_cs[h:] - err_cs[:-h]
 
-        sigma = np.sqrt(np.sum(y_error[:ns] ** 2) / (ns - (2 + 2 * self.k)))
+        sigma = np.sqrt(np.sum(y_error[:ns] ** 2) / (ns - (1 + int(self.trend) + 2 * self.k)))
         mosum_nn = 1.0 / (sigma * np.sqrt(ns)) * mosum_nn
 
         mosum = np.repeat(np.nan, N - self.n)
