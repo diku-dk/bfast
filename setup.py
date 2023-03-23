@@ -1,3 +1,4 @@
+import ast
 import os
 import sys
 import shutil
@@ -13,8 +14,6 @@ URL = 'http://bfast.readthedocs.io'
 LICENSE = 'GNU GENERAL PUBLIC LICENSE'
 DOWNLOAD_URL = 'https://github.com/diku-dk/bfast'
 
-import bfast
-VERSION = bfast.__version__
 
 # use setuptools for certain commands
 if len(set(('develop', 'release', 'bdist_egg', 'bdist_rpm',
@@ -72,6 +71,53 @@ def configuration(parent_package='', top_path=None):
     config.add_subpackage('bfast')
 
     return config
+
+
+def get_version(module_path, identifier="__version__"):
+    """
+    Get the version of the package without an import.
+
+    Uses abstract syntax trees to avoid importing, and to not
+    rely on regex. See a similar approach using line splitting:
+    https://packaging.python.org/en/latest/guides/single-sourcing-package-version/ (option 1).
+
+    Parameters
+    ----------
+    module_path : str
+        The relative path from the setup.py file to the module
+        containing the version, given as a path.
+        E.g. "bfast/__init__.py".
+    identifier : str, default "__version__"
+        The name of the variable containing the version.
+
+    Returns
+    -------
+    str
+        The version identifier as set in the module.
+
+    Raises
+    ------
+    AttributeError
+        If the version identifier is not set in the module.
+    """
+    setup_file_path = os.path.abspath(__file__)
+    root_dir = os.path.dirname(setup_file_path)
+    module_path = os.path.join(root_dir, module_path)
+
+    with open(module_path) as rf:
+        module = ast.parse(rf.read())
+
+    for node in ast.walk(module):
+        if isinstance(node, ast.Assign) and node.targets[0].id == identifier:
+            version = node.value.value  # no break in case it is set multiple times
+
+    try:
+        return version
+    except UnboundLocalError:
+        raise AttributeError("Module {} has no attribute {}".format(repr(module_path), repr(identifier)))
+
+
+VERSION = get_version("bfast/__init__.py")
 
 
 def setup_package():
