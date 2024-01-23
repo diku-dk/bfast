@@ -139,6 +139,7 @@ def setup_package():
                         'scipy>=1.2.1',
                         'matplotlib>=2.2.2',
                         'wget>=3.2',
+                        'cupy>=9.2.0'
                     ],
                     classifiers=['Intended Audience :: Science/Research',
                                  'Intended Audience :: Developers',

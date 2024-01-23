@@ -1,22 +1,20 @@
 '''
-Created on Apr 19, 2018
+Created on June 15, 2021
 
-@author: fgieseke, mortvest
+@author: Pierrick Rambaud
 '''
 
 import multiprocessing as mp
 from functools import partial
 
-import numpy as np
-np.warnings.filterwarnings('ignore')
-np.set_printoptions(suppress=True)
+import cupy as cp
 from sklearn import linear_model
 
 from bfast.base import BFASTMonitorBase
 from bfast.monitor.utils import compute_end_history, compute_lam, map_indices
 
 
-class BFASTMonitorPython(BFASTMonitorBase):
+class BFASTMonitorCuPy(BFASTMonitorBase):
     """ BFAST Monitor implementation based on Python and Numpy. The
     interface follows the one of the corresponding R package
     (see https://cran.r-project.org/web/packages/bfast)
@@ -28,10 +26,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
                  hfrac=0.25,
                  trend=True,
                  level=0.05,
-                 detailed_results=False,
-                 old_version=False,
                  verbose=0,
-                 platform_id=0,
                  device_id=0
                  ):
 
@@ -54,7 +49,7 @@ class BFASTMonitorPython(BFASTMonitorBase):
         the MOSUM/ME monitoring processes.
 
     trend : bool, default True
-        Whether a trend offset term shall be used or not
+        Whether a tend offset term shall be used or not
 
     level : float, default 0.05
         Significance level of the monitoring (and ROC,
@@ -67,17 +62,9 @@ class BFASTMonitorPython(BFASTMonitorBase):
 
     verbose : int, optional (default=0)
         The verbosity level (0=no output, 1=output)
-
-    use_mp : bool, default False
-        Determines whether to use the (very primitive) Python
-        multiprocessing or not. Enable for a speedup
-
-    Examples
-    --------
-
-    Notes
-    -----
-
+        
+    device_id : int, optional (default=1)
+        The GPU device id number
     """
     def __init__(self,
                  start_monitor,
@@ -88,8 +75,9 @@ class BFASTMonitorPython(BFASTMonitorBase):
                  level=0.05,
                  period=10,
                  verbose=0,
-                 use_mp=False
+                 device_id=0
                  ):
+        
         super().__init__(start_monitor,
                          freq,
                          k=k,
@@ -100,9 +88,11 @@ class BFASTMonitorPython(BFASTMonitorBase):
                          verbose=verbose)
 
         self._timers = {}
-        self.use_mp = use_mp
+        
+        # use the specified cuda device (default to 0)
+        cp.cuda.device.Device(device_id).use()
 
-    def fit(self, data, dates, nan_value=0):
+    def fit(self, data, dates, nan_value=0, **kwargs):
         """ Fits the models for the ndarray 'data'
 
         Parameters
@@ -124,64 +114,28 @@ class BFASTMonitorPython(BFASTMonitorBase):
         self : instance of BFASTMonitor
             The object itself.
         """
-        data_ints = data
-        data = np.copy(data_ints).astype(np.float32)
+            
+        data_ints = cp.copy(data)
+        data = cp.array(cp.copy(data_ints)).astype(cp.float32)
 
         # set NaN values
-        data[data_ints==nan_value] = np.nan
+        data[data_ints==nan_value] = cp.nan
 
         self.n = compute_end_history(dates, self.start_monitor)
 
         # create (complete) seasonal matrix ("patterns" as columns here!)
-        self.mapped_indices = map_indices(dates).astype(np.int32)
+        self.mapped_indices = np.array(map_indices(dates)).astype(cp.int32)
         self.X = self._create_data_matrix(self.mapped_indices)
 
-        # period = data.shape[0] / np.float(self.n)
-        self.lam = compute_lam(data.shape[0], self.hfrac, self.level, self.period)
-
-        if self.use_mp:
-            print("Python backend is running in parallel using {} threads".format(mp.cpu_count()))
-            y = np.transpose(data, (1, 2, 0)).reshape(data.shape[1] * data.shape[2], data.shape[0])
-            pool = mp.Pool(mp.cpu_count())
-            p_map = pool.map(self.fit_single, y)
-            rval = np.array(p_map, dtype=object).reshape(data.shape[1], data.shape[2], 4)
-
-            self.breaks = rval[:,:,0].astype(np.int32)
-            self.means = rval[:,:,1].astype(np.float32)
-            self.magnitudes = rval[:,:,2].astype(np.float32)
-            self.valids = rval[:,:,3].astype(np.int32)
-        else:
-            means_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.float32)
-            magnitudes_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.float32)
-            breaks_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.int32)
-            valids_global = np.zeros((data.shape[1], data.shape[2]), dtype=np.int32)
-
-            for i in range(data.shape[1]):
-                if self.verbose > 0:
-                    print("Processing row {}".format(i))
-
-                for j in range(data.shape[2]):
-                    y = data[:,i,j]
-                    
-                    print(y.shape)
-                    
-                    (pix_break,
-                     pix_mean,
-                     pix_magnitude,
-                     pix_num_valid) = self.fit_single(y)
-                    print(self.fit_single(y))
-                    
-                    breaks_global[i,j] = pix_break
-                    means_global[i,j] = pix_mean
-                    magnitudes_global[i,j] = pix_magnitude
-                    valids_global[i,j] = pix_num_valid
-                    
-                    raise Exception('stop')
-                    
-            self.breaks = breaks_global
-            self.means = means_global
-            self.magnitudes = magnitudes_global
-            self.valids = valids_global
+        # period = data.shape[0] / cp.float(self.n)
+        self.lam = cp.array(compute_lam(data.shape[0], self.hfrac, self.level, self.period))
+        
+        results = cp.apply_along_axis(self.fit_single, axis=0, arr=data)
+        
+        self.breaks = results[0].get()
+        self.means = results[1].get()
+        self.magnitudes = results[2].get()
+        self.valids = results[3].get()
 
         return self
 
@@ -198,17 +152,18 @@ class BFASTMonitorPython(BFASTMonitorBase):
         self : instance of BFASTCPU
             The object itself
         """
+        
         N = y.shape[0]
 
         # compute nan mappings
-        nans = np.isnan(y)
-        num_nans = np.cumsum(nans)
-        val_inds = np.array(range(N))[~nans]
+        nans = cp.isnan(y)
+        num_nans = cp.cumsum(nans)
+        val_inds = cp.array(range(N))[~nans]
 
         # compute new limits (in data NOT containing missing values)
         # ns = n - num_nans[self.n]
         ns = self.n - num_nans[self.n - 1]
-        h = np.int(float(ns) * self.hfrac)
+        h = cp.int(float(ns) * self.hfrac)
         Ns = N - num_nans[N - 1]
 
         if ns <= 5 or Ns - ns <= 5:
@@ -217,7 +172,8 @@ class BFASTMonitorPython(BFASTMonitorBase):
             magnitude = 0.0
             if self.verbose > 1:
                 print("WARNING: Not enough observations: ns={ns}, Ns={Ns}".format(ns=ns, Ns=Ns))
-            return brk, mean, magnitude, Ns
+            
+            return cp.array([brk, mean, magnitude, Ns], dtype=cp.float)
 
         val_inds = val_inds[ns:]
         val_inds -= self.n
@@ -233,65 +189,48 @@ class BFASTMonitorPython(BFASTMonitorBase):
         y_nn_m = y_nn[ns:]
 
         # (1) fit linear regression model for history period
-        model = linear_model.LinearRegression(fit_intercept=False)
-        model.fit(X_nn_h.T, y_nn_h)
-
-        if self.verbose > 1:
-            column_names = np.array(["Intercept",
-                                     "trend",
-                                     "harmonsin1",
-                                     "harmoncos1",
-                                     "harmonsin2",
-                                     "harmoncos2",
-                                     "harmonsin3",
-                                     "harmoncos3"])
-            if self.trend:
-                indxs = np.array([0, 1, 3, 5, 7, 2, 4, 6])
-            else:
-                indxs = np.array([0, 2, 4, 6, 1, 3, 5])
-            # print(column_names[indxs])
-            print(column_names[indxs])
-            print(model.coef_[indxs])
+        coef = cp.linalg.pinv(X_nn_h@X_nn_h.T)@X_nn_h@y_nn_h
 
         # get predictions for all non-nan points
-        y_pred = model.predict(X_nn.T)
+        y_pred = X_nn.T@coef
+        
         y_error = y_nn - y_pred
 
         # (2) evaluate model on monitoring period mosum_nn process
-        err_cs = np.cumsum(y_error[ns - h:Ns + 1])
+        err_cs = cp.cumsum(y_error[ns - h:Ns + 1])
         mosum_nn = err_cs[h:] - err_cs[:-h]
 
-        sigma = np.sqrt(np.sum(y_error[:ns] ** 2) / (ns - (2 + 2 * self.k)))
-        mosum_nn = 1.0 / (sigma * np.sqrt(ns)) * mosum_nn
+        sigma = cp.sqrt(cp.sum(y_error[:ns] ** 2) / (ns - (2 + 2 * self.k)))
+        mosum_nn = 1.0 / (sigma * cp.sqrt(ns)) * mosum_nn
 
-        mosum = np.full(N - self.n, np.nan)
+        mosum =  cp.full(N - self.n, cp.nan)
         mosum[val_inds[:Ns - ns]] = mosum_nn
         if self.verbose:
             print("MOSUM process", mosum_nn.shape)
 
         # compute mean
-        mean = np.mean(mosum_nn)
+        mean = cp.mean(mosum_nn)
 
         # compute magnitude
-        magnitude = np.median(y_error[ns:])
+        magnitude = cp.median(y_error[ns:])
 
         # boundary and breaks
-        a = self.mapped_indices[self.n:] / self.mapped_indices[self.n - 1].astype(np.float)
-        bounds = self.lam * np.sqrt(self._log_plus(a))
+        a = self.mapped_indices[self.n:] / self.mapped_indices[self.n - 1].astype(cp.float)
+        bounds = self.lam * cp.sqrt(self._log_plus(a))
 
         if self.verbose:
             print("lambda", self.lam)
             print("bounds", bounds)
 
-        breaks = np.abs(mosum) > bounds
-        first_break = np.where(breaks)[0]
+        breaks = cp.abs(mosum) > bounds
+        first_break = cp.where(breaks)[0]
 
         if first_break.shape[0] > 0:
-            first_break = first_break[0]
+            first_break = first_break[0].item()
         else:
             first_break = -1
-
-        return first_break, mean, magnitude, Ns
+        
+        return cp.array([first_break, mean.item(), magnitude.item(), Ns.item()], dtype=cp.float)
 
     def get_timers(self):
         """ Returns runtime measurements for the
@@ -305,23 +244,26 @@ class BFASTMonitorPython(BFASTMonitorBase):
         return self._timers
 
     def _create_data_matrix(self, mapped_indices):
+        
+        # cast to cp array 
+        mapped_indices = cp.array(mapped_indices)
         N = mapped_indices.shape[0]
-        temp = 2 * np.pi * mapped_indices / np.float(self.freq)
+        temp = 2 * cp.pi * mapped_indices / cp.float(self.freq)
 
         if self.trend:
-            X = np.vstack((np.ones(N), mapped_indices))
+            X = cp.vstack((cp.ones(N), mapped_indices))
         else:
-            X = np.ones(N)
+            X = cp.ones(N)
 
-        for j in np.arange(1, self.k + 1):
-            X = np.vstack((X, np.sin(j * temp)))
-            X = np.vstack((X, np.cos(j * temp)))
+        for j in cp.arange(1, self.k + 1):
+            X = cp.vstack((X, cp.sin(j * temp)))
+            X = cp.vstack((X, cp.cos(j * temp)))
 
         return X
 
     def _log_plus(self, a):
-        retval = np.ones(a.shape, dtype=np.float)
-        fl = a > np.e
-        retval[fl] = np.log(a[fl])
+        retval = cp.ones(a.shape, dtype=cp.float)
+        fl = a > cp.e
+        retval[fl] = cp.log(a[fl])
 
         return retval
